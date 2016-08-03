@@ -1,12 +1,25 @@
-GEM
+GIT
+  remote: git://github.com/alexcu/ruby-doxygen-parser.git
+  revision: e5bd6319e15ba9093fb41f549c82f6908ad24c16
+  branch: enhance/doxyfile
   specs:
     doxyparser (1.5.1)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mini_portile2 (2.1.0)
+    nokogiri (1.6.8)
+      mini_portile2 (~> 2.1.0)
+      pkg-config (~> 1.1.7)
+    pkg-config (1.1.7)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  doxyparser (= 1.5.1)
+  doxyparser!
+  nokogiri (= 1.6.8)
 
 BUNDLED WITH
    1.12.5
