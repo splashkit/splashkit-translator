@@ -1,0 +1,12 @@
+GEM
+  specs:
+    doxyparser (1.5.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  doxyparser (= 1.5.1)
+
+BUNDLED WITH
+   1.12.5
