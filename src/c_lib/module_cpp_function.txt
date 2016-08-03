@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-
-%(return_type)s %(name_lower)s(%(params)s)
-{
-    return %(the_call)s;
-}
-
-#endif
