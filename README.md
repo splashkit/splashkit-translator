@@ -1,22 +1,13 @@
-# Splashkit API Parser
+# SplashKit API Parser
 
-Converts Splashkit API documentation into YAML and then anything else...
+Converts SplashKit API documentation into YAML and then anything else...
 
 ## Running
 
-Ensure you have doxygen installed. For macOS using Homebrew:
+Ensure you have headerdoc2html installed. Under macOS, you will need to have
+Xcode installed. Under Ubuntu, refer to [this article](http://maplesteve.com/2012/02/26/install-headerdoc-on-ubuntu/).
 
-```bash
-$ brew cask doxygen
-```
-
-or on Linux:
-
-```
-$ sudo apt-get install doxygen
-```
-
-Then install dependencies and run using `parse.rb` in the root folder.
+Install dependencies and run using `parse.rb` in the root folder.
 
 ```bash
 $ bundle install
