@@ -49,6 +49,22 @@ module Parser
   class ParserError < StandardError; end
 
   #
+  # Parses HeaderDoc's parsedparamaterlist (ppl) element
+  #
+  def parse_ppl(xml)
+    xml.xpath('./parsedparameterlist/parsedparameter').map do |p|
+      [p.xpath('name').text, p.xpath('type').text]
+    end.to_h
+  end
+
+  #
+  # Parses a signature from HeaderDoc's declaration element
+  #
+  def parse_signature(xml)
+    xml.xpath('declaration').text.split(/\n/).map(&:strip).join()
+  end
+
+  #
   # Parses the docblock at the start of a .h file
   #
   def parse_header(xml)
@@ -127,11 +143,11 @@ module Parser
   #
   # Parses a single `@param` in a docblock
   #
-  def parse_parameter(xml, hdoc_parsed_params)
+  def parse_parameter(xml, ppl)
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
-    # the hdoc_parsed_params elements
-    type = hdoc_parsed_params[name]
+    # the parsed parameter list elements
+    type = ppl[name]
     if type.nil?
       raise ParserError,
             "Mismatched headerdoc @param '#{name}'. Check it exists
@@ -149,9 +165,9 @@ module Parser
   #
   # Parses all parameters in a docblock
   #
-  def parse_parameters(xml, hdoc_parsed_params)
+  def parse_parameters(xml, ppl)
     xml.xpath('.//parameter').map do |p|
-      parse_parameter(p, hdoc_parsed_params)
+      parse_parameter(p, ppl)
     end.to_h
   end
 
@@ -159,11 +175,9 @@ module Parser
   # Parses the docblock of a function
   #
   def parse_function(xml)
-    signature = xml.xpath('declaration').text.split(/\n/).map(&:strip).join()
+    signature = parse_signature(xml)
     # Values from the <parsedparamater> elements
-    hdoc_pp = xml.xpath('.//parsedparameter').map do |p|
-      [p.xpath('name').text, p.xpath('type').text]
-    end.to_h
+    ppl = parse_ppl(xml)
     {
       signature:   signature,
       name:        xml.xpath('name').text,
@@ -171,7 +185,7 @@ module Parser
       brief:       xml.xpath('abstract').text,
       return_type: xml.xpath('returntype').text,
       returns:     xml.xpath('result').text,
-      parameters:  parse_parameters(xml, hdoc_pp),
+      parameters:  parse_parameters(xml, ppl),
       attributes:  parse_attributes(xml)
     }
   rescue ParserError => e
@@ -189,7 +203,7 @@ module Parser
   # Parses a single typedef
   #
   def parse_typedef(xml)
-    signature = xml.xpath('declaration').text.split(/\n/).map(&:strip).join()
+    signature = parse_signature(xml)
     {
       signature:   signature,
       name:        xml.xpath('name').text,
@@ -207,6 +221,39 @@ module Parser
   end
 
   #
+  # Parses all fields (marked with `@param`) in a struct
+  #
+  def parse_fields(xml, ppl)
+    xml.xpath('.//field').map do |p|
+      # fields are marked with `@param`, so we just use parse_parameter
+      parse_parameter(p, ppl)
+    end.to_h
+  end
+
+  #
+  # Parses a single struct
+  #
+  def parse_struct(xml)
+    signature = parse_signature(xml)
+    ppl = parse_ppl(xml)
+    {
+      signature:   signature,
+      name:        xml.xpath('name').text,
+      description: xml.xpath('desc').text,
+      brief:       xml.xpath('abstract').text,
+      fields:      parse_fields(xml, ppl),
+      attributes:  parse_attributes(xml),
+    }
+  end
+
+  #
+  # Parses all structs in the xml provided
+  #
+  def parse_structs(xml)
+    xml.xpath('//header/structs_and_unions/struct').map { |s| parse_struct(s) }
+  end
+
+  #
   # Parses the XML into a hash representing the object model of every header
   # file
   #
@@ -215,6 +262,7 @@ module Parser
     parsed = parse_header(xml)
     parsed[:functions] = parse_functions(xml)
     parsed[:typedefs]  = parse_typedefs(xml)
+    parsed[:structs]   = parse_structs(xml)
     parsed
   end
 end

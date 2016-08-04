@@ -29,4 +29,5 @@ parsed.each do |hfile_name, hfile|
     puts "---"
   end
   puts 'Types:', hfile[:typedefs]
+  puts 'Structs:', hfile[:structs]
 end
