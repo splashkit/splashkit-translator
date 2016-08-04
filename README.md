@@ -87,6 +87,50 @@ Example, `load_sound_effect`:
 sound_effect load_sound_effect(string name, string filename);
 ```
 
+### Enum Docblocks
+
+An enum docblock **must** define every one of its constants using the
+`@constant` tag. For example:
+
+```c
+/**
+ * Defines each of the five weekdays
+ *
+ * @constant Monday     The day where you want to go sleep
+ * @constant Tuesday    The day where you start to get stuff done
+ * @constant Wednesday  The day where you realise you're only midway through
+ * @constant Thursday   The day where you can smell Friday coming
+ * @constant Friday     The day where you party hard
+ */
+enum weekdays {
+  Monday,
+  Tuesday,
+  Wednesday,
+  Thursday,
+  Friday
+};
+```
+
+### Struct Docblocks
+
+A struct docblock must define each of its field members using a `@param` tag.
+For example:
+
+```c
+/**
+ * Defines basic details for a person
+ *
+ * @param name    The name of the person
+ * @param age     The age of the person
+ * @param friend  The person's bestest friend in the whole world
+ */
+struct person {
+  string name,
+  int age,
+  person *friend
+};
+```
+
 ### Typedef Docblocks
 
 A function docblock should consist of _at least_ a basic description of the
