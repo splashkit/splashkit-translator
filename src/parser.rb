@@ -32,14 +32,21 @@ module Parser
       proc = IO.popen cmd
       out = proc.readlines
       hfile_xml = out.empty? ? nil : out.join
-      raise "headerdoc2html failed. Command was #{cmd}." unless $?.exitstatus.zero?
+      unless $?.exitstatus.zero?
+        raise ParserError,
+              "headerdoc2html failed. Command was #{cmd}."
+      end
       [File.basename(hfile), parse_xml(Nokogiri.XML(hfile_xml))]
     end
     parsed.to_h
   end
 
-  private
-  module_function
+  private; module_function
+
+  #
+  # Class for raising parsing errors
+  #
+  class ParserError < StandardError; end
 
   #
   # Parses the docblock at the start of a .h file
@@ -64,7 +71,8 @@ module Parser
   #
   def parse_attributes(xml)
     attrs = xml.xpath('.//attribute').map { |a| parse_attribute(a) }.to_h
-    # Enforce rules - all that require class
+    # Method, self, unique, destructor, constructor, getter, setter
+    # must have a class attribute also
     enforce_class_keys = [
       :method,
       :self,
@@ -77,12 +85,42 @@ module Parser
     enforced_class_keys_found = attrs.keys & enforce_class_keys
     has_enforced_class_keys = !enforced_class_keys_found.empty?
     if has_enforced_class_keys && attrs[:class].nil?
-      raise "Attributes `#{enforced_class_keys_found.map(&:to_s).join('\', `')}' found, but `class' attribute is missing?"
+      raise ParserError,
+            "Attribute(s) `#{enforced_class_keys_found.map(&:to_s)
+            .join('\', `')}' found, but `class' attribute is missing?"
     end
-    # TODO: Can't have destructor & constructor
-    # TODO: Can't have (destructor | constructor) & method
-    # TODO: Can't have (setter | getter) & method
-    # TODO: Can't have unique without method
+    # Can't have destructor & constructor
+    if attrs[:destructor] && attrs[:constructor]
+      raise ParserError,
+            'Attributes `destructor` and `constructor` conflict.'
+    end
+    # Can't have (destructor | constructor) & (setter | getter)
+    destructor_constructor_keys_found = attrs.keys & [:constructor, :destructor]
+    getter_setter_keys_found = attrs.keys & [:getter, :setter]
+    if !destructor_constructor_keys_found.empty? &&
+       !getter_setter_keys_found.empty?
+      raise ParserError,
+            "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
+            .join('\', `')}' violate `#{getter_setter_keys_found.map(&:to_s)
+            .join('\', `')}'. Choose one or the other."
+    end
+    # Can't have (destructor | constructor) & method
+    if !destructor_constructor_keys_found.empty? && !attrs[:method].nil?
+      raise ParserError,
+            "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
+            .join('\', `')}' violate `method`. Choose one or the other."
+    end
+    # Can't have (setter | getter) & method
+    if !getter_setter_keys_found.empty? && attrs[:method]
+      raise ParserError,
+            "Attribute(s) `#{getter_setter_keys_found.map(&:to_s)
+            .join('\', `')}' violate `method`. Choose one or the other."
+    end
+    # If unique then method must be set
+    if attrs[:unique] && attrs[:method].nil?
+      raise ParserError,
+            "Attribute `unique` is only valid if `method` attribute is also set"
+    end
     attrs
   end
 
@@ -94,7 +132,11 @@ module Parser
     # Need to find the matching type, this comes from
     # the hdoc_parsed_params elements
     type = hdoc_parsed_params[name]
-    raise "Mismatched headerdoc @param '#{name}'. Check it exists in the signature." if type.nil?
+    if type.nil?
+      raise ParserError,
+            "Mismatched headerdoc @param '#{name}'. Check it exists
+            in the signature."
+    end
     [
       name.to_sym,
       {
@@ -117,11 +159,13 @@ module Parser
   # Parses the docblock of a function
   #
   def parse_function(xml)
+    signature = xml.xpath('declaration').text.split(/\n/).map(&:strip).join()
     # Values from the <parsedparamater> elements
     hdoc_pp = xml.xpath('.//parsedparameter').map do |p|
       [p.xpath('name').text, p.xpath('type').text]
     end.to_h
     {
+      signature:   signature,
       name:        xml.xpath('name').text,
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
@@ -130,6 +174,8 @@ module Parser
       parameters:  parse_parameters(xml, hdoc_pp),
       attributes:  parse_attributes(xml)
     }
+  rescue ParserError => e
+    raise ParserError, "HeaderDoc parser error on `#{signature}`: #{e.message}"
   end
 
   #
