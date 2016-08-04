@@ -2,7 +2,32 @@
 
 Converts SplashKit API documentation into YAML and then anything else we want to generate...
 
-## Running
+# Contents
+
+<!-- MDTOC maxdepth:4 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:0 -->
+
+- [SplashKit API Parser](#splashkit-api-parser)
+- [Contents](#contents)
+- [Running](#running)
+- [SplashKit Documentation Guidelines](#splashkit-documentation-guidelines)
+   - [Header File Docblocks](#header-file-docblocks)
+   - [Function Docblocks](#function-docblocks)
+   - [Enum Docblocks](#enum-docblocks)
+   - [Struct Docblocks](#struct-docblocks)
+   - [Typedef Docblocks](#typedef-docblocks)
+   - [Attributes](#attributes)
+      - [`class`](#class)
+         - [Usage in typedefs](#usage-in-typedefs)
+         - [Usage in functions](#usage-in-functions)
+      - [`method`](#method)
+      - [`constructor`](#constructor)
+      - [`destructor`](#destructor)
+      - [`self`](#self)
+      - [`unique`](#unique)
+
+<!-- /MDTOC -->
+
+# Running
 
 Ensure you have HeaderDoc installed:
 
@@ -17,14 +42,14 @@ $ bundle install
 $ ./parse.rb /path/to/splashkit/coresdk/src/coresdk
 ```
 
-## SplashKit Documentation Guidelines
+# SplashKit Documentation Guidelines
 
 SplashKit uses [HeaderDoc](https://en.wikipedia.org/wiki/HeaderDoc) to parse
 documentation. A guide on HeaderDoc can be found [here](https://developer.apple.com/legacy/library/documentation/DeveloperTools/Conceptual/HeaderDoc/intro/intro.html#//apple_ref/doc/uid/TP40001215-CH345-SW1).
 
 **Ensure that `snake_case` is consistently used throughout documentation.**
 
-### Header File Docblocks
+## Header File Docblocks
 
 A header file should begin with a docblock consisting of:
 
@@ -52,7 +77,7 @@ Example, `audio.h`:
  */
 ```
 
-### Function Docblocks
+## Function Docblocks
 
 A function docblock should consist of _at least_ a basic description of the
 functionality provided by the function in Markdown. Where applicable, it also
@@ -87,7 +112,7 @@ Example, `load_sound_effect`:
 sound_effect load_sound_effect(string name, string filename);
 ```
 
-### Enum Docblocks
+## Enum Docblocks
 
 An enum docblock **must** define every one of its constants using the
 `@constant` tag. For example:
@@ -111,7 +136,7 @@ enum weekdays {
 };
 ```
 
-### Struct Docblocks
+## Struct Docblocks
 
 A struct docblock must define each of its field members using a `@param` tag.
 For example:
@@ -131,12 +156,12 @@ struct person {
 };
 ```
 
-### Typedef Docblocks
+## Typedef Docblocks
 
 A function docblock should consist of _at least_ a basic description of the
 functionality provided by the function in Markdown.
 
-### Attributes
+## Attributes
 
 Attributes provide options to the language translator. They are applicable to
 functions and typedef docblocks. Attributes are declared as thus:
@@ -149,9 +174,9 @@ functions and typedef docblocks. Attributes are declared as thus:
 
 Here is a list of all accepted attribute keys:
 
-#### `class`
+### `class`
 
-##### Usage in typedefs
+#### Usage in typedefs
 
 When added to a typedef, the type will be declared as a class:
 
@@ -164,7 +189,7 @@ When added to a typedef, the type will be declared as a class:
 typedef struct _sound_data *sound_effect;
 ```
 
-##### Usage in functions
+#### Usage in functions
 
 The `sound_effect` type would appear in OO-translated SplashKit code as a class.
 
@@ -189,12 +214,12 @@ This will convert the above to an equivalent OO method:
 Audio.Close()
 ```
 
-#### `method`
+### `method`
 
 Associates a function as a method to a class. Requires the `class` attribute
 to be set. See the above example.
 
-#### `constructor`
+### `constructor`
 
 Associates a function as the constructor to a class. Requires the `class`
 attribute to be set. To mark a constructor, simply set the value as `true`:
@@ -215,7 +240,7 @@ This will convert the above to an equivalent OO constructor:
 SoundEffect(string name, string filename)
 ```
 
-#### `destructor`
+### `destructor`
 
 Same as `constructor`, but for a destructor. Requires a `self` attribute to be
 set (see below).
@@ -238,7 +263,7 @@ the `effect` parameter:
 delete someSoundEffectInstance;
 ```
 
-#### `self`
+### `self`
 
 Specifies the name of the parameter which should act as `this` or `self` on the
 function call. That is, when the function is converted to a method for an OO
@@ -268,7 +293,7 @@ will call
 play_sound_effect(someSoundEffectInstance, 3, 10.0f)
 ```
 
-#### `unique`
+### `unique`
 
 For translated languages that do not support overloaded function names, the
 name specified by `unique` name will be used instead. For example:
@@ -288,7 +313,7 @@ void play_sound_effect(sound_effect effect, int times, float volume);
 will be translated into Python as:
 
 ```python
-some_sound_effect_instance.play_with_loops_and_volume(3, 10.0f)
+some_sound_effect_instance.play_with_loops_and_volume(3, 10.0)
 ```
 
 whereas in C# it would look like:
