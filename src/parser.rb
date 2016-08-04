@@ -254,6 +254,37 @@ module Parser
   end
 
   #
+  # Parses enum constants
+  #
+  def parse_enum_constants(xml)
+    xml.xpath('.//constant').map do |const|
+      [const.xpath('name').text.to_sym, const.xpath('desc').text]
+    end.to_h
+  end
+
+  #
+  # Parses a single enum
+  #
+  def parse_enum(xml)
+    signature = parse_signature(xml)
+    {
+      signature:   signature,
+      name:        xml.xpath('name').text,
+      description: xml.xpath('desc').text,
+      brief:       xml.xpath('abstract').text,
+      constants:   parse_enum_constants(xml),
+      attributes:  parse_attributes(xml),
+    }
+  end
+
+  #
+  # Parses all enums in the xml provided
+  #
+  def parse_enums(xml)
+    xml.xpath('//header/enums/enum').map { |s| parse_struct(s) }
+  end
+
+  #
   # Parses the XML into a hash representing the object model of every header
   # file
   #
@@ -263,6 +294,7 @@ module Parser
     parsed[:functions] = parse_functions(xml)
     parsed[:typedefs]  = parse_typedefs(xml)
     parsed[:structs]   = parse_structs(xml)
+    parsed[:enums]     = parse_enums(xml)
     parsed
   end
 end
