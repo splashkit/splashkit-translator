@@ -64,6 +64,26 @@ module Parser
   #
   def parse_attributes(xml)
     attrs = xml.xpath('.//attribute').map { |a| parse_attribute(a) }.to_h
+    # Enforce rules - all that require class
+    enforce_class_keys = [
+      :method,
+      :self,
+      :unique,
+      :destructor,
+      :constructor,
+      :getter,
+      :setter
+    ]
+    enforced_class_keys_found = attrs.keys & enforce_class_keys
+    has_enforced_class_keys = !enforced_class_keys_found.empty?
+    if has_enforced_class_keys && attrs[:class].nil?
+      raise "Attributes `#{enforced_class_keys_found.map(&:to_s).join('\', `')}' found, but `class' attribute is missing?"
+    end
+    # TODO: Can't have destructor & constructor
+    # TODO: Can't have (destructor | constructor) & method
+    # TODO: Can't have (setter | getter) & method
+    # TODO: Can't have unique without method
+    attrs
   end
 
   #
