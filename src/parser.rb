@@ -186,6 +186,27 @@ module Parser
   end
 
   #
+  # Parses a single typedef
+  #
+  def parse_typedef(xml)
+    signature = xml.xpath('declaration').text.split(/\n/).map(&:strip).join()
+    {
+      signature:   signature,
+      name:        xml.xpath('name').text,
+      description: xml.xpath('desc').text,
+      brief:       xml.xpath('abstract').text,
+      attributes:  parse_attributes(xml)
+    }
+  end
+
+  #
+  # Parses all typedefs in the xml provided
+  #
+  def parse_typedefs(xml)
+    xml.xpath('//header/typedefs/typedef').map { |td| parse_typedef(td) }
+  end
+
+  #
   # Parses the XML into a hash representing the object model of every header
   # file
   #
@@ -193,7 +214,7 @@ module Parser
     # TODO: Finish this off for types etc...
     parsed = parse_header(xml)
     parsed[:functions] = parse_functions(xml)
-    parsed[:typedefs]  = nil
+    parsed[:typedefs]  = parse_typedefs(xml)
     parsed
   end
 end

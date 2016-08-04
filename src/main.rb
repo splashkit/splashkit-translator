@@ -28,5 +28,5 @@ parsed.each do |hfile_name, hfile|
     end
     puts "---"
   end
-  #puts 'Types:', hfile.typedefs
+  puts 'Types:', hfile[:typedefs]
 end
