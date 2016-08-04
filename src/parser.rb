@@ -46,14 +46,20 @@ module Parser
   #
   # Class for raising parsing errors
   #
-  class ParserError < StandardError; end
+  class ParserError < StandardError
+    def initialize(message, signature = nil)
+      return super(message) unless signature
+      @signature = signature
+      super("HeaderDoc parser error on `#{signature}`: #{message}")
+    end
+  end
 
   #
   # Parses HeaderDoc's parsedparamaterlist (ppl) element
   #
   def parse_ppl(xml)
     xml.xpath('./parsedparameterlist/parsedparameter').map do |p|
-      [p.xpath('name').text, p.xpath('type').text]
+      [p.xpath('name').text.to_sym, p.xpath('type').text]
     end.to_h
   end
 
@@ -147,11 +153,10 @@ module Parser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
-    type = ppl[name]
+    type = ppl[name.to_sym]
     if type.nil?
       raise ParserError,
-            "Mismatched headerdoc @param '#{name}'. Check it exists
-            in the signature."
+            "Mismatched headerdoc @param '#{name}'. Check it exists in the signature."
     end
     [
       name.to_sym,
@@ -189,7 +194,7 @@ module Parser
       attributes:  parse_attributes(xml)
     }
   rescue ParserError => e
-    raise ParserError, "HeaderDoc parser error on `#{signature}`: #{e.message}"
+    raise ParserError.new e.message, signature
   end
 
   #
@@ -211,6 +216,8 @@ module Parser
       brief:       xml.xpath('abstract').text,
       attributes:  parse_attributes(xml)
     }
+  rescue ParserError => e
+    raise ParserError.new e.message, signature
   end
 
   #
@@ -244,6 +251,8 @@ module Parser
       fields:      parse_fields(xml, ppl),
       attributes:  parse_attributes(xml),
     }
+  rescue ParserError => e
+    raise ParserError.new e.message, signature
   end
 
   #
@@ -256,10 +265,19 @@ module Parser
   #
   # Parses enum constants
   #
-  def parse_enum_constants(xml)
-    xml.xpath('.//constant').map do |const|
+  def parse_enum_constants(xml, ppl)
+    constants = xml.xpath('.//constant').map do |const|
       [const.xpath('name').text.to_sym, const.xpath('desc').text]
     end.to_h
+    # after parsing <constant>, must ensure they align with the ppl
+    constants.keys.each do | const |
+      # ppl for enums have no types! Thus, just check against keys
+      unless ppl.keys.include? const
+        raise ParserError,
+              "Mismatched headerdoc @constant '#{const}'. Check it exists the enum definition."
+      end
+    end
+    constants
   end
 
   #
@@ -267,21 +285,24 @@ module Parser
   #
   def parse_enum(xml)
     signature = parse_signature(xml)
+    ppl = parse_ppl(xml)
     {
       signature:   signature,
       name:        xml.xpath('name').text,
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
-      constants:   parse_enum_constants(xml),
+      constants:   parse_enum_constants(xml, ppl),
       attributes:  parse_attributes(xml),
     }
+  rescue ParserError => e
+    raise ParserError.new e.message, signature
   end
 
   #
   # Parses all enums in the xml provided
   #
   def parse_enums(xml)
-    xml.xpath('//header/enums/enum').map { |s| parse_struct(s) }
+    xml.xpath('//header/enums/enum').map { |e| parse_enum(e) }
   end
 
   #
@@ -289,7 +310,6 @@ module Parser
   # file
   #
   def parse_xml(xml)
-    # TODO: Finish this off for types etc...
     parsed = parse_header(xml)
     parsed[:functions] = parse_functions(xml)
     parsed[:typedefs]  = parse_typedefs(xml)

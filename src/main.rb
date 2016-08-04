@@ -30,4 +30,5 @@ parsed.each do |hfile_name, hfile|
   end
   puts 'Types:', hfile[:typedefs]
   puts 'Structs:', hfile[:structs]
+  puts 'Enums:', hfile[:enums]
 end
