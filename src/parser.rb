@@ -55,19 +55,26 @@ module Parser
   #
   # Parses a single `@attribute` in a docblock
   #
-  def parse_attributes(xml)
+  def parse_attribute(xml)
     [xml.xpath('name').text.to_sym, xml.xpath('value').text]
+  end
+
+  #
+  # Parses all attributes in a docblock
+  #
+  def parse_attributes(xml)
+    attrs = xml.xpath('.//attribute').map { |a| parse_attribute(a) }.to_h
   end
 
   #
   # Parses a single `@param` in a docblock
   #
-  def parse_parameters(xml, hdoc_parsed_params)
+  def parse_parameter(xml, hdoc_parsed_params)
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the hdoc_parsed_params elements
     type = hdoc_parsed_params[name]
-    raise "Mismatched headerdoc @param '#{name}'. Check it exists in the signature: #{fn.xpath('declaration').text}" if type.nil?
+    raise "Mismatched headerdoc @param '#{name}'. Check it exists in the signature." if type.nil?
     [
       name.to_sym,
       {
@@ -75,6 +82,15 @@ module Parser
         description: xml.xpath('desc').text
       }
     ]
+  end
+
+  #
+  # Parses all parameters in a docblock
+  #
+  def parse_parameters(xml, hdoc_parsed_params)
+    xml.xpath('.//parameter').map do |p|
+      parse_parameter(p, hdoc_parsed_params)
+    end.to_h
   end
 
   #
@@ -91,9 +107,16 @@ module Parser
       brief:       xml.xpath('abstract').text,
       return_type: xml.xpath('returntype').text,
       returns:     xml.xpath('result').text,
-      parameters:  xml.xpath('.//parameter').map { |p| parse_parameters(p, hdoc_pp) }.to_h,
-      attributes:  xml.xpath('.//attribute').map { |a| parse_attributes(a) }.to_h
+      parameters:  parse_parameters(xml, hdoc_pp),
+      attributes:  parse_attributes(xml)
     }
+  end
+
+  #
+  # Parses all functions in the xml provided
+  #
+  def parse_functions(xml)
+    xml.xpath('//header/functions/function').map { |fn| parse_function(fn) }
   end
 
   #
@@ -103,7 +126,7 @@ module Parser
   def parse_xml(xml)
     # TODO: Finish this off for types etc...
     parsed = parse_header(xml)
-    parsed[:functions] = xml.xpath('//header/functions/function').map { |fn| parse_function(fn) }
+    parsed[:functions] = parse_functions(xml)
     parsed[:typedefs]  = nil
     parsed
   end
