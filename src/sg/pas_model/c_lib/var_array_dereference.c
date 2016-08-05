@@ -1,1 +1,0 @@
-%(var_reference)s[%(expression)s]

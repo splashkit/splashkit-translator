@@ -1,1 +1,0 @@
-%(identifier)s : %(type)s 
