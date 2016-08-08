@@ -8,7 +8,10 @@ module Generators
     include Helper
 
     def define_sk_types
-      '2'
+      custom_types = @data.values.pluck(:structs).flatten +
+                     @data.values.pluck(:enums).flatten
+      custom_types.map { |ty| wrap_sk_custom_type(ty) }
+                  .join(";\n") << ';'
     end
 
     def forward_declare_sk_lib
@@ -27,6 +30,19 @@ module Generators
     end
 
     private
+
+    #
+    # Wraps the custom type in a __sk_type_casting macro
+    #
+    def wrap_sk_custom_type(type)
+      type = type[:name]
+      # When __sk_type_casting is called, the function __to_#{type} becomes
+      # avaliable. Need to register that this exists in @custom_type_lookup
+      @custom_type_lookup = {} if @custom_type_lookup.nil?
+      @custom_type_lookup[type] = "__to_#{type}"
+      "__sk_type_casting(#{type})"
+    end
+
 
     #
     # Generate a library type signature from a SK function

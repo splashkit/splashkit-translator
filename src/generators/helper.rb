@@ -10,6 +10,9 @@ module Generators
     # Initializes the generator with the data provided
     #
     def initialize(data)
+      if methods.include? :initialize
+        self.initialize
+      end
       @data = data
     end
 
