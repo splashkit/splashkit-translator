@@ -91,7 +91,7 @@ module Parser
   #
   # Parses all attributes in a docblock
   #
-  def parse_attributes(xml)
+  def parse_attributes(xml, ppl = nil)
     attrs = xml.xpath('.//attribute').map { |a| parse_attribute(a) }.to_h
     # Method, self, unique, destructor, constructor, getter, setter
     # must have a class attribute also
@@ -111,12 +111,12 @@ module Parser
             "Attribute(s) `#{enforced_class_keys_found.map(&:to_s)
             .join('\', `')}' found, but `class' attribute is missing?"
     end
-    # Can't have destructor & constructor
+    # Can't have `destructor` & `constructor`
     if attrs[:destructor] && attrs[:constructor]
       raise ParserError,
             'Attributes `destructor` and `constructor` conflict.'
     end
-    # Can't have (destructor | constructor) & (setter | getter)
+    # Can't have (`destructor` | `constructor`) & (`setter` | `getter`)
     destructor_constructor_keys_found = attrs.keys & [:constructor, :destructor]
     getter_setter_keys_found = attrs.keys & [:getter, :setter]
     if !destructor_constructor_keys_found.empty? &&
@@ -126,13 +126,13 @@ module Parser
             .join('\', `')}' violate `#{getter_setter_keys_found.map(&:to_s)
             .join('\', `')}'. Choose one or the other."
     end
-    # Can't have (destructor | constructor) & method
+    # Can't have (`destructor` | `constructor`) & method
     if !destructor_constructor_keys_found.empty? && !attrs[:method].nil?
       raise ParserError,
             "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
             .join('\', `')}' violate `method`. Choose one or the other."
     end
-    # Can't have (setter | getter) & method
+    # Can't have (`setter` | `getter`) & method
     if !getter_setter_keys_found.empty? && attrs[:method]
       raise ParserError,
             "Attribute(s) `#{getter_setter_keys_found.map(&:to_s)
@@ -141,9 +141,24 @@ module Parser
     # If unique then method must be set
     if attrs[:unique] && attrs[:method].nil?
       raise ParserError,
-            "Attribute `unique` is only valid if `method` attribute is also set"
+            'Attribute `unique` is only valid if `method` attribute is also set.'
     end
-    attrs
+    # Ensure `self` matches a parameter
+    self_value = attrs[:self]
+    if self_value && ppl && ppl[self_value.to_sym].nil?
+      raise ParserError,
+            'Attribute `self` must be set to the name of a parameter.'
+    end
+    # Ensure the parameter set by `self` attribute has the same type indicated
+    # by the `class`
+    if self_value && ppl
+      class_type = attrs[:class]
+      self_type  = ppl[self_value.to_sym]
+      unless class_type == self_type
+        raise ParserError,
+              "Attribute `self` must list a parameter whose type matches the `class` value (`class` is `#{class_type}` but `self` is set to parameter (`#{self_value}`) with type `#{self_type}`)"
+      end
+    end
   end
 
   #
@@ -191,7 +206,7 @@ module Parser
       return_type: xml.xpath('returntype').text,
       returns:     xml.xpath('result').text,
       parameters:  parse_parameters(xml, ppl),
-      attributes:  parse_attributes(xml)
+      attributes:  parse_attributes(xml, ppl)
     }
   rescue ParserError => e
     raise ParserError.new e.message, signature
