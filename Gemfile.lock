@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    hashie (3.4.4)
     mini_portile2 (2.1.0)
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
@@ -11,6 +12,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  hashie (= 3.4.4)
   nokogiri
 
 BUNDLED WITH
