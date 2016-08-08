@@ -23,10 +23,10 @@ module Parser
   # @return [Hash] a hash with a representation of every header
   #
   def parse(src)
-    hcfg_file = File.expand_path File.dirname __FILE__ + '/res/headerdoc.config'
+    hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
-    src += '/*.h' unless src.end_with? '.h'
-    parsed = Dir[src].map do |hfile|
+    headers_src = "#{src}/*.h" unless src.end_with? '.h'
+    parsed = Dir[headers_src].map do |hfile|
       puts "Parsing #{hfile}..."
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
       proc = IO.popen cmd
@@ -37,6 +37,12 @@ module Parser
               "headerdoc2html failed. Command was #{cmd}."
       end
       [File.basename(hfile), parse_xml(Nokogiri.XML(hfile_xml))]
+    end
+    if parsed.empty?
+      raise str = <<-EOS
+Nothing parsed! Check that #{src} is the correct SplashKit CoreSDK directory
+and that HeaderDoc comments exist.
+EOS
     end
     parsed.to_h
   end
