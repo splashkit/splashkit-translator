@@ -1,10 +1,11 @@
 require_relative 'helper'
 
 module Generators
-  module SKLibC
-    extend Helper
-
-    module_function
+  #
+  # SplashKit C Library code generator
+  #
+  class SKLibC
+    include Helper
 
     def forward_declare_sk_lib
       '1'
