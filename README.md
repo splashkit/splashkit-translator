@@ -293,6 +293,22 @@ will call
 play_sound_effect(someSoundEffectInstance, 3, 10.0f)
 ```
 
+When using a `self` attribute, you must ensure that **the parameter named by
+`self` has a type which matches the `class` attribute value**. For example, the
+following will cause an error since `times` is an `int`, which does not match
+the `class` attribute value of type `sound_effect`:
+
+```c
+/**
+ * ...
+ *
+ * @attribute class   sound_effect    <-------------------------------
+ * @attribute method  play                                             \
+ * @attribute self    times           <--- times is an int, not a sound_effect!!
+ */
+void play_sound_effect(sound_effect effect, int times, float volume);
+```
+
 ### `unique`
 
 For translated languages that do not support overloaded function names, the
