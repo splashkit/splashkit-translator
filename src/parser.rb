@@ -41,7 +41,7 @@ module Parser
       [File.basename(hfile), parse_xml(Nokogiri.XML(hfile_xml))]
     end
     if parsed.empty?
-      raise str = <<-EOS
+      raise ParserError <<-EOS
 Nothing parsed! Check that #{src} is the correct SplashKit CoreSDK directory
 and that HeaderDoc comments exist.
 EOS

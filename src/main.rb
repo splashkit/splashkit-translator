@@ -69,7 +69,7 @@ begin
   options[:generators].each do | generator_class |
     puts generator_class.new(parsed).execute
   end
-rescue => e
+rescue Parser::ParserError
   puts $!.to_s
   exit 1
 end
