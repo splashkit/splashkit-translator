@@ -34,18 +34,28 @@ std::string name_of_sound_effect(sound_effect effect)
 
 //== Includes ==
 
+#include <stdlib.h>
+#include <string>
 // #include "splashkit.h"
 
 //== Type conversions ==
 #define ptr void *
+#define __to_ptr(value)\
+(ptr)value
 #define __to_bool(value)\
 value == 1 ? true : false
-#define __no_type_change(value)\
-value
+#define __no_type_change(type)\
+type __to_##type(type value) { return value; }
 #define __sk_type_casting(type)\
 type __to_##type(ptr value) { return static_cast<type>(value); }
 #define __array_wrappable(type)\
 typedef struct { type *data; } __sklib_##type##_array;
+
+__no_type_change(int)
+__no_type_change(float)
+__no_type_change(double)
+__no_type_change(long)
+__no_type_change(short)
 
 //== Strings ==
 typedef struct { char *string; int size; } __sklib_string;
@@ -61,7 +71,7 @@ void __sklib_free_sklib_string(__sklib_string s)
 {
   free(s.string);
 }
-std::string __to_std_string(__sklib_string s)
+std::string __to_string(__sklib_string s)
 {
   return std::string(s.string);
 }
@@ -70,7 +80,7 @@ std::string __to_std_string(__sklib_string s)
 // TODO: Get ruby to geneate and map (see below) the signatures for the .cpp
 // file
 
-extern "C" sound_effect __sklib_sound_effect_named__std_string(__sklib_string name);
+extern "C" ptr __sklib_sound_effect_named__std_string(__sklib_string name);
 extern "C" void __sklib_play_sound_effect__sound_effect__int__float(ptr effect, int loops, float vol);
 extern "C" __sklib_string __sklib_name_of_sound_effect__sound_effect(ptr effect);
 
@@ -88,7 +98,7 @@ __array_wrappable(sound_effect) // allow wrapping the array in a struct
 // * map in the signature std::string -> __sklib_string
 //   in the code, we must use the following to map:
 //     1. std::string    -> __sklib_string == __to_sklib_string(s)
-//     2. __sklib_string -> std::string    == __to_std_string(s)
+//     2. __sklib_string -> std::string    == __to_string(s)
 //   in the code, we don't need to map them across
 // * map in the signature bool -> int
 //   in the code, we must use the following to map:
@@ -103,18 +113,19 @@ __array_wrappable(sound_effect) // allow wrapping the array in a struct
 
 ptr __sklib_sound_effect_named__std_string(__sklib_string name)
 {
-  return sound_effect_named(__to_std_string(name));
+  sound_effect __sklib_return_value = sound_effect_named(__to_string(name));
+  return __to_ptr(__sklib_return_value);
 }
 
 void __sklib_play_sound_effect__sound_effect__int__float(ptr effect, int loops, float vol)
 {
-  play_sound_effect(__to_sound_effect(effect), __no_type_change(loops), __no_type_change(vol));
+  play_sound_effect(__to_sound_effect(effect), __to_int(loops), __to_float(vol));
 }
 
 __sklib_string __sklib_name_of_sound_effect__sound_effect(ptr effect)
 {
-  std::string result = name_of_sound_effect(__to_sound_effect(effect));
-  return __to_sklib_string(result);
+  std::string __sklib_return_value = name_of_sound_effect(__to_sound_effect(effect));
+  return __to_sklib_string(__sklib_return_value);
 }
 
 //===
