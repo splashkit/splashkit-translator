@@ -3,6 +3,8 @@
 #
 module Parser
   require 'nokogiri'
+  require 'ostruct'
+  require 'recursive-open-struct'
 
   # Monkey patch Nokogiri to squash data down
   require_relative '../lib/core_ext/nokogiri/xml.rb'
@@ -321,6 +323,6 @@ EOS
     parsed[:typedefs]  = parse_typedefs(xml)
     parsed[:structs]   = parse_structs(xml)
     parsed[:enums]     = parse_enums(xml)
-    parsed
+    RecursiveOpenStruct.new parsed
   end
 end
