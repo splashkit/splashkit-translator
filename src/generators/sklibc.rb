@@ -19,7 +19,7 @@ module Generators
              .flatten
              .map { |fn| sk_function_to_lib_type_signature fn }
              .join(";\n#{external_decl} ")
-      "#{external_decl} #{function_prototypes}"
+      "#{external_decl} #{function_prototypes};"
     end
 
     def implement_sk_lib
@@ -44,7 +44,7 @@ module Generators
     def sk_parameter_list_to_lib_parameter_list(function)
       params = function[:parameters]
       result = []
-      params.each do | name, data |
+      params.each do |name, data|
         type = sk_type_to_lib_type data[:type]
         result << "#{type} #{name}"
       end
@@ -58,6 +58,7 @@ module Generators
       default_type = 'ptr' # use when we don't have a mapping
       from_sk_to_c = {
         # SK src type -> C type
+        'void'   => 'void',
         'int'    => 'int',
         'float'  => 'float',
         'double' => 'double',
