@@ -3,6 +3,9 @@ module Generators
   # Common helper methods for generators
   #
   module Helper
+    # Plucking for arrays of hashes
+    require_relative '../../lib/core_ext/array.rb'
+
     #
     # Initializes the generator with the data provided
     #

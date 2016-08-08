@@ -101,7 +101,7 @@ __array_wrappable(sound_effect) // allow wrapping the array in a struct
 //    has been called in libgen_c.h (otherwise __to_sk_type(ptr) doesn't
 //    exist yet)!!!)
 
-sound_effect __sklib_sound_effect_named__std_string(__sklib_string name)
+ptr __sklib_sound_effect_named__std_string(__sklib_string name)
 {
   return sound_effect_named(__to_std_string(name));
 }

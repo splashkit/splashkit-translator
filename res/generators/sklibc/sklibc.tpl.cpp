@@ -34,11 +34,11 @@ std::string __to_std_string(__sklib_string s)
   return std::string(s.string);
 }
 
-//== Forward Declare Functions ==
-[Generators::SKLibC.forward_declare_sk_lib]
-
 //== SK Types ==
 [Generators::SKLibC.define_sk_types]
+
+//== Forward Declare Functions ==
+[Generators::SKLibC.forward_declare_sk_lib]
 
 //== Define Implementations ==
 [Generators::SKLibC.implement_sk_lib]

@@ -61,7 +61,7 @@ EOS
   end
 
   #
-  # Parses HeaderDoc's parsedparamaterlist (ppl) element
+  # Parses HeaderDoc's parsedparameterlist (ppl) element
   #
   def parse_ppl(xml)
     xml.xpath('./parsedparameterlist/parsedparameter').map do |p|
@@ -187,7 +187,7 @@ EOS
   #
   def parse_function(xml)
     signature = parse_signature(xml)
-    # Values from the <parsedparamater> elements
+    # Values from the <parsedparameter> elements
     ppl = parse_ppl(xml)
     {
       signature:   signature,
