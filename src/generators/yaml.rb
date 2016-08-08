@@ -13,8 +13,8 @@ module Generators
     # Initializes the generator with the data provided
     #
     def initialize(data)
-      # Ignore the header keys and marshal_dump the OpenStruct
-      @data = data.values.map { |d| Hashie.stringify_keys(d.marshal_dump) }
+      # Ignore the header keys and ensure strings not symbols
+      @data = data.values.map { |d| Hashie.stringify_keys(d) }
     end
 
     #
