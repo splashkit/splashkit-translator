@@ -92,10 +92,6 @@ module Generators
     #
     def wrap_sk_custom_type(type)
       type = type[:name]
-      # When __sk_type_casting is called, the function __to_#{type} becomes
-      # avaliable. Need to register that this exists in @custom_type_lookup
-      @custom_type_lookup = {} if @custom_type_lookup.nil?
-      @custom_type_lookup[type] = "__to_#{type}"
       "__sk_type_casting(#{type})"
     end
 
