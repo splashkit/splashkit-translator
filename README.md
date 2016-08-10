@@ -39,8 +39,10 @@ Install dependencies and run using `parse.rb` in the root folder:
 
 ```bash
 $ bundle install
-$ ./parse.rb /path/to/splashkit/coresdk/src/coresdk
+$ ./parse.rb --from /path/to/splashkit/coresdk/src/coresdk --to SKLIBC,YAML
 ```
+
+Run without arguments for improved usage.
 
 # SplashKit Documentation Guidelines
 
@@ -268,7 +270,7 @@ delete someSoundEffectInstance;
 Specifies the name of the parameter which should act as `this` or `self` on the
 function call. That is, when the function is converted to a method for an OO
 language, the instance calling the method will be passed into the parameter
-specified by `@self`. For example:
+specified by `self`. For example:
 
 ```c
 /**

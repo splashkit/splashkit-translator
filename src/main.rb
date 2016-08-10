@@ -1,34 +1,75 @@
 #!/usr/bin/env ruby
+require          'optparse'
 require_relative 'parser'
+require_relative 'generators/sklibc'
+require_relative 'generators/yaml'
 
-sk_src = ARGF.argv.first
-raise 'Please provide the /path/to/splashkit/coresdk/src/coresdk' unless sk_src
-raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
+# Required to run
+options = {
+  generators: [],
+  src: nil
+}
 
-parsed = Parser.parse(sk_src)
-puts parsed
-parsed.each do |hfile_name, hfile|
-  puts "==== #{hfile_name} ===="
-  puts "~ #{hfile[:brief]} ~\n\n#{hfile[:description]}\n\n"
-  puts 'Functions:'
-  hfile[:functions].each_with_index do |fn, index|
-    puts "#{index+1}.\tName:\t#{fn[:name]}"
-    puts "\tBrief:\t#{fn[:brief]}"
-    puts "\tDesc:\n\t\t#{fn[:description].gsub("\n", "\n\t\t")}"
-    puts "\tParameters:\t#{fn[:parameters].nil? ? 'None' : ''}"
-    fn[:parameters].each do |k, v|
-      puts "\t\t* #{k}: #{v[:type]}"
-      puts "\t\t\t#{v[:description].gsub("\n", "\n\t\t\t")}"
-    end
-    puts "\tReturns:\t#{fn[:return_type]}"
-    puts "\t        \t#{fn[:returns]}" unless fn[:return_type] == 'void'
-    puts "\tAttributes:"
-    fn[:attributes].each do |k, v|
-      puts "\t\t* #{k}: #{v}"
-    end
-    puts "---"
+# Options parse block
+opt_parser = OptionParser.new do |opts|
+  # Generators we can use
+  avaliable_gens =
+    Generators.constants
+              .select { |c| Class === Generators.const_get(c) }
+              .map { |g| [g.upcase, Generators.const_get(g)] }
+              .to_h
+  # Setup
+  help = <<-EOS
+Usage: parse.rb --from /path/to/splashkit/coresdk/src/coresdk[/file.h]
+                --to GENERATOR[,GENERATOR ... ]
+EOS
+  opts.banner = help
+  opts.separator ''
+  opts.separator 'Required:'
+  # Source file
+  help = <<-EOS
+Source header file or SplashKit CoreSDK directory
+EOS
+  opts.on('-f', '--from SOURCE', help) do |file|
+    options[:src] = file
   end
-  puts 'Types:', hfile[:typedefs]
-  puts 'Structs:', hfile[:structs]
-  puts 'Enums:', hfile[:enums]
+  # To [using generator]
+  help = <<-EOS
+Comma separated list of generators to run on the file(s).
+EOS
+  opts.on('-t', '--to GENERATOR[,GENERATOR ... ]', help) do |gens|
+    parsed_gens = gens.split(',')
+    options[:generators] = parsed_gens.map do |gen|
+      gen_class = avaliable_gens[gen.upcase.to_sym]
+      if gen_class.nil?
+        raise OptionParser::InvalidOption.new "#{gen} - Unknown generator #{gen}"
+      end
+      gen_class
+    end
+  end
+  opts.separator ''
+  opts.separator 'Generators:'
+  avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}"}
+end
+# Parse block
+begin
+  opt_parser.parse!
+  mandatory = [:generators, :src]
+  missing = mandatory.select{ |param| options[param].nil? }
+  raise OptionParser::MissingArgument.new "Arguments missing" unless missing.empty?
+rescue OptionParser::InvalidOption, OptionParser::MissingArgument
+  puts $!.to_s
+  puts opt_parser
+  exit 1
+end
+# Run block
+begin
+  raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
+  parsed = Parser.parse(options[:src])
+  options[:generators].each do | generator_class |
+    puts generator_class.new(parsed).execute
+  end
+rescue Parser::ParserError
+  puts $!.to_s
+  exit 1
 end

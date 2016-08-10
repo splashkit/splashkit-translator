@@ -1,19 +1,21 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    hashie (3.4.4)
     mini_portile2 (2.1.0)
     nokogiri (1.6.8)
       mini_portile2 (~> 2.1.0)
       pkg-config (~> 1.1.7)
     pkg-config (1.1.7)
-    xml-simple (1.1.5)
+    recursive-open-struct (1.0.1)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  hashie (= 3.4.4)
   nokogiri
-  xml-simple (= 1.1.5)
+  recursive-open-struct (= 1.0.1)
 
 BUNDLED WITH
    1.12.5
