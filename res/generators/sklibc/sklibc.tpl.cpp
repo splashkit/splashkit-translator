@@ -17,7 +17,7 @@ __no_type_change(double)
 
 //== Strings ==
 typedef struct { char *string; int size; } __sklib_string;
-__sklib_string __to_sklib_string(string s)
+__sklib_string __to_sklib_string(std::string s)
 {
     __sklib_string result;
     result.size = s.length();
