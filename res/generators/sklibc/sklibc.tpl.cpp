@@ -1,8 +1,3 @@
-//== Includes ==
-#include <stdlib.h>
-#include <string>
-// #include "splashkit.h"
-
 //== Type conversions ==
 #define ptr void *
 #define __to_ptr(value)\
