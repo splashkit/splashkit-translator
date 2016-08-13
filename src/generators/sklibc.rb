@@ -15,7 +15,7 @@ module Generators
       read_template 'types'
     end
 
-    def define_sk_types
+    def declare_type_converters
       custom_types = @data.values.pluck(:structs).flatten +
                      @data.values.pluck(:enums).flatten +
                      @data.values.pluck(:typedefs).flatten
@@ -64,21 +64,17 @@ module Generators
         else
           lib_return_type = sk_type_to_lib_type sk_return_type
           lib_return_variable_name = "#{SK_LIB_PREFIX}__return_value"
-          [
-            "#{sk_return_type} #{lib_return_variable_name} = #{sk_func_call};",
-            "return __to_#{lib_return_type}(#{lib_return_variable_name});"
-          ].join("\n")
+          read_template 'non_void_fn_body',
+                        sk_return_type: sk_return_type,
+                        lib_return_variable_name: lib_return_variable_name,
+                        sk_func_call: sk_func_call,
+                        lib_return_type: lib_return_type
         end
         .split("\n")
         .join("\n    ") # 4 space indentation for debug readability
-      "#{lib_type_sig}\n{\n    #{lib_body}\n}"
-    end
-
-    #
-    # Returns the lib function body for the provided method
-    #
-    def lib_function_body
-
+      read_template 'fn',
+                    signature: lib_type_sig,
+                    body: lib_body
     end
 
     #
