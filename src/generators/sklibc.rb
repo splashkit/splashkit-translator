@@ -7,6 +7,18 @@ module Generators
   class SKLibC
     include Helper
 
+    alias helper_execute execute
+    def execute
+      {
+        'sklib.c' => helper_execute,
+        'makefile' => read_template('makefile', include_dir: @src)
+      }
+    end
+
+    def include_sk_header
+      read_template 'skheader', sk_header_path: @src
+    end
+
     def include_strings_template
       read_template 'strings'
     end

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require          'optparse'
+require          'fileutils'
 require_relative 'parser'
 require_relative 'generators/sklibc'
 require_relative 'generators/yaml'
@@ -8,7 +9,8 @@ require_relative 'generators/cpp'
 # Required to run
 options = {
   generators: [],
-  src: nil
+  src: nil,
+  out: nil
 }
 
 # Options parse block
@@ -23,6 +25,7 @@ opt_parser = OptionParser.new do |opts|
   help = <<-EOS
 Usage: parse.rb --from /path/to/splashkit/coresdk/src/coresdk[/file.h]
                 --to GENERATOR[,GENERATOR ... ]
+                [--out /path/to/write/output/to]
 EOS
   opts.banner = help
   opts.separator ''
@@ -48,6 +51,13 @@ EOS
       gen_class
     end
   end
+  # Output file(s)
+  help = <<-EOS
+Directory to write output to
+EOS
+  opts.on('-o', '--out OUTPUT', help) do |out|
+    options[:out] = out
+  end
   opts.separator ''
   opts.separator 'Generators:'
   avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}"}
@@ -56,7 +66,7 @@ end
 begin
   opt_parser.parse!
   mandatory = [:generators, :src]
-  missing = mandatory.select{ |param| options[param].nil? }
+  missing = mandatory.select { |param| options[param].nil? }
   raise OptionParser::MissingArgument.new "Arguments missing" unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
@@ -67,8 +77,16 @@ end
 begin
   raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
   parsed = Parser.parse(options[:src])
-  options[:generators].each do | generator_class |
-    puts generator_class.new(parsed).execute
+  options[:generators].each do |generator_class|
+    out = generator_class.new(parsed, options[:src]).execute
+    if options[:out]
+      out.each do |filename, contents|
+        output = options[:out] + '/' + filename
+        FileUtils.mkdir_p File.dirname output
+        puts "Writing output to #{output}..."
+        File.write output, contents
+      end
+    end
   end
 rescue Parser::ParserError
   puts $!.to_s

@@ -7,13 +7,11 @@ module Generators
     require_relative '../../lib/core_ext/array.rb'
 
     #
-    # Initializes the generator with the data provided
+    # Initializes the generator with the data and source directories provided
     #
-    def initialize(data)
-      if methods.include? :initialize
-        self.initialize
-      end
+    def initialize(data, src)
       @data = data
+      @src = File.dirname src
     end
 
     #
@@ -25,7 +23,7 @@ module Generators
       result = String.new template
       template.gsub(template_method_flags) do |method_flag|
         method = method_for_template_flag method_flag
-        puts "-> Running replacement for #{method_flag}..."
+        puts "-> Running replacement for #{method}..."
         replace_with = send(method)
         result.gsub!(method_flag, replace_with)
       end
@@ -76,7 +74,7 @@ module Generators
       template.gsub(regex) do |var_flag|
         _, var_name = *(regex.match var_flag)
         sub_value = data[var_name.to_sym]
-        raise "No data supplied for variable #{match}" if sub_value.nil?
+        raise "No data supplied for variable #{var_name}" if sub_value.nil?
         result.gsub!(var_flag, sub_value)
       end
       result
@@ -91,7 +89,7 @@ module Generators
     def read_template(name = generator_name, data = {})
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
-      path = "#{generator_res_dir}/#{name}.tpl.*"
+      path = "#{generator_res_dir}/#{name}.tpl*"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" if files.length > 1

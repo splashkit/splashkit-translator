@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <string>
-#include "splashkit.h"
+
+//== Include SK Headers ==/
+[Generators::SKLibC.include_sk_header]
 
 //== Type conversions ==
 [Generators::SKLibC.include_types_template]

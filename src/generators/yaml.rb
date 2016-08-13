@@ -12,7 +12,7 @@ module Generators
     #
     # Initializes the generator with the data provided
     #
-    def initialize(data)
+    def initialize(data, _)
       # Ignore the header keys and ensure strings not symbols
       @data = data.values.map { |d| Hashie.stringify_keys(d) }
     end
@@ -24,7 +24,7 @@ module Generators
       puts "Executing #{name} generator..."
       yaml = @data.to_yaml
       puts '-> Done!'
-      yaml
+      { 'splashkit.yaml' => yaml }
     end
   end
 end
