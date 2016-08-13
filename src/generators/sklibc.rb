@@ -7,6 +7,14 @@ module Generators
   class SKLibC
     include Helper
 
+    def include_strings_template
+      read_template 'strings'
+    end
+
+    def include_types_template
+      read_template 'types'
+    end
+
     def define_sk_types
       custom_types = @data.values.pluck(:structs).flatten +
                      @data.values.pluck(:enums).flatten +
