@@ -7,7 +7,8 @@ require_relative 'generators/yaml'
 # Required to run
 options = {
   generators: [],
-  src: nil
+  src: nil,
+  validate_only: false
 }
 
 # Options parse block
@@ -20,8 +21,7 @@ opt_parser = OptionParser.new do |opts|
               .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --from /path/to/splashkit/coresdk/src/coresdk[/file.h]
-                --to GENERATOR[,GENERATOR ... ]
+Usage: parse.rb --from /path/to/splashkit/coresdk/src/coresdk[/file.h] [ OPTIONS ]
 EOS
   opts.banner = help
   opts.separator ''
@@ -47,6 +47,13 @@ EOS
       gen_class
     end
   end
+  # Validate only (don't generate)
+  help = <<-EOS
+Validate HeaderDoc only to parse without translating
+EOS
+  opts.on('-v', '--validate', help) do |validated|
+    options[:validate_only] = true
+  end
   opts.separator ''
   opts.separator 'Generators:'
   avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}"}
@@ -54,7 +61,9 @@ end
 # Parse block
 begin
   opt_parser.parse!
-  mandatory = [:generators, :src]
+  mandatory = [:src]
+  # Add generators to mandatory if not validating
+  mandatory << :generators unless options[:validate_only]
   missing = mandatory.select{ |param| options[param].nil? }
   raise OptionParser::MissingArgument.new "Arguments missing" unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
@@ -66,8 +75,12 @@ end
 begin
   raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
   parsed = Parser.parse(options[:src])
-  options[:generators].each do | generator_class |
-    puts generator_class.new(parsed).execute
+  if options[:validate_only]
+    puts 'Parser succeeded with no errors 🎉'
+  else
+    options[:generators].each do | generator_class |
+      puts generator_class.new(parsed).execute
+    end
   end
 rescue Parser::ParserError
   puts $!.to_s
