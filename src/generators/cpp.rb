@@ -7,7 +7,7 @@ module Generators
   class CPP
     include Helper
 
-    def include_types_template
+    def include_ptr_template
       read_template 'ptr'
     end
 
@@ -33,13 +33,21 @@ module Generators
     end
 
     def implement_cpp
-      @data.values.pluck(:functions).flatten
+      # @data.values.pluck(:functions).flatten
+      "hi"
+    end
+
+    alias helper_execute execute
+    def execute
+      {
+        'test.cpp' => helper_execute
+      }
     end
 
     alias helper_initialize initialize
-    def initialize(data)
-      @sklibc = Generators::SKLibC.new(data)
-      helper_initialize(data)
+    def initialize(data, src)
+      @sklibc = Generators::SKLibC.new(data, src)
+      helper_initialize(data, src)
     end
 
     private

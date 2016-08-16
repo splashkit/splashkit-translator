@@ -7,7 +7,6 @@ GEM
       mini_portile2 (~> 2.1.0)
       pkg-config (~> 1.1.7)
     pkg-config (1.1.7)
-    recursive-open-struct (1.0.1)
 
 PLATFORMS
   ruby
@@ -15,7 +14,6 @@ PLATFORMS
 DEPENDENCIES
   hashie (= 3.4.4)
   nokogiri
-  recursive-open-struct (= 1.0.1)
 
 BUNDLED WITH
    1.12.5
