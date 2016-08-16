@@ -28,11 +28,13 @@ module Generators
     end
 
     def declare_type_converters
-      custom_types = @data.values.pluck(:structs).flatten +
-                     @data.values.pluck(:enums).flatten +
-                     @data.values.pluck(:typedefs).flatten
-      custom_types.map { |ty| wrap_sk_custom_type(ty) }
-                  .join("\n")
+      enums   = @data.values.pluck(:enums).flatten
+                     .map { |e| make_enum_adapter(e) }
+      aliases = @data.values.pluck(:typedefs).flatten
+                     .map { |a| make_typealias_adapter(a) }
+      structs = @data.values.pluck(:structs).flatten
+                     .map { |s| make_struct_adapter(s) }
+      (enums + structs + aliases).flatten.join("\n")
     end
 
     def forward_declare_sk_lib
@@ -82,8 +84,7 @@ module Generators
                         sk_func_call: sk_func_call,
                         lib_return_type: lib_return_type
         end
-        .split("\n")
-        .join("\n    ") # 4 space indentation for debug readability
+        .indent()
       read_template 'fn',
                     signature: lib_type_sig,
                     body: lib_body
@@ -101,14 +102,6 @@ module Generators
         result << "__to_#{type}(#{argument_name})"
       end
       result.join(', ')
-    end
-
-    #
-    # Wraps the custom type in a __sk_type_casting macro
-    #
-    def wrap_sk_custom_type(type)
-      type = type[:name]
-      "__sk_type_casting(#{type})"
     end
 
     #
@@ -135,7 +128,64 @@ module Generators
     end
 
     #
+    # Function name to convert a SK type to a C-library type
+    #
+    def adapter_to_lib_type(type)
+      "#{SK_ADAPTER_PREFIX}__to_sklib_#{type[:name]}"
+    end
+
+    #
+    # Function name to convert a C-library type to a SK type
+    #
+    def adapter_to_sk_type(type)
+      "#{SK_ADAPTER_PREFIX}__to_#{type[:name]}"
+    end
+
+    #
+    # Generates a typedef alias adapter for the given SK type
+    #
+    def make_typealias_adapter(type)
+      # Use C macro to save time
+      "#{SK_ADAPTER_PREFIX}__make_typealias_adapter(#{type[:name]})"
+    end
+
+    #
+    # Generates an enum adapter for the given SK type
+    #
+    def make_enum_adapter(type)
+      # Use C macro to save time
+      "#{SK_ADAPTER_PREFIX}__make_enum_adapter(#{type[:name]})"
+    end
+
+    #
+    # Generates a struct adapter for the given SK type
+    #
+    def make_struct_adapter(type)
+      definitions = []
+      adapter_to_lib = []
+      adapter_to_sk = []
+      # Go through each field to populate required template variables
+      type[:fields].each do |field_name, data|
+        field_type = data[:type]
+        field_name = field_name.to_s
+        definitions << "#{field_name} __sklib_#{field_type};"
+        adapter_to_lib << read_template('make_struct_adapter_field_types_to_lib',
+                                        field_name: field_name,
+                                        field_type: field_type)
+        adapter_to_sk << read_template('make_struct_adapter_field_types_to_sk',
+                                       field_name: field_name,
+                                       field_type: field_type)
+      end
+      read_template 'make_struct_adapter',
+                    struct_name: type[:name],
+                    definition_field_types_to_lib: definitions.indent,
+                    adapter_field_types_to_lib: adapter_to_lib.indent,
+                    adapter_field_types_to_sk: adapter_to_sk.indent
+    end
+
+    #
     # Convert a SK type to a C-library type
+    # TODO: Deprecate for underlying type (add underlying_type to struct|enum)
     #
     def sk_type_to_lib_type(type)
       default_type = 'ptr' # use when we don't have a mapping
@@ -173,5 +223,10 @@ module Generators
     # SplashKit library prefix name
     #
     SK_LIB_PREFIX = '__sklib'.freeze
+
+    #
+    # SplashKit adapter prefix name
+    #
+    SK_ADAPTER_PREFIX = '#{SK_ADAPTER_PREFIX}'.freeze
   end
 end
