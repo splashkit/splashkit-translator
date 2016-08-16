@@ -35,6 +35,13 @@ module CoreExtensions
     rescue ArgumentError
       nil
     end
+
+    #
+    # Split a string and indent it by the number of spaces specified
+    #
+    def indent(by = 4)
+      split("\n").indent(by)
+    end
   end
 end
 String.prepend CoreExtensions::String

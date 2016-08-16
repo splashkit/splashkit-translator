@@ -5,6 +5,8 @@ module Generators
   module Helper
     # Plucking for arrays of hashes
     require_relative '../../lib/core_ext/array.rb'
+    # For indent method
+    require_relative '../../lib/core_ext/string.rb'
 
     #
     # Initializes the generator with the data and source directories provided

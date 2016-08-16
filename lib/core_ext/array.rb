@@ -6,6 +6,14 @@ module CoreExtensions
     def pluck(key)
       map { |h| h[key] }
     end
+
+    #
+    # Joins an array and indents it by the number of spaces specified
+    #
+    def indent(by = 4)
+      spaces = ' ' * by
+      join("\n#{spaces}")
+    end
   end
 end
 Array.prepend CoreExtensions::Array
