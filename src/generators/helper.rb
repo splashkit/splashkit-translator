@@ -98,7 +98,7 @@ module Generators
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" if files.length > 1
       template = read_res_file File.basename files.first
-      sub_template_data template, data
+      sub_template_data(template, data).strip
     end
 
     #
