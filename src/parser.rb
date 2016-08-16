@@ -250,13 +250,18 @@ EOS
   def parse_typedef(xml)
     signature = parse_signature(xml)
     alias_info = parse_typedef_signature(signature)
+    attributes = parse_attributes(xml)
+    if attributes[:class].nil? && alias_info[:is_pointer]
+      raise ParserError,
+            "Typealiases to pointers must have a class attribute set"
+    end
     {
       signature:   signature,
       alias_info:  alias_info,
       name:        xml.xpath('name').text,
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
-      attributes:  parse_attributes(xml)
+      attributes:
     }
   rescue ParserError => e
     raise ParserError.new e.message, signature

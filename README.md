@@ -191,6 +191,8 @@ When added to a typedef, the type will be declared as a class:
 typedef struct _sound_data *sound_effect;
 ```
 
+Note that typedef aliases to pointers **must** be declared with a `class` attribute.
+
 #### Usage in functions
 
 The `sound_effect` type would appear in OO-translated SplashKit code as a class.
