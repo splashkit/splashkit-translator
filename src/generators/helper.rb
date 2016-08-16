@@ -76,7 +76,9 @@ module Generators
       template.gsub(regex) do |var_flag|
         _, var_name = *(regex.match var_flag)
         sub_value = data[var_name.to_sym]
-        raise "No data supplied for variable #{var_name}" if sub_value.nil?
+        unless sub_value.is_a? String
+          raise "Variable substitution for #{var_name} must be a string (got `#{sub_value.inspect}')"
+        end
         result.gsub!(var_flag, sub_value)
       end
       result
