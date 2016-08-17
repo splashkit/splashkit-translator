@@ -7,187 +7,62 @@ module Generators
   class SKLibC
     include Helper
 
+    attr_readers :src, :header_path, :include_directory
+
     alias helper_execute execute
     def execute
       {
         'sklib.c' => helper_execute,
-        'makefile' => read_template('makefile', include_dir: @src)
+        'makefile' => read_template('makefile')
       }
     end
 
-    def include_sk_header
-      read_template 'skheader', sk_header_path: @src
-    end
-
-    def include_strings_template
-      read_template 'strings'
-    end
-
-    def include_types_template
+    #
+    # Renders the types template
+    #
+    def render_types_template
+      @enums = @data.values.pluck(:enums).flatten
+      @typealiases = @data.values.pluck(:typedefs).flatten
+      @structs = @data.values.pluck(:structs).flatten
       read_template 'types'
     end
 
-    def declare_type_converters
-      enums   = @data.values.pluck(:enums).flatten
-                     .map { |e| make_enum_adapter(e) }
-      aliases = @data.values.pluck(:typedefs).flatten
-                     .map { |a| make_typealias_adapter(a) }
-      structs = @data.values.pluck(:structs).flatten
-                     .map { |s| make_struct_adapter(s) }
-      (enums + structs + aliases).flatten.join("\n")
-    end
-
-    def forward_declare_sk_lib
-      external_decl = 'extern "C"'
-      function_prototypes =
-        @data.values
-             .pluck(:functions)
-             .flatten
-             .map { |fn| sk_function_to_lib_type_signature fn }
-             .join(";\n#{external_decl} ")
-      "#{external_decl} #{function_prototypes};"
-    end
-
-    def implement_sk_lib
-      @data.values
-           .pluck(:functions)
-           .flatten
-           .map { |fn| map_sk_function_to_lib_function fn }
-           .join("\n")
-    end
-
-    private
-
     #
-    # Create the implementation body of a SK function
+    # Renders the function template
     #
-    def map_sk_function_to_lib_function(function)
-      lib_arg_list   = lib_argument_list_for_sk_function_call(function)
-      lib_type_sig   = sk_function_to_lib_type_signature(function)
-      sk_func_name   = function[:name]
-      sk_func_call   = "#{sk_func_name}(#{lib_arg_list})"
-      sk_return_type = function[:return_type]
-      lib_body       =
-        # determine the body based on the return type
-        case sk_return_type
-        # void function has no special body; just call the SK code
-        when 'void'
-          "#{sk_func_call};"
-        # other types mean we have an intermediary variable typed as the
-        # SK return type which we then convert to its associated lib type
-        else
-          lib_return_type = sk_type_to_lib_type sk_return_type
-          lib_return_variable_name = "#{SK_LIB_PREFIX}__return_value"
-          read_template 'non_void_fn_body',
-                        sk_return_type: sk_return_type,
-                        lib_return_variable_name: lib_return_variable_name,
-                        sk_func_call: sk_func_call,
-                        lib_return_type: lib_return_type
-        end
-        .indent()
-      read_template 'fn',
-                    signature: lib_type_sig,
-                    body: lib_body
-    end
-
-    #
-    # Defines the argument list of a SK function call
-    #
-    def lib_argument_list_for_sk_function_call(function)
-      params = function[:parameters]
-      result = []
-      params.each do |argument_name, data|
-        type = data[:type]
-        # Convert lib type to SK type using __to_#{type}
-        result << "__to_#{type}(#{argument_name})"
-      end
-      result.join(', ')
+    def render_functions_template
+      @functions = @data.values.pluck(:functions).flatten
+      read_template 'functions'
     end
 
     #
     # Generate a library type signature from a SK function
     #
-    def sk_function_to_lib_type_signature(function)
-      name            = sk_function_to_lib_function_name function
-      return_type     = sk_type_to_lib_type function[:return_type]
-      parameter_list  = sk_parameter_list_to_lib_parameter_list function
+    def lib_signature_for(function)
+      name            = lib_function_name_for function
+      return_type     = lib_type_for function[:return_type]
+      parameter_list  = lib_parameter_list_for function
       "#{return_type} #{name}(#{parameter_list})"
     end
 
     #
     # Convert a list of parameters to a C-library parameter list
     #
-    def sk_parameter_list_to_lib_parameter_list(function)
+    def lib_parameter_list_for(function)
       params = function[:parameters]
       result = []
       params.each do |name, data|
-        type = sk_type_to_lib_type data[:type]
+        type = lib_type_for data[:type]
         result << "#{type} #{name}"
       end
       result.join(', ')
     end
 
     #
-    # Function name to convert a SK type to a C-library type
-    #
-    def adapter_to_lib_type(type)
-      "#{SK_ADAPTER_PREFIX}__to_sklib_#{type[:name]}"
-    end
-
-    #
-    # Function name to convert a C-library type to a SK type
-    #
-    def adapter_to_sk_type(type)
-      "#{SK_ADAPTER_PREFIX}__to_#{type[:name]}"
-    end
-
-    #
-    # Generates a typedef alias adapter for the given SK type
-    #
-    def make_typealias_adapter(type)
-      # Use C macro to save time
-      "#{SK_ADAPTER_PREFIX}__make_typealias_adapter(#{type[:name]})"
-    end
-
-    #
-    # Generates an enum adapter for the given SK type
-    #
-    def make_enum_adapter(type)
-      # Use C macro to save time
-      "#{SK_ADAPTER_PREFIX}__make_enum_adapter(#{type[:name]})"
-    end
-
-    #
-    # Generates a struct adapter for the given SK type
-    #
-    def make_struct_adapter(type)
-      definitions = []
-      adapter_to_lib = []
-      adapter_to_sk = []
-      # Go through each field to populate required template variables
-      type[:fields].each do |field_name, data|
-        field_type = data[:type]
-        field_name = field_name.to_s
-        definitions << "#{field_name} __sklib_#{field_type};"
-        adapter_to_lib << read_template('make_struct_adapter_field_types_to_lib',
-                                        field_name: field_name,
-                                        field_type: field_type)
-        adapter_to_sk << read_template('make_struct_adapter_field_types_to_sk',
-                                       field_name: field_name,
-                                       field_type: field_type)
-      end
-      read_template 'make_struct_adapter',
-                    struct_name: type[:name],
-                    definition_field_types_to_lib: definitions.indent,
-                    adapter_field_types_to_lib: adapter_to_lib.indent,
-                    adapter_field_types_to_sk: adapter_to_sk.indent
-    end
-
-    #
     # Convert a SK type to a C-library type
     # TODO: Deprecate for underlying type (add underlying_type to struct|enum)
     #
-    def sk_type_to_lib_type(type)
+    def lib_type_for(type)
       default_type = 'ptr' # use when we don't have a mapping
       from_sk_to_c = {
         # SK src type -> C type
@@ -208,9 +83,9 @@ module Generators
     #
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
-    def sk_function_to_lib_function_name(function)
+    def lib_function_name_for(function)
       name_part = function[:name]
-      name = "#{SK_LIB_PREFIX}__#{name_part}"
+      name = "__sklib__#{name_part}"
       params = function[:parameters]
       unless params.empty?
         types_part = params.values.pluck(:type).join('__')
@@ -218,15 +93,5 @@ module Generators
       end
       name
     end
-
-    #
-    # SplashKit library prefix name
-    #
-    SK_LIB_PREFIX = '__sklib'.freeze
-
-    #
-    # SplashKit adapter prefix name
-    #
-    SK_ADAPTER_PREFIX = '#{SK_ADAPTER_PREFIX}'.freeze
   end
 end
