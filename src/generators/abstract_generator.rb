@@ -2,7 +2,7 @@ module Generators
   #
   # Common helper methods for generators
   #
-  module Helper
+  class AbstractGenerator
     require 'erb'
     # Plucking for arrays of hashes
     require_relative '../../lib/core_ext/array.rb'
@@ -20,32 +20,43 @@ module Generators
     #
     def execute
       puts "Executing #{name} generator..."
-      result = read_template
+      execute_result = render_templates
       puts '-> Done!'
-      result
+      execute_result
+    end
+
+    #
+    # Gets the full name of the generator
+    #
+    def name
+      self.class.name.to_s.split('::').last.downcase
     end
 
     private
 
     #
-    # Gets the full name of the class
+    # Called under `execute` to render templates
     #
-    def name
-      self.class.name
+    def render_templates
+      raise NotImplementedError
     end
 
     #
-    # Gets the executing module's name
+    # Alias of attr_reader but allows multiple aliases to be used
     #
-    def generator_name
-      name.to_s.split('::').last.downcase
+    def self.attr_readers(attribute_name, *list_of_aliases)
+      list_of_aliases.each do |aliass|
+        define_method(aliass) do
+          instance_variable_get("@#{attribute_name}")
+        end
+      end
     end
 
     #
     # Returns the generator's resource directory
     #
     def generator_res_dir
-      File.expand_path('../../../res/generators', __FILE__) + '/' + generator_name
+      File.expand_path('../../../res/generators', __FILE__) + '/' + name
     end
 
     #
@@ -61,23 +72,15 @@ module Generators
     #
     # Reads a generator's template file (defaults to the primary template file)
     #
-    def read_template(name = generator_name)
+    def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
       path = "#{generator_res_dir}/#{name}.*.erb"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
-      raise "Need exactly one match for #{path}" if files.length > 1
-      template = read_res_file(File.basename(files).first).strip
-      ERB.new(template).result
-    end
-
-    def attr_readers(attribute_name, *list_of_aliases)
-      list_of_aliases.each do |aliass|
-        define_method(aliass) do
-          instance_variable_get("@#{attribute_name}")
-        end
-      end
+      raise "Need exactly one match for #{path}" unless files.length == 1
+      template = read_res_file(File.basename(files.first)).strip
+      ERB.new(template, nil, '>').result(binding)
     end
   end
 end

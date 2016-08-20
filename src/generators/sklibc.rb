@@ -1,18 +1,24 @@
-require_relative 'helper'
+require_relative 'abstract_generator'
 
 module Generators
   #
   # SplashKit C Library code generator
   #
-  class SKLibC
-    include Helper
-
+  class SKLibC < AbstractGenerator
     attr_readers :src, :header_path, :include_directory
 
-    alias helper_execute execute
-    def execute
+    def initialize(data, src)
+      super(data, src)
+      @enums = @data.values.pluck(:enums).flatten
+      @typealiases = @data.values.pluck(:typedefs).flatten
+      @structs = @data.values.pluck(:structs).flatten
+      @functions = @data.values.pluck(:functions).flatten
+      @no_type_changes = %w(int float double)
+    end
+
+    def render_templates
       {
-        'sklib.c' => helper_execute,
+        'sklib.c' => read_template,
         'makefile' => read_template('makefile')
       }
     end
@@ -21,9 +27,6 @@ module Generators
     # Renders the types template
     #
     def render_types_template
-      @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten
-      @structs = @data.values.pluck(:structs).flatten
       read_template 'types'
     end
 
@@ -31,7 +34,6 @@ module Generators
     # Renders the function template
     #
     def render_functions_template
-      @functions = @data.values.pluck(:functions).flatten
       read_template 'functions'
     end
 
@@ -59,22 +61,40 @@ module Generators
     end
 
     #
+    # Return true iff function provided is void
+    #
+    def function_is_void?(function)
+      function[:return_type] == 'void'
+    end
+
+    #
     # Convert a SK type to a C-library type
-    # TODO: Deprecate for underlying type (add underlying_type to struct|enum)
     #
     def lib_type_for(type)
-      default_type = 'ptr' # use when we don't have a mapping
-      from_sk_to_c = {
+      # Lookup type
+      type =
+        if @typealiases.pluck(:name).include? type
+          'typealias'
+        elsif @structs.pluck(:name).include? type
+          'struct'
+        elsif @enums.pluck(:name).include? type
+          'enum'
+        else
+          type
+        end
+      result = {
         # SK src type -> C type
-        'void'   => 'void',
-        'int'    => 'int',
-        'float'  => 'float',
-        'double' => 'double',
-        'bool'   => 'int',
-        'struct' => 'struct',
-        'string' => '__sklib_string'
-      }
-      from_sk_to_c[type] || default_type
+        'void'      => 'void',
+        'int'       => 'int',
+        'float'     => 'float',
+        'double'    => 'double',
+        'bool'      => 'int',
+        'enum'      => 'int',
+        'struct'    => "__sklib_#{type}",
+        'string'    => '__sklib_string',
+        'typealias' => '__sklib_ptr'
+      }[type]
+      result
     end
 
     #

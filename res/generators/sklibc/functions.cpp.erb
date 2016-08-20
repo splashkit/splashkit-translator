@@ -1,11 +1,8 @@
-/*=sk_return_type*/ /*=lib_return_variable_name*/ = /*=sk_func_call*/
-return __to_/*=lib_return_type*/(/*=lib_return_variable_name*/);
-
 <%#
     Forward declare each function as a C-external function.
 %>
 <% @functions.each do |function| %>
-    extern "C" <%= lib_signature_for(function) %>;
+extern "C" <%= lib_signature_for(function) %>;
 <% end %>
 
 <%#
@@ -16,21 +13,15 @@ return __to_/*=lib_return_type*/(/*=lib_return_variable_name*/);
 <% @functions.each do |function| %>
 <%= lib_signature_for(function) %>
 {
-<% function.parameters.each do |param_name, param_data| %>
-    <%= lib_type_for(param_data[:type]) %> __skparam__<%= param_name %> = __skadapter__to_sklib_<%= param_data[:type] %>(<%= param_name %>);
+<% function[:parameters].each do |param_name, param_data| %>
+    <%= param_data[:type] %> __skparam__<%= param_name %> = __skadapter__to_<%= param_data[:type] %>(<%= param_name %>);
 <% end %>
-<% if is_void?(function) %>
-    <%= function[:name] %>(<%=
-      function.parameters.map do |param_name, _|
+    <% unless function_is_void?(function) %><%= lib_type_for(function[:return_type]) %> __skreturn = <% end %><%= function[:name] %>(<%=
+      function[:parameters].map do |param_name, _|
         "__skparam__#{param_name}"
       end.join(', ')
-    %>)
-<% else %>
-    __sklib_<%= function[:return_type] %> __skreturn = <%= function[:name] %>(<%=
-      function.parameters.map do |param_name, _|
-        "__skparam__#{param_name}"
-      end.join(', ')
-    %>)
+    %>);
+<% unless function_is_void?(function) %>
     return __skreturn;
 <% end %>
 }

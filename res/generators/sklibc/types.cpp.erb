@@ -10,24 +10,23 @@
     6. Free the returned `__sklib_string' from the heap
     7. Return the wrapped `Bar::String'
 %>
-typedef struct { char *string; int size; } __sklib_string;
-__sklib_string __skadapter__to_sklib_string(std::string s)
-{
+typedef struct {
+  char *string;
+  int size;
+} __sklib_string;
+__sklib_string __skadapter__to_sklib_string(std::string s) {
     __sklib_string result;
     result.size = s.length();
     result.string = (char *)malloc(result.size + 1);
     strcpy(result.string, s.c_str());
     return result;
 }
-void __skadapter__free_sklib_string(__sklib_string s)
-{
+void __skadapter__free_sklib_string(__sklib_string s) {
     free(s.string);
 }
-std::string __skadapter__to_string(__sklib_string s)
-{
+std::string __skadapter__to_string(__sklib_string s) {
     return std::string(s.string);
 }
-
 
 <%#
     SK `bool' to C `int' adapter macros.
@@ -45,9 +44,9 @@ std::string __skadapter__to_string(__sklib_string s)
 #define __skadapter__make_direct_adapter(type)\
 type __skadapter__to_sklib_##type(type value) { return value; }\
 type __skadapter__to_##type(type value) { return value; }
-__skadapter__make_direct_adapter(int)
-__skadapter__make_direct_adapter(float)
-__skadapter__make_direct_adapter(double)
+<% @no_type_changes.each do |type| %>
+__skadapter__make_direct_adapter(<%= type %>)
+<% end %>
 
 <%#
     `__sklib_ptr' is a wrapper for typealiases to pointer types using static
