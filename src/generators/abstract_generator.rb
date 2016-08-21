@@ -4,6 +4,8 @@ module Generators
   #
   class AbstractGenerator
     require 'erb'
+    # Indentation helper
+    require_relative '../../lib/core_ext/string.rb'
     # Plucking for arrays of hashes
     require_relative '../../lib/core_ext/array.rb'
 
@@ -13,6 +15,10 @@ module Generators
     def initialize(data, src)
       @data = data
       @src = File.dirname src
+      @enums = @data.values.pluck(:enums).flatten
+      @typealiases = @data.values.pluck(:typedefs).flatten
+      @structs = @data.values.pluck(:structs).flatten
+      @functions = @data.values.pluck(:functions).flatten
     end
 
     #
@@ -32,7 +38,41 @@ module Generators
       self.class.name.to_s.split('::').last.downcase
     end
 
+    #
+    # Dynamically adds the case conversion functions using the right types
+    # assigned by self.case_converters
+    #
+    def self.case_converters=(converters)
+      string_case_module = Module.new do
+        def send_case_conversion_method(casee)
+          send("to_#{casee}".to_sym)
+        end
+        define_method(:type_case) do
+          send_case_conversion_method converters[:types]
+        end
+        define_method(:function_case) do
+          send_case_conversion_method converters[:functions]
+        end
+        define_method(:parameter_case) do
+          send_case_conversion_method converters[:parameters]
+        end
+      end
+      string_case_module.freeze
+      String.prepend string_case_module
+    end
+
+    private_class_method :"case_converters="
+
     private
+
+    #
+    # Default case types are snake_case, unless it is overridden in a subclass
+    #
+    self.case_converters = {
+      types:      :snake_case,
+      functions:  :snake_case,
+      parameters: :snake_case
+    }
 
     #
     # Called under `execute` to render templates. Should return a hash

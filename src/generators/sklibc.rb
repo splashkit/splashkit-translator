@@ -9,10 +9,6 @@ module Generators
 
     def initialize(data, src)
       super(data, src)
-      @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten
-      @structs = @data.values.pluck(:structs).flatten
-      @functions = @data.values.pluck(:functions).flatten
       @no_type_changes = %w(int float double)
     end
 
@@ -24,17 +20,29 @@ module Generators
     end
 
     #
-    # Renders the types template
+    # Convert the name of a function to its library represented function
+    # name, that is:
     #
-    def render_types_template
-      read_template 'types'
+    #    my_function(int p1, float p2) => __sklib_my_function__int__float
+    #
+    def self.lib_function_name_for(function)
+      name_part = function[:name].function_case
+      name = "__sklib__#{name_part}"
+      params = function[:parameters]
+      unless params.empty?
+        types_part = params.values.pluck(:type).join('__')
+        name << "__#{types_part}"
+      end
+      name
     end
 
+    private
+
     #
-    # Renders the function template
+    # Alias to static method for usage on instance
     #
-    def render_functions_template
-      read_template 'functions'
+    def lib_function_name_for(function)
+      SKLibC.lib_function_name_for(function)
     end
 
     #
@@ -95,23 +103,6 @@ module Generators
         'typealias' => '__sklib_ptr'
       }[type]
       result
-    end
-
-    #
-    # Convert the name of a function to its library represented function
-    # name, that is:
-    #
-    #    my_function(int p1, float p2) => __sklib_my_function__int__float
-    #
-    def lib_function_name_for(function)
-      name_part = function[:name]
-      name = "__sklib__#{name_part}"
-      params = function[:parameters]
-      unless params.empty?
-        types_part = params.values.pluck(:type).join('__')
-        name << "__#{types_part}"
-      end
-      name
     end
   end
 end
