@@ -9,7 +9,7 @@ module Generators
 
     def initialize(data, src)
       super(data, src)
-      @no_type_changes = %w(int float double)
+      @direct_types = %w(int float double)
     end
 
     def render_templates
