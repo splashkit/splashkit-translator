@@ -15,11 +15,14 @@ typedef struct {
   int size;
 } __sklib_string;
 __sklib_string __skadapter__to_sklib_string(std::string s) {
-    __sklib_string result;
-    result.size = s.length();
-    result.string = (char *)malloc(result.size + 1);
-    strcpy(result.string, s.c_str());
-    return result;
+    __sklib_string __sklib_return_value;
+    __sklib_return_value.size = s.length();
+    __sklib_return_value.string = (char *)malloc(__sklib_return_value.size + 1);
+    strcpy(__sklib_return_value.string, s.c_str());
+    return __sklib_return_value;
+}
+void __skadapter__free_sklib_string_internal_pointer(char *s, int size) {
+    free(s);
 }
 void __skadapter__free_sklib_string(__sklib_string s) {
     free(s.string);
@@ -31,20 +34,20 @@ std::string __skadapter__to_string(__sklib_string s) {
 <%#
     SK `bool' to C `int' adapter macros.
 %>
-#define __skadapter__to_sklib_bool(value)\
-(value == true ? 1 : 0)
-#define __skadapter__to_bool(value)\
-(value == 1 ? true : false)
+#define __skadapter__to_sklib_bool(v)\
+(v == true ? 1 : 0)
+#define __skadapter__to_bool(v)\
+(v == 1 ? true : false)
 
 <%#
     Direct adapters are made for no change between SK and Lib types. Use the
     `__skadapter__make_direct_adapter' macro to generate adapter methods for a
-    no-change type.
+    no-change/direct type.
 %>
 #define __skadapter__make_direct_adapter(type)\
-type __skadapter__to_sklib_##type(type value) { return value; }\
-type __skadapter__to_##type(type value) { return value; }
-<% @no_type_changes.each do |type| %>
+type __skadapter__to_sklib_##type(type v) { return v; }\
+type __skadapter__to_##type(type v) { return v; }
+<% @direct_types.each do |type| %>
 __skadapter__make_direct_adapter(<%= type %>)
 <% end %>
 
@@ -55,8 +58,8 @@ __skadapter__make_direct_adapter(<%= type %>)
  %>
 #define __sklib_ptr void *
 #define __skadapter__make_typealias_adapter(type)\
-__sklib_ptr __skadapter__to_sklib_##type(type value) { return static_cast<__sklib_ptr>(value); }\
-type __skadapter__to_##type(__sklib_ptr value) { return static_cast<type>(value); }
+__sklib_ptr __skadapter__to_sklib_##type(type v) { return static_cast<__sklib_ptr>(v); }\
+type __skadapter__to_##type(__sklib_ptr v) { return static_cast<type>(v); }
 <% @typealiases.each do |typealias| %>
 __skadapter__make_typealias_adapter(<%= typealias[:name] %>)
 <% end %>
@@ -67,8 +70,8 @@ __skadapter__make_typealias_adapter(<%= typealias[:name] %>)
     and from the SK and Lib enums.
  %>
 #define __skadapter__make_enum_adapter(type)\
-int __skadapter__to_sklib_##type(type value) { return static_cast<int>(value); }\
-type __skadapter__to_##type(int value) { return static_cast<type>(value); }
+int __skadapter__to_sklib_##type(type v) { return static_cast<int>(v); }\
+type __skadapter__to_##type(int v) { return static_cast<type>(v); }
 <% @enums.each do |enum| %>
 __skadapter__make_enum_adapter(<%= enum[:name] %>)
 <% end %>
