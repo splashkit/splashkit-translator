@@ -83,22 +83,19 @@ __skadapter__make_enum_adapter(<%= enum[:name] %>)
     cast so we must generate the functions individually.
  %>
 <% @structs.each do |struct| %>
-typedef struct
-{
+typedef struct {
 <% struct[:fields].each do |field_name, field_data| %>
     __sklib_<%= field_data[:type] %> <%= field_name %>;
 <% end %>
 } __sklib_<%= struct[:name] %>;
-__sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name] %> v)
-{
+__sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name] %> v) {
     __sklib_<%= struct[:name] %> __sklib_return_value;
 <% struct[:fields].each do |field_name, field_data| %>
     v.<%= field_name %> = __skadapter__to_sklib_<%= field_data[:type] %>(v.<%= field_name %>);
 <% end %>
     return __sklib_return_value;
 }
-<%= struct[:name] %> __skadapter__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v)
-{
+<%= struct[:name] %> __skadapter__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v) {
     <%= struct[:name] %> __sklib_return_value;
 <% struct[:fields].each do |field_name, field_data| %>
     v.<%= field_name %> = __skadapter__to_<%= field_data[:type] %>(v.<%= field_name %>);
