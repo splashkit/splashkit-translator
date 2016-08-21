@@ -1,14 +1,14 @@
 # TODO:
 
-[ ] Switch to ERBs templates!
+- [x] Switch to ERBs templates!
 
-[x] New rule to @attribute class for typedef aliases:
+- [x] New rule to @attribute class for typedef aliases:
    - must be a pointer (isPointer) and have a class
    - otherwise throw an error
 
-[x] Enums use a `static_cast` to convert to and from `int` to their enum type
+- [x] Enums use a `static_cast` to convert to and from `int` to their enum type
 
-[x] Structs must convert individually each field by mapping each field type
+- [x] Structs must convert individually each field by mapping each field type
     and vice versa (omit __sklib_ at __sklib_person and add __sklib_ to person)
 
 ```cpp
@@ -22,17 +22,17 @@
   }
 ```
 
-[ ] Rename arrays to vectors
+- [ ] Rename arrays to vectors
 
-[ ] Arrays must have:
+- [ ] Arrays must have:
    - `__skadapter__to_sklib_[type]_array`
    - `__skadapter__to_[type]_array`
    - `__skadapter__free_[type]_array`
    - i.e., follow principles of string
 
-[ ] Reject all `int[]` types - we only accept vectors!
+- [ ] Reject all `int[]` types - we only accept vectors!
 
-[ ] Adapter's must be written both ways for sklibc and {LANGUAGE}
+- [ ] Adapter's must be written both ways for sklibc and {LANGUAGE}
 
 ```
           ( __skadapter__to_[type]       )->|             |<-( __skadapter__to_sklib_[type] )
@@ -40,9 +40,9 @@
           ( __skadapter__to_sklib_[type] )<-|             |->( __skadapter__to_[type]       )
 ```
 
-[ ] Enums must be to ints in SKLIBC
+- [x] Enums must be to ints in SKLIBC
 
-[ ] Structs must be declared as their types in the generated language code (go through each field)
+- [x] Structs must be declared as their types in the generated language code (go through each field)
    (not in SKLIBC code as it's included from #include splashkit)
 
-[ ] New breakdown for function calls in both SKLIBC and generated code
+- [x] New breakdown for function calls in both SKLIBC and generated code
