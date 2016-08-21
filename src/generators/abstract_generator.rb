@@ -75,6 +75,13 @@ module Generators
     }
 
     #
+    # Return true iff function provided is void
+    #
+    def function_is_void?(function)
+      function[:return_type] == 'void'
+    end
+
+    #
     # Called under `execute` to render templates. Should return a hash
     # with the intended filename as the key and its contents as the value
     #

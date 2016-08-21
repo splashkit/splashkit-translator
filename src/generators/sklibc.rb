@@ -69,13 +69,6 @@ module Generators
     end
 
     #
-    # Return true iff function provided is void
-    #
-    def function_is_void?(function)
-      function[:return_type] == 'void'
-    end
-
-    #
     # Convert a SK type to a C-library type
     #
     def lib_type_for(type)
