@@ -110,8 +110,8 @@ module Generators
     #
     # Reads a file defined by res/generators/{generator_name}/{file_name}
     #
-    def read_res_file(file_name)
-      file = File.new "#{generator_res_dir}/#{file_name}", 'r'
+    def read_res_file(file_path)
+      file = File.new file_path, 'r'
       file.readlines.join
     ensure
       file.close
@@ -127,7 +127,7 @@ module Generators
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1
-      template = read_res_file(File.basename(files.first)).strip
+      template = read_res_file(files.first).strip
       ERB.new(template, nil, '>').result(binding)
     end
 
