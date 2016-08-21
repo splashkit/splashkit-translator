@@ -70,7 +70,7 @@ __skadapter__make_typealias_adapter(<%= typealias[:name] %>)
 int __skadapter__to_sklib_##type(type value) { return static_cast<int>(value); }\
 type __skadapter__to_##type(int value) { return static_cast<type>(value); }
 <% @enums.each do |enum| %>
-__skadapter__make_typealias_adapter(<%= enum[:name] %>)
+__skadapter__make_enum_adapter(<%= enum[:name] %>)
 <% end %>
 
 <%#
