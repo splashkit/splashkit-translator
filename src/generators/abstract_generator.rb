@@ -53,8 +53,8 @@ module Generators
         define_method(:function_case) do
           send_case_conversion_method converters[:functions]
         end
-        define_method(:parameter_case) do
-          send_case_conversion_method converters[:parameters]
+        define_method(:variable_case) do
+          send_case_conversion_method converters[:variables]
         end
       end
       string_case_module.freeze
@@ -71,7 +71,7 @@ module Generators
     self.case_converters = {
       types:      :snake_case,
       functions:  :snake_case,
-      parameters: :snake_case
+      variables:  :snake_case
     }
 
     #
