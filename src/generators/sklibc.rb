@@ -24,20 +24,6 @@ module Generators
     end
 
     #
-    # Renders the types template
-    #
-    def render_types_template
-      read_template 'types'
-    end
-
-    #
-    # Renders the function template
-    #
-    def render_functions_template
-      read_template 'functions'
-    end
-
-    #
     # Generate a library type signature from a SK function
     #
     def lib_signature_for(function)

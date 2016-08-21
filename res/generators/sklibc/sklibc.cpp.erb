@@ -3,6 +3,5 @@
 #include "<%= header_path %>/splashkit.h"
 using std::string;
 
-<%= render_types_template %>
-
-<%= render_functions_template %>
+<%= read_template 'types' %>
+<%= read_template 'functions' %>
