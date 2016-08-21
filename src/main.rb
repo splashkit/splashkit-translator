@@ -23,9 +23,10 @@ opt_parser = OptionParser.new do |opts|
               .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --from /path/to/splashkit/coresdk/src/coresdk[/file.h]
-                --to GENERATOR[,GENERATOR ... ]
-                [--out /path/to/write/output/to]
+Usage: parse.rb --input /path/to/splashkit/coresdk/src/coresdk[/file.h]
+                [--generate GENERATOR[,GENERATOR ... ]
+                [--output /path/to/write/output/to]
+                [--validate]
 EOS
   opts.banner = help
   opts.separator ''
@@ -55,28 +56,28 @@ EOS
   help = <<-EOS
 Directory to write output to
 EOS
-  opts.on('-o', '--out OUTPUT', help) do |out|
+  opts.on('-o', '--output OUTPUT', help) do |out|
     options[:out] = out
   end
   # Validate only (don't generate)
   help = <<-EOS
 Validate HeaderDoc only to parse without translating
 EOS
-  opts.on('-v', '--validate', help) do |validated|
+  opts.on('-v', '--validate', help) do
     options[:validate_only] = true
   end
   opts.separator ''
   opts.separator 'Generators:'
-  avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}"}
+  avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}" }
 end
 # Parse block
 begin
   opt_parser.parse!
   mandatory = [:src]
   # Add generators to mandatory if not validating
-  mandatory << :generators unless options[:validate_only]
-  missing = mandatory.select{ |param| options[param].nil? }
-  raise OptionParser::MissingArgument.new "Arguments missing" unless missing.empty?
+  mandatory = [:src, :generators, :out] unless options[:validate_only]
+  missing = mandatory.select { |param| options[param].nil? }
+  raise OptionParser::MissingArgument, 'Arguments missing' unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
   puts opt_parser
@@ -92,7 +93,7 @@ begin
       puts 'Parser succeeded with no errors 🎉'
     elsif options[:out]
       out.each do |filename, contents|
-        output = options[:out] + '/' + filename
+        output = "#{options[:out]}/#{generator_class}/#{filename}"
         FileUtils.mkdir_p File.dirname output
         puts "Writing output to #{output}..."
         File.write output, contents

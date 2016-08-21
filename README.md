@@ -48,27 +48,28 @@ Then run using `parse`.
 ## Validating
 
 To validate a single file or files, supply the `--validate` or `-v` switch and
-the `--from` or `-f` switch with the header file you wish to validate:
+the `--input` or `-i` switch with the header file you wish to validate:
 
 ```bash
-$ ./parse --validate --from /path/to/splashkit/coresdk/src/coresdk/audio.h
+$ ./parse --validate --input /path/to/splashkit/coresdk/src/coresdk/audio.h
 ```
 
 Alternatively, you can validate all header files by supplying just the
 SplashKit `coresdk/src/coresdk` directory instead:
 
 ```bash
-$ ./parse -v -f /path/to/splashkit/coresdk/src/coresdk
+$ ./parse -v -i /path/to/splashkit/coresdk/src/coresdk
 ```
 
 ## Converting
 
 To convert, follow the same as the above, removing the `--validate`/`-v` switch
 and supplying the generators you would like to run using a comma-separated list
-under the `--to` or `-t` switch:
+under the `--generate` or `-g` switch and specifiying the output directory using
+the `--output` or `-o` switch:
 
 ```bash
-$ ./parse --from /path/to/splashkit/coresdk/src/coresdk/audio.h --to YAML,SKLIBC
+$ ./parse -i /path/to/splashkit/coresdk/src/coresdk/audio.h -o ~/Desktop/audio -g YAML,SKLIBC,CPP
 ```
 
 To see a full list of each generator available, use the `--help` switch.
