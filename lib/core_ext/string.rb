@@ -35,6 +35,49 @@ module CoreExtensions
     rescue ArgumentError
       nil
     end
+
+    #
+    # Split a string and indent it by the number of spaces specified
+    #
+    def indent(by = 4)
+      split("\n").indent(by)
+    end
+
+    #
+    # Converts from snake_case to camelCase
+    #
+    def to_camel_case
+      pascal_case = to_pascal_case
+      pascal_case[0, 1].downcase + pascal_case[1..-1]
+    end
+
+    #
+    # Converts from snake_case to PascalCase
+    #
+    def to_pascal_case
+      to_human_case.sub(' ', '')
+    end
+
+    #
+    # Converts from snake_case to Humanised Case
+    #
+    def to_human_case
+      split('_').map(&:capitalize).join(' ')
+    end
+
+    #
+    # Converts from snake_case to snake_case (no change)
+    #
+    def to_snake_case
+      self
+    end
+
+    #
+    # Converts from snake_case to kebab-case
+    #
+    def to_kebab_case
+      to_human_case.downcase.sub(' ', '-')
+    end
   end
 end
 String.prepend CoreExtensions::String

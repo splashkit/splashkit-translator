@@ -226,16 +226,42 @@ EOS
   end
 
   #
+  # Parses a typedef signature for extended information that HeaderDoc does
+  # not parse in
+  #
+  def parse_typedef_signature(signature)
+    regex = /typedef ([a-z]+)? ([a-z\_]+) (\*)?([a-z\_]+);$/
+    _,
+    aliased_type,
+    aliased_identifier,
+    is_pointer,
+    new_identifier = *(regex.match signature)
+    {
+      aliased_type: aliased_type,
+      aliased_identifier: aliased_identifier,
+      is_pointer: !is_pointer.nil?,
+      new_identifier: new_identifier
+    }
+  end
+
+  #
   # Parses a single typedef
   #
   def parse_typedef(xml)
     signature = parse_signature(xml)
+    alias_info = parse_typedef_signature(signature)
+    attributes = parse_attributes(xml)
+    if attributes && attributes[:class].nil? && alias_info[:is_pointer]
+      raise ParserError,
+            "Typealiases to pointers must have a class attribute set"
+    end
     {
       signature:   signature,
+      alias_info:  alias_info,
       name:        xml.xpath('name').text,
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
-      attributes:  parse_attributes(xml)
+      attributes:  attributes
     }
   rescue ParserError => e
     raise ParserError.new e.message, signature

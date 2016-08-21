@@ -1,0 +1,28 @@
+<%#
+    Forward declare each function as a C-external function.
+%>
+<% @functions.each do |function| %>
+extern "C" <%= lib_signature_for(function) %>;
+<% end %>
+
+<%#
+    Implement each of the function bodies calling the SK code. Three-step
+    process: variableize the arguments to the SK call from their lib-type
+    adapted versions, make the call (and return the call if non-void).
+%>
+<% @functions.each do |function| %>
+<%= lib_signature_for(function) %>
+{
+<% function[:parameters].each do |param_name, param_data| %>
+    <%= param_data[:type] %> __skparam__<%= param_name %> = __skadapter__to_<%= param_data[:type] %>(<%= param_name %>);
+<% end %>
+    <% unless function_is_void?(function) %><%= lib_type_for(function[:return_type]) %> __skreturn = <% end %><%= function[:name] %>(<%=
+      function[:parameters].map do |param_name, _|
+        "__skparam__#{param_name}"
+      end.join(', ')
+    %>);
+<% unless function_is_void?(function) %>
+    return __skreturn;
+<% end %>
+}
+<% end %>
