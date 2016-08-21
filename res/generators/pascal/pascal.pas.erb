@@ -1,5 +1,4 @@
 unit SplashKit;
-uses strings;
 
 interface
 
@@ -10,6 +9,7 @@ type
 <%= read_template 'interface/function_prototypes' %>
 
 implementation
+uses strings;
 
 type
   <%= read_template('implementation/types').indent(2) %>
