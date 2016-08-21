@@ -3,8 +3,6 @@ require          'optparse'
 require          'fileutils'
 require_relative 'parser'
 require_relative 'generators/sklibc'
-require_relative 'generators/yaml'
-require_relative 'generators/cpp'
 
 # Required to run
 options = {
