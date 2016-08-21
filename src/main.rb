@@ -80,7 +80,6 @@ begin
   raise OptionParser::MissingArgument, 'Arguments missing' unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
-  puts opt_parser
   exit 1
 end
 # Run block
