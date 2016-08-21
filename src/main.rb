@@ -88,12 +88,13 @@ begin
   raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
   parsed = Parser.parse(options[:src])
   options[:generators].each do |generator_class|
-    out = generator_class.new(parsed, options[:src]).execute
+    gen = generator_class.new(parsed, options[:src])
+    out = gen.execute
     if options[:validate_only]
       puts 'Parser succeeded with no errors 🎉'
     elsif options[:out]
       out.each do |filename, contents|
-        output = "#{options[:out]}/#{generator_class}/#{filename}"
+        output = "#{options[:out]}/#{gen.name}/#{filename}"
         FileUtils.mkdir_p File.dirname output
         puts "Writing output to #{output}..."
         File.write output, contents
