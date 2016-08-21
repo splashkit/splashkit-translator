@@ -23,7 +23,7 @@ __sklib_<%= typealias[:name] %>_data_type = record end;
   <%= field_name.to_s.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;
 <% end %>
 end;
-__sklib_<%= struct[:name] %> = record end;
+__sklib_<%= struct[:name] %> = <%= struct[:name].type_case %>;
 <% end %>
 <%#
   Enum declaration
