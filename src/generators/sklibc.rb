@@ -20,7 +20,6 @@ module Generators
     end
 
     #
-<<<<<<< HEAD
     # Convert the name of a function to its library represented function
     # name, that is:
     #
@@ -47,8 +46,6 @@ module Generators
     end
 
     #
-=======
->>>>>>> origin/quality/refactor-types
     # Generate a library type signature from a SK function
     #
     def lib_signature_for(function)
