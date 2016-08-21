@@ -16,13 +16,13 @@ extern "C" <%= lib_signature_for(function) %>;
 <% function[:parameters].each do |param_name, param_data| %>
     <%= param_data[:type] %> __skparam__<%= param_name %> = __skadapter__to_<%= param_data[:type] %>(<%= param_name %>);
 <% end %>
-    <% unless function_is_void?(function) %><%= lib_type_for(function[:return_type]) %> __skreturn = <% end %><%= function[:name] %>(<%=
+    <% unless function_is_void?(function) %><%= function[:return_type] %> __skreturn = <% end %><%= function[:name] %>(<%=
       function[:parameters].map do |param_name, _|
         "__skparam__#{param_name}"
       end.join(', ')
     %>);
 <% unless function_is_void?(function) %>
-    return __skreturn;
+    return __skadapter__to_sklib_<%= function[:return_type] %>(__skreturn);
 <% end %>
 }
 <% end %>
