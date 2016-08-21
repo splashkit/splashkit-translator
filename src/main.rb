@@ -3,6 +3,7 @@ require          'optparse'
 require          'fileutils'
 require_relative 'parser'
 require_relative 'generators/sklibc'
+require_relative 'generators/pascal'
 
 # Required to run
 options = {

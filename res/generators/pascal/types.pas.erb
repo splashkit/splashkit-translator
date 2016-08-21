@@ -1,0 +1,33 @@
+<%#
+  SplashKit __sklib_string wrapper
+%>
+__sklib_string = record
+  str: PChar;
+  size: Integer;
+end;
+<%#
+  `__sklib_ptr' is a wrapper for typealiases to pointer types using type
+  casts.
+%>
+__sklib_ptr = Pointer;
+<% @typealiases.each do |typealias| %>
+<%= typealias[:name].type_case %> = ^__sklib_<%= typealias[:name] %>_data_type;
+__sklib_<%= typealias[:name] %>_data_type = record end;
+<% end %>
+<%#
+  Record declaration from structs
+%>
+<% @structs.each do |struct| %>
+<%= struct[:name].type_case %> = record
+<% struct[:fields].each do |field_name, field_data| %>
+  <%= field_name.to_s.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;
+<% end %>
+end;
+__sklib_color = <%= struct[:name].type_case %>;
+<% end %>
+<%#
+  Enum declaration
+%>
+<% @enums.each do |enum| %>
+<%= enum[:name].type_case %> = ( <%= enum[:constants].keys.join(', ') %> );
+<% end %>

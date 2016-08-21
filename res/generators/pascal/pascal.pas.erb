@@ -1,0 +1,16 @@
+library SplashKit;
+uses strings;
+
+type
+  <%= read_template('types').indent(2) %>
+
+
+<%= read_template 'type_adapters' %>
+
+
+<%= read_template 'functions' %>
+
+exports
+<%= read_template('exports').indent(2) %>
+
+end.
