@@ -55,7 +55,7 @@ module CoreExtensions
     # Converts from snake_case to PascalCase
     #
     def to_pascal_case
-      to_human_case.sub(' ', '')
+      to_human_case.tr(' ', '')
     end
 
     #
@@ -76,7 +76,7 @@ module CoreExtensions
     # Converts from snake_case to kebab-case
     #
     def to_kebab_case
-      to_human_case.downcase.sub(' ', '-')
+      to_human_case.downcase.tr(' ', '-')
     end
   end
 end
