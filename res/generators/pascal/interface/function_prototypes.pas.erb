@@ -1,0 +1,8 @@
+<% @functions.each do |function| %>
+<% if is_void?(function) %>procedure <% else %>function <% end %>
+<%= function[:name].function_case %>(<%=
+  function[:parameters].map do |param_name, param_data|
+    param_name.to_s.variable_case + ": " + pascal_type_for(param_data[:type])
+  end.join('; ')
+%>)<% unless is_void?(function) %>: <%= pascal_type_for(function[:return_type]) %><% end %>;
+<% end %>

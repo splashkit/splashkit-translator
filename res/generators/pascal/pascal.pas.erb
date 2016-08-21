@@ -1,15 +1,21 @@
-library SplashKit;
+unit SplashKit;
 uses strings;
 
+interface
+
 type
-  <%= read_template('types').indent(2) %>
+  <%= read_template('interface/types').indent(2) %>
 
 
-<%= read_template 'type_adapters' %>
+<%= read_template 'interface/function_prototypes' %>
 
-<%= read_template 'functions' %>
+implementation
 
-exports
-  <%= read_template('exports').indent(2) %>
+type
+  <%= read_template('implementation/types').indent(2) %>
+
+<%= read_template 'implementation/type_adapters' %>
+
+<%= read_template 'implementation/functions' %>
 
 end.
