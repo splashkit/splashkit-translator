@@ -26,16 +26,26 @@ module Generators
       }
     end
 
-    #
-    # Convert a SK type to a pascal type
-    #
+    def lib_type_for(type)
+      raw_t = raw_type_for(type)
+      lookup_table = @direct_types.merge(
+        'bool'      => 'Integer',
+        'string'    => '__sklib_string',
+        'enum'      => 'Integer',
+        'struct'    => "__sklib_#{type}",
+        'typealias' => '__sklib_ptr'
+      )
+      lookup_table[raw_t]
+    end
+
     def pascal_type_for(type)
       raw_t = raw_type_for(type)
       lookup_table = @direct_types.merge(
-        'bool'   => 'Boolean',
-        'string' => 'String',
-        'enum'   => type,
-        'struct' => type
+        'bool'      => 'Boolean',
+        'string'    => 'String',
+        'enum'      => type,
+        'struct'    => type,
+        'typealias' => type
       )
       lookup_table[raw_t].type_case
     end
