@@ -77,7 +77,7 @@ module Generators
     #
     # Return true iff function provided is void
     #
-    def function_is_void?(function)
+    def is_void?(function)
       function[:return_type] == 'void'
     end
 
