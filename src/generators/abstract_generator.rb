@@ -35,7 +35,8 @@ module Generators
     private
 
     #
-    # Called under `execute` to render templates
+    # Called under `execute` to render templates. Should return a hash
+    # with the intended filename as the key and its contents as the value
     #
     def render_templates
       raise NotImplementedError

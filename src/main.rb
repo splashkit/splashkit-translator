@@ -18,6 +18,7 @@ opt_parser = OptionParser.new do |opts|
   avaliable_gens =
     Generators.constants
               .select { |c| Class === Generators.const_get(c) }
+              .select { |c| c != :AbstractGenerator }
               .map { |g| [g.upcase, Generators.const_get(g)] }
               .to_h
   # Setup
@@ -33,19 +34,19 @@ EOS
   help = <<-EOS
 Source header file or SplashKit CoreSDK directory
 EOS
-  opts.on('-f', '--from SOURCE', help) do |file|
+  opts.on('-i', '--input SOURCE', help) do |file|
     options[:src] = file
   end
   # To [using generator]
   help = <<-EOS
 Comma separated list of generators to run on the file(s).
 EOS
-  opts.on('-t', '--to GENERATOR[,GENERATOR ... ]', help) do |gens|
+  opts.on('-g', '--generate GENERATOR[,GENERATOR ... ]', help) do |gens|
     parsed_gens = gens.split(',')
     options[:generators] = parsed_gens.map do |gen|
       gen_class = avaliable_gens[gen.upcase.to_sym]
       if gen_class.nil?
-        raise OptionParser::InvalidOption.new "#{gen} - Unknown generator #{gen}"
+        raise OptionParser::InvalidOption, "#{gen} - Unknown generator #{gen}"
       end
       gen_class
     end
