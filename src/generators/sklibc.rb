@@ -26,7 +26,7 @@ module Generators
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
     def self.lib_function_name_for(function)
-      name_part = function[:name].function_case
+      name_part = function[:name]
       name = "__sklib__#{name_part}"
       params = function[:parameters]
       unless params.empty?
