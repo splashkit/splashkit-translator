@@ -10,7 +10,8 @@ require_relative 'generators/cpp'
 options = {
   generators: [],
   src: nil,
-  out: nil
+  out: nil,
+  validate_only: false
 }
 
 # Options parse block
@@ -58,6 +59,13 @@ EOS
   opts.on('-o', '--out OUTPUT', help) do |out|
     options[:out] = out
   end
+  # Validate only (don't generate)
+  help = <<-EOS
+Validate HeaderDoc only to parse without translating
+EOS
+  opts.on('-v', '--validate', help) do |validated|
+    options[:validate_only] = true
+  end
   opts.separator ''
   opts.separator 'Generators:'
   avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}"}
@@ -65,8 +73,10 @@ end
 # Parse block
 begin
   opt_parser.parse!
-  mandatory = [:generators, :src]
-  missing = mandatory.select { |param| options[param].nil? }
+  mandatory = [:src]
+  # Add generators to mandatory if not validating
+  mandatory << :generators unless options[:validate_only]
+  missing = mandatory.select{ |param| options[param].nil? }
   raise OptionParser::MissingArgument.new "Arguments missing" unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
@@ -79,7 +89,9 @@ begin
   parsed = Parser.parse(options[:src])
   options[:generators].each do |generator_class|
     out = generator_class.new(parsed, options[:src]).execute
-    if options[:out]
+    if options[:validate_only]
+      puts 'Parser succeeded with no errors 🎉'
+    elsif options[:out]
       out.each do |filename, contents|
         output = options[:out] + '/' + filename
         FileUtils.mkdir_p File.dirname output

@@ -29,20 +29,49 @@ Converts SplashKit API documentation into YAML and then anything else we want to
 
 # Running
 
+## Dependencies
+
 Ensure you have HeaderDoc installed:
 
 - Under macOS, you will need to have Xcode with Developer Tools installed.
 - Under Ubuntu, you can download HeaderDoc at Apple's OpenSource Developer Tools
   [here](http://opensource.apple.com/release/developer-tools-64/).
 
-Install dependencies and run using `parse.rb` in the root folder:
+Install dependencies using `bundle`:
 
 ```bash
 $ bundle install
-$ ./parse.rb --from /path/to/splashkit/coresdk/src/coresdk --to SKLIBC,YAML
 ```
 
-Run without arguments for improved usage.
+Then run using `parse`.
+
+## Validating
+
+To validate a single file or files, supply the `--validate` or `-v` switch and
+the `--from` or `-f` switch with the header file you wish to validate:
+
+```bash
+$ ./parse --validate --from /path/to/splashkit/coresdk/src/coresdk/audio.h
+```
+
+Alternatively, you can validate all header files by supplying just the
+SplashKit `coresdk/src/coresdk` directory instead:
+
+```bash
+$ ./parse -v -f /path/to/splashkit/coresdk/src/coresdk
+```
+
+## Converting
+
+To convert, follow the same as the above, removing the `--validate`/`-v` switch
+and supplying the generators you would like to run using a comma-separated list
+under the `--to` or `-t` switch:
+
+```bash
+$ ./parse --from /path/to/splashkit/coresdk/src/coresdk/audio.h --to YAML,SKLIBC
+```
+
+To see a full list of each generator available, use the `--help` switch.
 
 # SplashKit Documentation Guidelines
 
