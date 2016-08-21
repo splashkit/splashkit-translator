@@ -79,19 +79,7 @@ module Generators
     # Convert a SK type to a C-library type
     #
     def lib_type_for(type)
-      # Lookup type
-      type =
-        if @typealiases.pluck(:name).include? type
-          'typealias'
-        elsif @structs.pluck(:name).include? type
-          'struct'
-        elsif @enums.pluck(:name).include? type
-          'enum'
-        else
-          type
-        end
-      result = {
-        # SK src type -> C type
+      {
         'void'      => 'void',
         'int'       => 'int',
         'float'     => 'float',
@@ -101,8 +89,7 @@ module Generators
         'struct'    => "__sklib_#{type}",
         'string'    => '__sklib_string',
         'typealias' => '__sklib_ptr'
-      }[type]
-      result
+      }[raw_type_for(type)]
     end
   end
 end

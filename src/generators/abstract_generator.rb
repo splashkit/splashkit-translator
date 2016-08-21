@@ -123,5 +123,20 @@ module Generators
       template = read_res_file(File.basename(files.first)).strip
       ERB.new(template, nil, '>').result(binding)
     end
+
+    #
+    # Attempts to lookup a raw type for the provided type
+    #
+    def raw_type_for(type)
+      if @typealiases.pluck(:name).include? type
+        'typealias'
+      elsif @structs.pluck(:name).include? type
+        'struct'
+      elsif @enums.pluck(:name).include? type
+        'enum'
+      else
+        type
+      end
+    end
   end
 end
