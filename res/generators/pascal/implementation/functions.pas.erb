@@ -29,7 +29,7 @@ var
   __skparam__<%= param_name %>: <%= lib_type_for(param_data[:type]) %>;
 <% end %>
 <% unless is_void?(function) %>
-  <%= lib_type_for(function[:return_type]) %>: __skreturn;
+  __skreturn: <%= lib_type_for(function[:return_type]) %>;
 <% end %>
 begin
 <%# Convert params to sklibc type %>
