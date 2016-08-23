@@ -205,9 +205,15 @@ EOS
   # Parses all parameters in a docblock
   #
   def parse_parameters(xml, ppl)
-    xml.xpath('.//parameter').map do |p|
+    params = xml.xpath('.//parameter').map do |p|
       parse_parameter(p, ppl)
     end.to_h
+    ppl.each do |p_name, p_type|
+      if params[p_name].nil?
+        params[p_name] = parse_parameter_info(p_type, xml.xpath('desc').text)
+      end
+    end
+    params
   end
 
   #
