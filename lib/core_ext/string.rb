@@ -13,8 +13,8 @@ module CoreExtensions
     # Converts to a boolean type if applicable, or nil
     #
     def to_b
-      return true if self =~ /^(true|t|yes)$/i
-      return false if empty? || self =~ /^(false|f|no)$/i
+      return true if self =~ /^(true)$/i
+      return false if empty? || self =~ /^(false)$/i
       nil
     end
 
