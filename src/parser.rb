@@ -25,7 +25,7 @@ module Parser
   def parse(src)
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
-    headers_src = "#{src}/*.h" unless src.end_with? '.h'
+    headers_src = "#{src}/coresdk/src/coresdk/*.h" unless src.end_with? '.h'
     parsed = Dir[headers_src || src].map do |hfile|
       puts "Parsing #{hfile}..."
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
@@ -40,8 +40,9 @@ module Parser
     end
     if parsed.empty?
       raise ParserError <<-EOS
-Nothing parsed! Check that #{src} is the correct SplashKit CoreSDK directory
-and that HeaderDoc comments exist.
+Nothing parsed! Check that #{src} is the correct SplashKit directory and that
+coresdk/src/coresdk contains the correct C++ source. Check that HeaderDoc
+comments exist (refer to README).
 EOS
     end
     parsed.to_h

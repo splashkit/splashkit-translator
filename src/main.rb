@@ -24,7 +24,7 @@ opt_parser = OptionParser.new do |opts|
               .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --input /path/to/splashkit/coresdk/src/coresdk[/file.h]
+Usage: parse.rb --input /path/to/splashkit[/coresdk/src/coresdk/file.h]
                 [--generate GENERATOR[,GENERATOR ... ]
                 [--output /path/to/write/output/to]
                 [--validate]
