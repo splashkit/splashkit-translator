@@ -169,6 +169,21 @@ EOS
   end
 
   #
+  # Returns parameter type information based on the type and desc given
+  #
+  def parse_parameter_info(type, desc = nil)
+    regex = /(const)?\s*([^\s]*)\s*(?:(&amp;)|(\*))?/
+    _, const, type, ref, ptr = *(type.match regex)
+    {
+      type: type,
+      description: desc,
+      is_pointer: !ptr.nil?,
+      is_const: !const.nil?,
+      is_reference: !ref.nil?
+    }
+  end
+
+  #
   # Parses a single `@param` in a docblock
   #
   def parse_parameter(xml, ppl)
@@ -182,10 +197,7 @@ EOS
     end
     [
       name.to_sym,
-      {
-        type:        type,
-        description: xml.xpath('desc').text
-      }
+      parse_parameter_info(type, xml.xpath('desc').text)
     ]
   end
 
