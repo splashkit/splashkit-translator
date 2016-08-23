@@ -7,7 +7,7 @@
   function[:parameters].map do |param_name, param_data|
     param_name.to_s.variable_case + ": " + lib_type_for(param_data[:type])
   end.join('; ')
-%>)<% unless is_void?(function) %>: <%= lib_type_for(function[:return_type]) %><% end %>; external; cdecl;
+%>)<% unless is_void?(function) %>: <%= lib_type_for(function[:return_type]) %><% end %>; cdecl; external;
 <% end %>
 
 <%#
