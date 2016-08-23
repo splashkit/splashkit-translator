@@ -66,7 +66,7 @@ EOS
   #
   def parse_ppl(xml)
     xml.xpath('./parsedparameterlist/parsedparameter').map do |p|
-      [p.xpath('name').text.to_sym, p.xpath('type').text]
+      [p.xpath('name').inner_text.to_sym, p.xpath('type').inner_text]
     end.to_h
   end
 
@@ -74,7 +74,7 @@ EOS
   # Parses a signature from HeaderDoc's declaration element
   #
   def parse_signature(xml)
-    xml.xpath('declaration').text.split(/\n/).map(&:strip).join()
+    xml.xpath('declaration').inner_text.split(/\n/).map(&:strip).join()
   end
 
   #
@@ -82,9 +82,9 @@ EOS
   #
   def parse_header(xml)
     {
-      name:         xml.xpath('//header/name').text,
-      brief:        xml.xpath('//header/abstract').text,
-      description:  xml.xpath('//header/desc').text
+      name:         xml.xpath('//header/name').inner_text,
+      brief:        xml.xpath('//header/abstract').inner_text,
+      description:  xml.xpath('//header/desc').inner_text
     }
   end
 
@@ -92,7 +92,7 @@ EOS
   # Parses a single `@attribute` in a docblock
   #
   def parse_attribute(xml)
-    [xml.xpath('name').text.to_sym, xml.xpath('value').text]
+    [xml.xpath('name').inner_text.to_sym, xml.xpath('value').inner_text]
   end
 
   #
@@ -172,7 +172,7 @@ EOS
   # Parses a single `@param` in a docblock
   #
   def parse_parameter(xml, ppl)
-    name = xml.xpath('name').text
+    name = xml.xpath('name').inner_text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
     type = ppl[name.to_sym]
@@ -184,7 +184,7 @@ EOS
       name.to_sym,
       {
         type:        type,
-        description: xml.xpath('desc').text
+        description: xml.xpath('desc').inner_text
       }
     ]
   end
@@ -207,11 +207,11 @@ EOS
     ppl = parse_ppl(xml)
     {
       signature:   signature,
-      name:        xml.xpath('name').text,
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
-      return_type: xml.xpath('returntype').text,
-      returns:     xml.xpath('result').text,
+      name:        xml.xpath('name').inner_text,
+      description: xml.xpath('desc').inner_text,
+      brief:       xml.xpath('abstract').inner_text,
+      return_type: xml.xpath('returntype').inner_text,
+      returns:     xml.xpath('result').inner_text,
       parameters:  parse_parameters(xml, ppl),
       attributes:  parse_attributes(xml, ppl)
     }
@@ -259,9 +259,9 @@ EOS
     {
       signature:   signature,
       alias_info:  alias_info,
-      name:        xml.xpath('name').text,
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
+      name:        xml.xpath('name').inner_text,
+      description: xml.xpath('desc').inner_text,
+      brief:       xml.xpath('abstract').inner_text,
       attributes:  attributes
     }
   rescue ParserError => e
@@ -293,9 +293,9 @@ EOS
     ppl = parse_ppl(xml)
     {
       signature:   signature,
-      name:        xml.xpath('name').text,
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
+      name:        xml.xpath('name').inner_text,
+      description: xml.xpath('desc').inner_text,
+      brief:       xml.xpath('abstract').inner_text,
       fields:      parse_fields(xml, ppl),
       attributes:  parse_attributes(xml),
     }
@@ -315,7 +315,7 @@ EOS
   #
   def parse_enum_constants(xml, ppl)
     constants = xml.xpath('.//constant').map do |const|
-      [const.xpath('name').text.to_sym, const.xpath('desc').text]
+      [const.xpath('name').inner_text.to_sym, const.xpath('desc').inner_text]
     end.to_h
     # after parsing <constant>, must ensure they align with the ppl
     constants.keys.each do | const |
@@ -336,9 +336,9 @@ EOS
     ppl = parse_ppl(xml)
     {
       signature:   signature,
-      name:        xml.xpath('name').text,
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
+      name:        xml.xpath('name').inner_text,
+      description: xml.xpath('desc').inner_text,
+      brief:       xml.xpath('abstract').inner_text,
       constants:   parse_enum_constants(xml, ppl),
       attributes:  parse_attributes(xml),
     }
