@@ -34,7 +34,7 @@ var
 begin
 <%# Convert params to sklibc type %>
 <% function[:parameters].each do |param_name, param_data| %>
-  __skparam__<%= param_name %> := __skadapter_to_sklib_<%= param_data[:type] %>(<%= param_name %>);
+  __skparam__<%= param_name %> := __skadapter__to_sklib_<%= param_data[:type] %>(<%= param_name %>);
 <% end %>
 <%# Call sklibc function %>
   <% unless is_void?(function) %>__skreturn := <% end %>
