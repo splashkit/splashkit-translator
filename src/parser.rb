@@ -183,7 +183,7 @@ EOS
   # E.g., float three_by_two_matrix[3][2] => [3,3]
   #
   def parse_array_dimensions(xml, search_for_name)
-    xpath_query = "//declaration/*[preceding-sibling::declaration_type[text() = '#{search_for_name}']]"
+    xpath_query = "declaration/*[preceding-sibling::declaration_type[text() = '#{search_for_name}']]"
     xml.xpath(xpath_query).map(&:text).take_while(&:int?).map(&:to_i)
   end
 
