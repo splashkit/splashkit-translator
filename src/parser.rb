@@ -158,11 +158,6 @@ EOS
             "Attribute(s) `#{getter_setter_keys_found.map(&:to_s)
             .join('\', `')}' violate `method`. Choose one or the other."
     end
-    # If unique then method must be set
-    if attrs[:unique] && attrs[:method].nil?
-      raise ParserError,
-            'Attribute `unique` is only valid if `method` attribute is also set.'
-    end
     # Ensure `self` matches a parameter
     self_value = attrs[:self]
     if self_value && ppl && ppl[self_value.to_sym].nil?
@@ -245,15 +240,37 @@ EOS
     signature = parse_signature(xml)
     # Values from the <parsedparameter> elements
     ppl = parse_ppl(xml)
+    # Originally, headerdoc does overloaded names like name(int, float).
+    headerdoc_overload_tags = /\(|\,\s|\)/
+    # We will make our unique name: name__int__float or use the attribute
+    # specified!
+    fn_name = xml.xpath('name').text
+    attributes = parse_attributes(xml, ppl)
+    # Choose the unique name from the attributes specified, or make your
+    # own using double underscore (i.e., headerdoc makes unique names for
+    # us but we want to make them double underscore separated)
+    unique_name =
+      if attributes and attributes[:unique]
+        attributes[:unique]
+      elsif !(fn_name =~ headerdoc_overload_tags).nil?
+        puts "No unique name for `#{fn_name}'! Creating default unique name."
+        fn_name.gsub(headerdoc_overload_tags, '__')
+      else
+        fn_name
+      end
+    # Original function name without the headerdoc overloaded name (if
+    # applicable)
+    fn_name = fn_name.split('(').first
     {
       signature:   signature,
-      name:        xml.xpath('name').text,
+      name:        fn_name,
+      unique_name: unique_name,
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
       return_type: xml.xpath('returntype').text,
       returns:     xml.xpath('result').text,
       parameters:  parse_parameters(xml, ppl),
-      attributes:  parse_attributes(xml, ppl)
+      attributes:  attributes
     }
   rescue ParserError => e
     raise ParserError.new e.message, signature
