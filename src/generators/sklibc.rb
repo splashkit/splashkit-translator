@@ -70,6 +70,7 @@ module Generators
         'int'       => 'int',
         'float'     => 'float',
         'double'    => 'double',
+        'byte'      => 'int',
         'bool'      => 'int',
         'enum'      => 'int',
         'struct'    => "__sklib_#{type}",
