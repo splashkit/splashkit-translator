@@ -1,6 +1,12 @@
 #include <stdlib.h>
 #include <string>
-#include "<%= header_path %>/splashkit.h"
+<% if header_path.end_with? '.h' %>
+#include "<%= header_path %>"
+<% else %>
+<% @data.each do |key, _| %>
+#include "<%= header_path %>/coresdk/src/coresdk/<%= key %>"
+<% end %>
+<% end %>
 using std::string;
 
 <%= read_template 'types' %>
