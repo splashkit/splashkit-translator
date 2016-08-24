@@ -65,6 +65,8 @@ module Generators
     # Convert a SK type to a C-library type
     #
     def lib_type_for(type)
+      is_unsigned = type =~ /unsigned/
+      return type if is_unsigned
       {
         'void'      => 'void',
         'int'       => 'int',
