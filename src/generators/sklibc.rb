@@ -80,5 +80,22 @@ module Generators
         'typealias' => '__sklib_ptr'
       }[raw_type_for(type)]
     end
+
+    def make_struct_field(field_name, field_data)
+      type = field_data[:type]
+      is_pointer = field_data[:is_pointer]
+      ptr_star = is_pointer ? '*' : ''
+      is_array   = field_data[:is_array]
+      array_dims = is_array ?
+                    '[' + field_data[:array_dimension_sizes].join('][') + ']' :
+                    ''
+      # actually a __sklib_ptr == void *?
+      if is_pointer && type == 'void'
+        "__sklib_ptr #{field_name}"
+      else
+        "__sklib_#{type} #{ptr_star}#{field_name}#{array_dims}"
+      end
+    end
+
   end
 end
