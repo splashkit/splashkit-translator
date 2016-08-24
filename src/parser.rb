@@ -241,11 +241,12 @@ EOS
     # Values from the <parsedparameter> elements
     ppl = parse_ppl(xml)
     # Originally, headerdoc does overloaded names like name(int, float).
-    headerdoc_overload_tags = /\(|\,\s|\)/
+    headerdoc_overload_tags = /const|\(|\,\s|\)|&|\*/
     # We will make our unique name: name__int__float or use the attribute
     # specified!
     fn_name = xml.xpath('name').text
     attributes = parse_attributes(xml, ppl)
+    parameters = parse_parameters(xml, ppl)
     # Choose the unique name from the attributes specified, or make your
     # own using double underscore (i.e., headerdoc makes unique names for
     # us but we want to make them double underscore separated)
@@ -254,7 +255,12 @@ EOS
         attributes[:unique]
       elsif !(fn_name =~ headerdoc_overload_tags).nil?
         puts "No unique name for `#{fn_name}'! Creating default unique name."
-        fn_name.gsub(headerdoc_overload_tags, '__')
+        name = fn_name.split(headerdoc_overload_tags).first
+        unless parameters.empty?
+          types_part = parameters.values.pluck(:type).join('__')
+          name << "__#{types_part}"
+        end
+        name
       else
         fn_name
       end
@@ -269,7 +275,7 @@ EOS
       brief:       xml.xpath('abstract').text,
       return_type: xml.xpath('returntype').text,
       returns:     xml.xpath('result').text,
-      parameters:  parse_parameters(xml, ppl),
+      parameters:  parameters,
       attributes:  attributes
     }
   rescue ParserError => e
