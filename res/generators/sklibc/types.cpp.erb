@@ -85,7 +85,7 @@ __skadapter__make_enum_adapter(<%= enum[:name] %>)
 <% @structs.each do |struct| %>
 typedef struct {
 <% struct[:fields].each do |field_name, field_data| %>
-    __sklib_<%= field_data[:type] == 'void' ? 'ptr' : field_data[:type] %> <%= field_name %>;
+    <%= make_struct_field(field_name, field_data) %>;
 <% end %>
 } __sklib_<%= struct[:name] %>;
 __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name] %> v) {
