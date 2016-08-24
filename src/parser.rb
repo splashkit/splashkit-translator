@@ -62,6 +62,19 @@ EOS
   end
 
   #
+  # A function which will default to the ppl provided if they are missing
+  # within the params
+  #
+  def ppl_default_to(xml, params, ppl)
+    ppl.each do |p_name, p_type|
+      if params[p_name].nil?
+        params[p_name] = parse_parameter_info(xml, p_name, p_type)
+      end
+    end
+    params
+  end
+
+  #
   # Parses HeaderDoc's parsedparameterlist (ppl) element
   #
   def parse_ppl(xml)
@@ -208,12 +221,7 @@ EOS
     params = xml.xpath('.//parameter').map do |p|
       parse_parameter(p, ppl)
     end.to_h
-    ppl.each do |p_name, p_type|
-      if params[p_name].nil?
-        params[p_name] = parse_parameter_info(p_type, xml.xpath('desc').text)
-      end
-    end
-    params
+    ppl_default_to(xml, params, ppl)
   end
 
   #
@@ -297,10 +305,11 @@ EOS
   # Parses all fields (marked with `@param`) in a struct
   #
   def parse_fields(xml, ppl)
-    xml.xpath('.//field').map do |p|
+    fields = xml.xpath('.//field').map do |p|
       # fields are marked with `@param`, so we just use parse_parameter
       parse_parameter(p, ppl)
     end.to_h
+    ppl_default_to(xml, fields, ppl)
   end
 
   #
