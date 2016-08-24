@@ -14,7 +14,7 @@ module Generators
     #
     def initialize(data, src)
       @data = data
-      @src = File.dirname src
+      @src = src
       @enums = @data.values.pluck(:enums).flatten
       @typealiases = @data.values.pluck(:typedefs).flatten
       @structs = @data.values.pluck(:structs).flatten
