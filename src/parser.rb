@@ -39,7 +39,7 @@ module Parser
       [File.basename(hfile), parse_xml(Nokogiri.XML(hfile_xml))]
     end
     if parsed.empty?
-      raise ParserError <<-EOS
+      raise ParserError, <<-EOS
 Nothing parsed! Check that #{src} is the correct SplashKit directory and that
 coresdk/src/coresdk contains the correct C++ source. Check that HeaderDoc
 comments exist (refer to README).
