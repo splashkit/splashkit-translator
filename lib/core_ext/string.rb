@@ -37,6 +37,13 @@ module CoreExtensions
     end
 
     #
+    # Returns true if string is an int
+    #
+    def int?
+      to_i.to_s == self
+    end
+
+    #
     # Split a string and indent it by the number of spaces specified
     #
     def indent(by = 4)
