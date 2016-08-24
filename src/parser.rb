@@ -67,9 +67,9 @@ EOS
   #
   def ppl_default_to(xml, params, ppl)
     ppl.each do |p_name, p_type|
-      if params[p_name].nil?
-        params[p_name] = parse_parameter_info(xml, p_name, p_type)
-      end
+      params[p_name] = (params[p_name] || {}).merge(
+        parse_parameter_info(xml, p_name, p_type)
+      )
     end
     params
   end
