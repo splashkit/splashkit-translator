@@ -182,17 +182,31 @@ EOS
   end
 
   #
+  # Parses array sizes from a given xml using its `<declaration>` and the
+  # given type name desired. If no array sizes are found, nil is returned.
+  # Otherwise each dimension and its size is given in order as an array.
+  # E.g., float three_by_two_matrix[3][2] => [3,3]
+  #
+  def parse_array_dimensions(xml, search_for_name)
+    xpath_query = "//declaration/*[preceding-sibling::declaration_type[text() = '#{search_for_name}']]"
+    xml.xpath(xpath_query).map(&:text).take_while(&:int?).map(&:to_i)
+  end
+
+  #
   # Returns parameter type information based on the type and desc given
   #
-  def parse_parameter_info(type, desc = nil)
-    regex = /(const)?\s*([^\s]*)\s*(?:(&amp;)|(\*))?/
-    _, const, type, ref, ptr = *(type.match regex)
+  def parse_parameter_info(xml, param_name, ppl_type_data)
+    regex = /(?:(const)\s+)?([^\s]+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
+    _, const, type, ref, ptr = *(ppl_type_data.match regex)
+    array = parse_array_dimensions(xml, param_name)
     {
       type: type,
-      description: desc,
+      description: xml.xpath('desc').text,
       is_pointer: !ptr.nil?,
       is_const: !const.nil?,
-      is_reference: !ref.nil?
+      is_reference: !ref.nil?,
+      is_array: !array.empty?,
+      array_dimension_sizes: array
     }
   end
 
@@ -210,7 +224,7 @@ EOS
     end
     [
       name.to_sym,
-      parse_parameter_info(type, xml.xpath('desc').text)
+      parse_parameter_info(xml, name, type)
     ]
   end
 
@@ -257,7 +271,7 @@ EOS
   # not parse in
   #
   def parse_typedef_signature(signature)
-    regex = /typedef ([a-z]+)? ([a-z\_]+) (\*)?([a-z\_]+);$/
+    regex = /typedef\s+([a-z]+)?\s+([a-z\_]+)\s+(\*)?([a-z\_]+);$/
     _,
     aliased_type,
     aliased_identifier,
@@ -324,7 +338,7 @@ EOS
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
       fields:      parse_fields(xml, ppl),
-      attributes:  parse_attributes(xml),
+      attributes:  parse_attributes(xml)
     }
   rescue ParserError => e
     raise ParserError.new e.message, signature
