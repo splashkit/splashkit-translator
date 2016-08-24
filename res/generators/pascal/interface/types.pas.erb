@@ -1,0 +1,22 @@
+<%#
+  Typealias declaration
+%>
+<% @typealiases.each do |typealias| %>
+<%= typealias[:name].type_case %> = ^__sklib_<%= typealias[:name] %>_data_type;
+<% end %>
+<%#
+  Record declaration from structs
+%>
+<% @structs.each do |struct| %>
+<%= struct[:name].type_case %> = record
+<% struct[:fields].each do |field_name, field_data| %>
+  <%= field_name.to_s.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;
+<% end %>
+end;
+<% end %>
+<%#
+  Enum declaration
+%>
+<% @enums.each do |enum| %>
+<%= enum[:name].type_case %> = ( <%= enum[:constants].keys.join(', ') %> );
+<% end %>

@@ -9,11 +9,7 @@ module Generators
 
     def initialize(data, src)
       super(data, src)
-      @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten
-      @structs = @data.values.pluck(:structs).flatten
-      @functions = @data.values.pluck(:functions).flatten
-      @no_type_changes = %w(int float double)
+      @direct_types = %w(int float double)
     end
 
     def render_templates
@@ -21,6 +17,32 @@ module Generators
         'sklib.c' => read_template,
         'makefile' => read_template('makefile')
       }
+    end
+
+    #
+    # Convert the name of a function to its library represented function
+    # name, that is:
+    #
+    #    my_function(int p1, float p2) => __sklib_my_function__int__float
+    #
+    def self.lib_function_name_for(function)
+      name_part = function[:name]
+      name = "__sklib__#{name_part}"
+      params = function[:parameters]
+      unless params.empty?
+        types_part = params.values.pluck(:type).join('__')
+        name << "__#{types_part}"
+      end
+      name
+    end
+
+    private
+
+    #
+    # Alias to static method for usage on instance
+    #
+    def lib_function_name_for(function)
+      SKLibC.lib_function_name_for(function)
     end
 
     #
@@ -47,29 +69,10 @@ module Generators
     end
 
     #
-    # Return true iff function provided is void
-    #
-    def function_is_void?(function)
-      function[:return_type] == 'void'
-    end
-
-    #
     # Convert a SK type to a C-library type
     #
     def lib_type_for(type)
-      # Lookup type
-      type =
-        if @typealiases.pluck(:name).include? type
-          'typealias'
-        elsif @structs.pluck(:name).include? type
-          'struct'
-        elsif @enums.pluck(:name).include? type
-          'enum'
-        else
-          type
-        end
-      result = {
-        # SK src type -> C type
+      {
         'void'      => 'void',
         'int'       => 'int',
         'float'     => 'float',
@@ -79,25 +82,7 @@ module Generators
         'struct'    => "__sklib_#{type}",
         'string'    => '__sklib_string',
         'typealias' => '__sklib_ptr'
-      }[type]
-      result
-    end
-
-    #
-    # Convert the name of a function to its library represented function
-    # name, that is:
-    #
-    #    my_function(int p1, float p2) => __sklib_my_function__int__float
-    #
-    def lib_function_name_for(function)
-      name_part = function[:name]
-      name = "__sklib__#{name_part}"
-      params = function[:parameters]
-      unless params.empty?
-        types_part = params.values.pluck(:type).join('__')
-        name << "__#{types_part}"
-      end
-      name
+      }[raw_type_for(type)]
     end
   end
 end

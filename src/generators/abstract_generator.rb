@@ -4,6 +4,8 @@ module Generators
   #
   class AbstractGenerator
     require 'erb'
+    # Indentation helper
+    require_relative '../../lib/core_ext/string.rb'
     # Plucking for arrays of hashes
     require_relative '../../lib/core_ext/array.rb'
 
@@ -13,6 +15,10 @@ module Generators
     def initialize(data, src)
       @data = data
       @src = File.dirname src
+      @enums = @data.values.pluck(:enums).flatten
+      @typealiases = @data.values.pluck(:typedefs).flatten
+      @structs = @data.values.pluck(:structs).flatten
+      @functions = @data.values.pluck(:functions).flatten
     end
 
     #
@@ -32,7 +38,48 @@ module Generators
       self.class.name.to_s.split('::').last.downcase
     end
 
+    #
+    # Dynamically adds the case conversion functions using the right types
+    # assigned by self.case_converters
+    #
+    def self.case_converters=(converters)
+      string_case_module = Module.new do
+        def send_case_conversion_method(casee)
+          send("to_#{casee}".to_sym)
+        end
+        define_method(:type_case) do
+          send_case_conversion_method converters[:types]
+        end
+        define_method(:function_case) do
+          send_case_conversion_method converters[:functions]
+        end
+        define_method(:variable_case) do
+          send_case_conversion_method converters[:variables]
+        end
+      end
+      string_case_module.freeze
+      String.prepend string_case_module
+    end
+
+    private_class_method :"case_converters="
+
     private
+
+    #
+    # Default case types are snake_case, unless it is overridden in a subclass
+    #
+    self.case_converters = {
+      types:      :snake_case,
+      functions:  :snake_case,
+      variables:  :snake_case
+    }
+
+    #
+    # Return true iff function provided is void
+    #
+    def is_void?(function)
+      function[:return_type] == 'void'
+    end
 
     #
     # Called under `execute` to render templates. Should return a hash
@@ -63,8 +110,8 @@ module Generators
     #
     # Reads a file defined by res/generators/{generator_name}/{file_name}
     #
-    def read_res_file(file_name)
-      file = File.new "#{generator_res_dir}/#{file_name}", 'r'
+    def read_res_file(file_path)
+      file = File.new file_path, 'r'
       file.readlines.join
     ensure
       file.close
@@ -80,8 +127,23 @@ module Generators
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1
-      template = read_res_file(File.basename(files.first)).strip
+      template = read_res_file(files.first).strip
       ERB.new(template, nil, '>').result(binding)
+    end
+
+    #
+    # Attempts to lookup a raw type for the provided type
+    #
+    def raw_type_for(type)
+      if @typealiases.pluck(:name).include? type
+        'typealias'
+      elsif @structs.pluck(:name).include? type
+        'struct'
+      elsif @enums.pluck(:name).include? type
+        'enum'
+      else
+        type
+      end
     end
   end
 end

@@ -3,6 +3,7 @@ require          'optparse'
 require          'fileutils'
 require_relative 'parser'
 require_relative 'generators/sklibc'
+require_relative 'generators/pascal'
 
 # Required to run
 options = {
@@ -80,7 +81,6 @@ begin
   raise OptionParser::MissingArgument, 'Arguments missing' unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
-  puts opt_parser
   exit 1
 end
 # Run block
