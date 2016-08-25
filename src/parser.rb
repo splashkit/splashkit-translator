@@ -171,7 +171,9 @@ EOS
       self_type  = ppl[self_value.to_sym]
       unless class_type == self_type
         raise ParserError,
-              "Attribute `self` must list a parameter whose type matches the `class` value (`class` is `#{class_type}` but `self` is set to parameter (`#{self_value}`) with type `#{self_type}`)"
+              'Attribute `self` must list a parameter whose type matches ' \
+              'the `class` value (`class` is `#{class_type}` but `self` ' \
+              "is set to parameter (`#{self_value}`) with type `#{self_type}`)"
       end
     end
   end
@@ -222,7 +224,8 @@ EOS
     type = ppl[name.to_sym]
     if type.nil?
       raise ParserError,
-            "Mismatched headerdoc @param '#{name}'. Check it exists in the signature."
+            "Mismatched headerdoc @param '#{name}'. Check it exists in the " \
+            'signature.'
     end
     [
       name.to_sym,
@@ -393,7 +396,8 @@ EOS
       # ppl for enums have no types! Thus, just check against keys
       unless ppl.keys.include? const
         raise ParserError,
-              "Mismatched headerdoc @constant '#{const}'. Check it exists the enum definition."
+              "Mismatched headerdoc @constant '#{const}'. Check it exists " \
+              'in the enum definition.'
       end
     end
     constants
