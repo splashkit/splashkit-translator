@@ -183,8 +183,15 @@ EOS
   # E.g., float three_by_two_matrix[3][2] => [3,3]
   #
   def parse_array_dimensions(xml, search_for_name)
-    xpath_query = "declaration/*[preceding-sibling::declaration_type[text() = '#{search_for_name}']]"
-    xml.xpath(xpath_query).map(&:text).take_while(&:int?).map(&:to_i)
+    xpath_query = 'declaration/*[preceding-sibling::declaration_type[' \
+                  "text() = '#{search_for_name}']]"
+    dims = xml.xpath(xpath_query).map(&:text).take_while(&:int?).map(&:to_i)
+    if dims.length > 2
+      raise ParserError,
+            'Only 1 and 2 dimensional arrays are supported at this time ' \
+            "(got a #{dims.length}D array for `#{search_for_name}')."
+    end
+    dims
   end
 
   #
