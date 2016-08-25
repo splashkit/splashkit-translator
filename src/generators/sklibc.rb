@@ -43,7 +43,7 @@ module Generators
     #
     def lib_signature_for(function)
       name            = lib_function_name_for function
-      return_type     = lib_type_for function[:return_type]
+      return_type     = lib_type_for function[:return]
       parameter_list  = lib_parameter_list_for function
       "#{return_type} #{name}(#{parameter_list})"
     end
@@ -52,21 +52,24 @@ module Generators
     # Convert a list of parameters to a C-library parameter list
     #
     def lib_parameter_list_for(function)
-      params = function[:parameters]
-      result = []
-      params.each do |name, data|
-        type = lib_type_for data[:type]
-        result << "#{type} #{name}"
-      end
-      result.join(', ')
+      function[:parameters].reduce('') do |memo, param|
+        param_name = param.first
+        param_data = param.last
+        type = lib_type_for param_data
+        "#{memo}, #{type} #{param_name}"
+      end[2..-1]
     end
 
     #
     # Convert a SK type to a C-library type
     #
-    def lib_type_for(type)
+    def lib_type_for(type_data)
+      type = type_data[:type]
+      # Handle unsigned [type] as direct
       is_unsigned = type =~ /unsigned/
       return type if is_unsigned
+      # Handle void * as __sklib_ptr
+      return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       {
         'void'      => 'void',
         'int'       => 'int',

@@ -244,47 +244,76 @@ EOS
   end
 
   #
+  # Parses a function return type
+  #
+  def parse_function_return_type(xml)
+    raw_return_type = xml.xpath('returntype').text
+    ret_type_regex = /(\w+)\s*(?:(&)|(\*)?)/
+    _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
+    is_pointer = !ptr.nil?
+    is_reference = !ref.nil?
+    desc = xml.xpath('result').text
+    if type == 'void' && desc && (is_pointer || is_reference)
+      throw ParserError,
+            'Pure procedures should not have an `@returns` labelled.'
+    end
+    {
+      type: type,
+      is_pointer: is_pointer,
+      is_reference: is_reference,
+      description: desc
+    }
+  end
+
+  #
+  # Parses a function's name for both a unique and standard name
+  #
+  def parse_function_names(xml, attributes, parameters)
+    # Originally, headerdoc does overloaded names like name(int, const float).
+    headerdoc_overload_tags = /const|\(|\,\s|\)|&|\*/
+    fn_name = xml.xpath('name').text
+    headerdoc_idx = fn_name.index(headerdoc_overload_tags)
+    sanitized_name = headerdoc_idx ? fn_name[0..(headerdoc_idx - 1)] : fn_name
+    # Choose the unique name from the attributes specified, or make your
+    # own using double underscore (i.e., headerdoc makes unique names for
+    # us but we want to make them double underscore separated)
+    unique_name =
+      if attributes && attributes[:unique]
+        attributes[:unique]
+      else
+        res = parameters.reduce(sanitized_name) do |memo, param|
+          param_data = param.last
+          ptr = param_data[:is_pointer] ? '_ptr' : ''
+          ref = param_data[:is_reference] ? '_ref' : ''
+          arr = param_data[:is_array] ? '_array' : ''
+          "#{memo}__#{param_data[:type]}#{ref}#{ptr}#{arr}"
+        end
+        res
+      end
+    {
+      sanitized: sanitized_name,
+      unique: unique_name
+    }
+  end
+
+  #
   # Parses the docblock of a function
   #
   def parse_function(xml)
     signature = parse_signature(xml)
     # Values from the <parsedparameter> elements
     ppl = parse_ppl(xml)
-    # Originally, headerdoc does overloaded names like name(int, float).
-    headerdoc_overload_tags = /const|\(|\,\s|\)|&|\*/
-    # We will make our unique name: name__int__float or use the attribute
-    # specified!
-    fn_name = xml.xpath('name').text
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
-    # Choose the unique name from the attributes specified, or make your
-    # own using double underscore (i.e., headerdoc makes unique names for
-    # us but we want to make them double underscore separated)
-    unique_name =
-      if attributes and attributes[:unique]
-        attributes[:unique]
-      elsif !(fn_name =~ headerdoc_overload_tags).nil?
-        puts "No unique name for `#{fn_name}'! Creating default unique name."
-        name = fn_name.split(headerdoc_overload_tags).first
-        unless parameters.empty?
-          types_part = parameters.values.pluck(:type).join('__')
-          name << "__#{types_part}"
-        end
-        name
-      else
-        fn_name
-      end
-    # Original function name without the headerdoc overloaded name (if
-    # applicable)
-    fn_name = fn_name.split('(').first
+    fn_names = parse_function_names(xml, attributes, parameters)
+    return_data = parse_function_return_type(xml)
     {
       signature:   signature,
-      name:        fn_name,
-      unique_name: unique_name,
+      name:        fn_names[:sanitized],
+      unique_name: fn_names[:unique],
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
-      return_type: xml.xpath('returntype').text,
-      returns:     xml.xpath('result').text,
+      return:      return_data,
       parameters:  parameters,
       attributes:  attributes
     }
