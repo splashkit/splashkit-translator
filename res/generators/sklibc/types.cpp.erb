@@ -83,22 +83,43 @@ __skadapter__make_enum_adapter(<%= enum[:name] %>)
     cast so we must generate the functions individually.
  %>
 <% @structs.each do |struct| %>
+<%# Definition of structs can use make_struct_field for convenience %>
 typedef struct {
 <% struct[:fields].each do |field_name, field_data| %>
     <%= make_struct_field(field_name, field_data) %>;
 <% end %>
 } __sklib_<%= struct[:name] %>;
+<%# Adapter for struct -> __sklib_struct %>
 __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name] %> v) {
     __sklib_<%= struct[:name] %> __sklib_return_value;
 <% struct[:fields].each do |field_name, field_data| %>
+<%# Handle fields typed as arrays %>
+<% if field_data[:is_array] %>
+<% get_Nd_array_size_as_1d(field_data).times do |i| %>
+<%# Copy over each value in the array (1D array << {1,2}D array)  %>
+    v.<%= field_name %>[<%= i %>] = __skadapter__to_sklib_<%= field_data[:type] %>(v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %>);
+<% end %>
+<%# Standard copy converted as lib type %>
+<% else %>
     v.<%= field_name %> = __skadapter__to_sklib_<%= field_data[:type] %>(v.<%= field_name %>);
+<% end %>
 <% end %>
     return __sklib_return_value;
 }
+<%# Adapter for __sklib_struct -> struct %>
 <%= struct[:name] %> __skadapter__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v) {
     <%= struct[:name] %> __sklib_return_value;
 <% struct[:fields].each do |field_name, field_data| %>
+<%# Handle fields typed as arrays %>
+<% if field_data[:is_array] %>
+<% get_Nd_array_size_as_1d(field_data).times do |i| %>
+<%# Copy over each value in the array ({1,2}D array << 1D array)  %>
+    v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %> = __skadapter__to_<%= field_data[:type] %>(v.<%= field_name %>[<%= i %>]);
+<% end %>
+<%# Standard copy converted as SK type %>
+<% else %>
     v.<%= field_name %> = __skadapter__to_<%= field_data[:type] %>(v.<%= field_name %>);
+<% end %>
 <% end %>
     return __sklib_return_value;
 }

@@ -81,21 +81,45 @@ module Generators
       }[raw_type_for(type)]
     end
 
+    #
+    # Returns the size of a N-dimensional array represented as a single
+    # dimensional array. E.g., if we have foo[3][3] -> foo[9] (i.e., 3 * 3)
+    #
+    def get_Nd_array_size_as_1d(field_data)
+      field_data[:array_dimension_sizes].inject(:*)
+    end
+
+    #
+    # Returns the index for
+    #
+    def get_Nd_array_index_as_1d(field_data, idx)
+      is_2d = field_data[:array_dimension_sizes].size == 2
+      if is_2d
+        r = field_data[:array_dimension_sizes][0]
+        c = field_data[:array_dimension_sizes][1] || field_data[:array_dimension_sizes][0]
+        '[' + [(idx / r).to_i, idx % c].join('][') + ']'
+      else
+        "[#{idx}]"
+      end
+    end
+
+    #
+    # Generates a field's struct information
+    #
     def make_struct_field(field_name, field_data)
       type = field_data[:type]
       is_pointer = field_data[:is_pointer]
       ptr_star = is_pointer ? '*' : ''
       is_array   = field_data[:is_array]
-      array_dims = is_array ?
-                    '[' + field_data[:array_dimension_sizes].join('][') + ']' :
-                    ''
+      # convert n multidimensional array to 1 dimensional array
+      size_of_arr = get_Nd_array_size_as_1d(field_data)
+      array_decl = is_array ? "[#{size_of_arr}]" : ''
       # actually a __sklib_ptr == void *?
       if is_pointer && type == 'void'
         "__sklib_ptr #{field_name}"
       else
-        "__sklib_#{type} #{ptr_star}#{field_name}#{array_dims}"
+        "__sklib_#{type} #{ptr_star}#{field_name}#{array_decl}"
       end
     end
-
   end
 end
