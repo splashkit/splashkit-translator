@@ -200,7 +200,7 @@ EOS
   # Returns parameter type information based on the type and desc given
   #
   def parse_parameter_info(xml, param_name, ppl_type_data)
-    regex = /(?:(const)\s+)?([^\s]+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
+    regex = /(?:(const)\s+)?(\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
     array = parse_array_dimensions(xml, param_name)
     {
@@ -304,7 +304,7 @@ EOS
   # not parse in
   #
   def parse_typedef_signature(signature)
-    regex = /typedef\s+([a-z]+)?\s+([a-z\_]+)\s+(\*)?([a-z\_]+);$/
+    regex = /typedef\s+(\w+)?\s+(\w+)\s+(\*)?(\w+);$/
     _,
     aliased_type,
     aliased_identifier,
