@@ -16,7 +16,12 @@ module Generators
       @data = data
       @src = src
       @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten
+      @typealiases = @data.values.pluck(:typedefs).flatten.select do |td|
+        !td[:is_function_pointer]
+      end
+      @function_pointers = @data.values.pluck(:typedefs).flatten.select do |td|
+        td[:is_function_pointer]
+      end
       @structs = @data.values.pluck(:structs).flatten
       @functions = @data.values.pluck(:functions).flatten
     end
