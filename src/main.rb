@@ -102,7 +102,7 @@ begin
       end
     end
   end
-rescue Parser::ParserError
+rescue Parser::Error
   puts $!.to_s
   exit 1
 end
