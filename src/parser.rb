@@ -316,19 +316,7 @@ class Parser::HeaderFileParser
     # Choose the unique name from the attributes specified, or make your
     # own using double underscore (i.e., headerdoc makes unique names for
     # us but we want to make them double underscore separated)
-    unique_name =
-      if attributes && attributes[:unique]
-        attributes[:unique]
-      else
-        res = parameters.reduce(sanitized_name) do |memo, param|
-          param_data = param.last
-          ptr = param_data[:is_pointer] ? '_ptr' : ''
-          ref = param_data[:is_reference] ? '_ref' : ''
-          arr = param_data[:is_array] ? '_array' : ''
-          "#{memo}__#{param_data[:type]}#{ref}#{ptr}#{arr}"
-        end
-        res
-      end
+    unique_name = attributes[:unique] if attributes
     {
       sanitized: sanitized_name,
       unique: unique_name

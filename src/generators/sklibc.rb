@@ -26,7 +26,13 @@ module Generators
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
     def self.lib_function_name_for(function)
-      "__sklib__#{function[:unique_name]}"
+      function[:parameters].reduce("__sklib__#{function[:name]}") do |memo, param|
+        param_data = param.last
+        ptr = param_data[:is_pointer] ? '_ptr' : ''
+        ref = param_data[:is_reference] ? '_ref' : ''
+        arr = param_data[:is_array] ? '_array' : ''
+        "#{memo}__#{param_data[:type]}#{ref}#{ptr}#{arr}"
+      end
     end
 
     private
