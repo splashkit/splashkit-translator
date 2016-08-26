@@ -1,48 +1,23 @@
 # TODO:
 
-- [x] Switch to ERBs templates!
+- [ ] Add `@attribute static [class]` - this is a static method to the class provided
 
-- [x] New rule to @attribute class for typedef aliases:
-   - must be a pointer (isPointer) and have a class
-   - otherwise throw an error
+<!-- - [ ] @attribute static cannot have getter, setter, constructor, destructor or method unless @attribute class overrides it -->
 
-- [x] Enums use a `static_cast` to convert to and from `int` to their enum type
+- [ ] Apply anything in header to all docblocks in that file, unless an
+     `@attribute` with the same name is explicitly added in a specific docblock
+     (if so, it overrides the attributes in the header).
 
-- [x] Structs must convert individually each field by mapping each field type
-    and vice versa (omit __sklib_ at __sklib_person and add __sklib_ to person)
+- [ ] Getters and setters can only have one parameter
 
-```cpp
-  __sklib_person __skadapter__to_sklib_person(person p)
-  {
-    __sklib_person result;
-    result.name     = __skadapter__to_sklib_string(p.name); // std::string -> sklib_string
-    result.gender   = __skadapter__to_sklib_gender(p.gender); // gender -> sklib_gender
-    result.address  = __skadapter__to_sklib_address(p.address); // address struct -> sklib_address
-    return result;
-  }
-```
+- [ ] Getters and setters that are not `true' means to make the getter or setter
+      name as that name.
 
-- [ ] Rename arrays to vectors
+- [ ] Move automatic unique name generator back to internal (move it back to
+      sklib.rb)
 
-- [ ] Arrays must have:
-   - `__skadapter__to_sklib_[type]_array`
-   - `__skadapter__to_[type]_array`
-   - `__skadapter__free_[type]_array`
-   - i.e., follow principles of string
+- [ ] Don't worry about unique name check for now!
 
-- [ ] Reject all `int[]` types - we only accept vectors!
+- [ ] Print a report of errors at the end of parsing
 
-- [ ] Adapter's must be written both ways for sklibc and {LANGUAGE}
-
-```
-          ( __skadapter__to_[type]       )->|             |<-( __skadapter__to_sklib_[type] )
-    SKLIBC                                  |   ADAPTER   |                                   SWIFT, PYTHON etc.
-          ( __skadapter__to_sklib_[type] )<-|             |->( __skadapter__to_[type]       )
-```
-
-- [x] Enums must be to ints in SKLIBC
-
-- [x] Structs must be declared as their types in the generated language code (go through each field)
-   (not in SKLIBC code as it's included from #include splashkit)
-
-- [x] New breakdown for function calls in both SKLIBC and generated code
+- [ ] Use `<definition>` for typealiases and use it for function pointers
