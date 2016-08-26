@@ -1,17 +1,18 @@
 # TODO:
 
-- [ ] Add `@attribute static [class]` - this is a static method to the class provided
+- [ ] Add `@attribute static [class]` - this is a static method to the class
+      provided
 
 <!-- - [ ] @attribute static cannot have getter, setter, constructor, destructor or method unless @attribute class overrides it -->
 
-- [ ] Apply anything in header to all docblocks in that file, unless an
+- [x] Apply anything in header to all docblocks in that file, unless an
      `@attribute` with the same name is explicitly added in a specific docblock
      (if so, it overrides the attributes in the header).
 
-- [ ] Getters and setters can only have one parameter
+- [x] Getters and setters can only have one|two parameter(s)
 
-- [ ] Getters and setters that are not `true' means to make the getter or setter
-      name as that name.
+- [ ] ~~Getters and setters that are not `true' means to make the getter or setter
+      name as that name.~~
 
 - [ ] Move automatic unique name generator back to internal (move it back to
       sklib.rb)

@@ -58,11 +58,14 @@ class Parser::Error < StandardError
   end
 end
 
+#
+# Class to parse a single header file
+#
 class Parser::HeaderFileParser
   attr_reader :header_file_name
 
   #
-  # Initialises a header parser with
+  # Initialises a header parser with required data
   #
   def initialize(name, input_xml)
     @header_file_name = name
@@ -74,6 +77,7 @@ class Parser::HeaderFileParser
   # Parses the header file
   #
   def parse
+    # Start directly from 'header' node
     parse_xml(@input_xml.xpath('header'))
   end
 
@@ -198,6 +202,19 @@ class Parser::HeaderFileParser
               "is set to parameter (`#{self_value}`) with type `#{self_type}`)"
       end
     end
+    # Getters must have 1 parameter which is self
+    if atts[:getters] && ppl.length != 1 && attrs[:self]
+      raise Parser::Error,
+            'Getters must have exactly one parameter that is the parameter'\
+            'specified by the attribute `self`'
+    end
+    # Setters must have 2 parameters
+    if atts[:setters] && ppl.length != 2 && attrs[:self] == ppl.keys.first
+      raise Parser::Error,
+            'Setters must have exactly two parameters of which the first'\
+            'parameter is the parameter specified by the attribute `self`'
+    end
+    
     attrs
   end
 

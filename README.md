@@ -415,27 +415,6 @@ QueryResult myQueryResult = myDatabase.queryResult;
 if (myQueryResult.isEmpty) { ... };
 ```
 
-If the value specified by `getter` is `true`, the name will not change.
-Otherwise the name will be set by the specified `getter` name:
-
-```c
-/**
- * ...
- *
- * @attribute class   query_result
- * @attribute self    effect
- * @attribyte getter  true
- */
-bool has_data(query_result result);
-```
-
-generates:
-
-```c#
-QueryResult myQueryResult = myDatabase.queryResult;
-if (myQueryResult.hasData) { ... };
-```
-
 ### `setter`
 
 Creates a setter method to the `class` specified. Requires `class` and `self`
@@ -463,24 +442,4 @@ generates:
 
 ```c#
 myDatabase.lastQuery = myQueryResult;
-```
-
-If the value specified by `setter` is `true`, the name will not change.
-Otherwise the name will be set by the specified `setter` name:
-
-```c
-/**
- * ...
- *
- * @attribute class   database
- * @attribute self    effect
- * @attribyte setter  true
- */
-void flagged(database db, bool flag);
-```
-
-generates:
-
-```c#
-myDatabase.flagged = false;
 ```
