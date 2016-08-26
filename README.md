@@ -106,8 +106,15 @@ Example, `audio.h`:
  * thing you need to do is load a sound effect or music file. You can do this
  * by calling the `load_sound_effect(string name)` function to the
  * `load_music(string name)` function.
+ *
+ * @attribute static audio
  */
 ```
+
+Any attributes set in a header file docblock will apply those attributes to all
+docblocks inside that file. In the example above, all docblocks will have
+`@attribute static audio` added to them _unless_ `@attribute static` is already
+listed in a docblock.
 
 ## Function Docblocks
 
@@ -225,7 +232,8 @@ Note that typedef aliases to pointers **must** be declared with a `class` attrib
 
 #### Usage in functions
 
-The `sound_effect` type would appear in OO-translated SplashKit code as a class.
+Associates the `sound_effect` type to an OO-translated SplashKit code class
+_instance_.
 
 When added to a function, the type will be associated to a class. You must
 pair this with `method`, `constructor`, `destructor`, `getter`, or `setter`
@@ -250,8 +258,15 @@ Audio.Close()
 
 ### `method`
 
-Associates a function as a method to a class. Requires the `class` attribute
-to be set. See the above example.
+Associates a function to a class. Requires the `class` or `static` attribute to
+be set. The name specified by `method` will be the method name that will be used
+as the method on the class. See the above example.
+
+When `method` is used with the `class` attribute, an _instance method_ will be
+generated on the class whose name is specified by `class`.
+
+When `method` is used with the `static` attribute, a _static method_ will be
+generated on the class whose name is specified by `class`.
 
 ### `constructor`
 
@@ -370,4 +385,102 @@ whereas in C# it would look like:
 
 ```c#
 someSoundEffectInstance.play(3, 10.0f)
+```
+
+### `getter`
+
+Creates a getter method to the `class` specified. Requires `class` and `self`
+to be set.
+
+Must be set on a function that has __exactly__ one parameter. This parameter
+must be the parameter which will be used as `self`.
+
+For example, the following:
+
+```c
+/**
+ * ...
+ *
+ * @attribute class   query_result
+ * @attribute self    effect
+ * @attribyte getter  is_empty
+ */
+bool query_result_empty(query_result result);
+```
+
+generates:
+
+```c#
+QueryResult myQueryResult = myDatabase.queryResult;
+if (myQueryResult.isEmpty) { ... };
+```
+
+If the value specified by `getter` is `true`, the name will not change.
+Otherwise the name will be set by the specified `getter` name:
+
+```c
+/**
+ * ...
+ *
+ * @attribute class   query_result
+ * @attribute self    effect
+ * @attribyte getter  true
+ */
+bool has_data(query_result result);
+```
+
+generates:
+
+```c#
+QueryResult myQueryResult = myDatabase.queryResult;
+if (myQueryResult.hasData) { ... };
+```
+
+### `setter`
+
+Creates a setter method to the `class` specified. Requires `class` and `self`
+to be set.
+
+Must be set on a function that has __exactly__ two parameters:
+
+1. the first must be the the parameter which will be used as `self`, and
+2. the second must the value that is to be set
+
+For example, the following:
+
+```c
+/**
+ * ...
+ *
+ * @attribute class   database
+ * @attribute self    effect
+ * @attribyte setter  last_query
+ */
+void database_set_query_result(database db, query_result result);
+```
+
+generates:
+
+```c#
+myDatabase.lastQuery = myQueryResult;
+```
+
+If the value specified by `setter` is `true`, the name will not change.
+Otherwise the name will be set by the specified `setter` name:
+
+```c
+/**
+ * ...
+ *
+ * @attribute class   database
+ * @attribute self    effect
+ * @attribyte setter  true
+ */
+void flagged(database db, bool flag);
+```
+
+generates:
+
+```c#
+myDatabase.flagged = false;
 ```
