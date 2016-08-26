@@ -203,18 +203,17 @@ class Parser::HeaderFileParser
       end
     end
     # Getters must have 1 parameter which is self
-    if atts[:getters] && ppl.length != 1 && attrs[:self]
+    if attrs[:getters] && ppl.length != 1 && attrs[:self]
       raise Parser::Error,
             'Getters must have exactly one parameter that is the parameter'\
             'specified by the attribute `self`'
     end
     # Setters must have 2 parameters
-    if atts[:setters] && ppl.length != 2 && attrs[:self] == ppl.keys.first
+    if attrs[:setters] && ppl.length != 2 && attrs[:self] == ppl.keys.first
       raise Parser::Error,
             'Setters must have exactly two parameters of which the first'\
             'parameter is the parameter specified by the attribute `self`'
     end
-    
     attrs
   end
 
@@ -284,16 +283,16 @@ class Parser::HeaderFileParser
   end
 
   #
-  # Parses a function return type
+  # Parses a function (pointer) return type
   #
-  def parse_function_return_type(xml)
-    raw_return_type = xml.xpath('returntype').text
+  def parse_function_return_type(xml, raw_return_type = nil)
+    raw_return_type ||= xml.xpath('returntype').text
     ret_type_regex = /(\w+)\s*(?:(&)|(\*)?)/
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
     is_reference = !ref.nil?
     desc = xml.xpath('result').text
-    if type == 'void' && desc && (is_pointer || is_reference)
+    if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
       throw Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
@@ -369,10 +368,30 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Parses a function-pointer typedef
+  #
+  def parse_function_pointer_typedef(xml)
+    ppl = parse_ppl(xml)
+    return_type = xml.xpath('declaration/declaration_type[1]').text
+    params = ppl_default_to(xml, {}, ppl) # just use PPL for this
+    {
+      returns: parse_function_return_type(xml, return_type),
+      parameters: params
+    }
+  end
+
+  #
+  # Checks if a typedef is a function pointer typedef (else it's 'simple')
+  #
+  def typedef_is_a_fn_ptr?(xml)
+    xml.xpath('@type').text == 'funcPtr'
+  end
+
+  #
   # Parses a typedef signature for extended information that HeaderDoc does
   # not parse in
   #
-  def parse_typedef_signature(signature)
+  def parse_simple_typedef(signature)
     regex = /typedef\s+(\w+)?\s+(\w+)\s+(\*)?(\w+);$/
     _,
     aliased_type,
@@ -391,21 +410,24 @@ class Parser::HeaderFileParser
   # Parses a single typedef
   #
   def parse_typedef(xml)
+    is_fn_ptr = typedef_is_a_fn_ptr?(xml)
     signature = parse_signature(xml)
-    alias_info = parse_typedef_signature(signature)
     attributes = parse_attributes(xml)
-    if attributes && attributes[:class].nil? && alias_info[:is_pointer]
-      raise Parser::Error,
-            "Typealiases to pointers must have a class attribute set"
-    end
-    {
+    merge_data = is_fn_ptr ? parse_function_pointer_typedef(xml) : parse_simple_typedef(xml)
+    data = {
       signature:   signature,
-      alias_info:  alias_info,
       name:        xml.xpath('name').text,
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
-      attributes:  attributes
-    }
+      attributes:  attributes,
+      is_function_pointer: is_fn_ptr
+    }.merge merge_data
+    if attributes && attributes[:class].nil? && data[:is_pointer]
+      raise Parser::Error,
+            "Typealiases to pointers must have a class attribute set"
+    end
+    puts data.inspect
+    data
   rescue Parser::Error => e
     raise Parser::Error.new e.message, signature
   end
