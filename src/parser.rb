@@ -116,7 +116,7 @@ class Parser::HeaderFileParser
   # Parses the docblock at the start of a .h file
   #
   def parse_header(xml)
-    @header_attrs = parse_attributes(xml)
+    @header_attrs = parse_attributes(xml).reject { |k, _| k == :Author }
     {
       name:         xml.xpath('name').text,
       brief:        xml.xpath('abstract').text,
