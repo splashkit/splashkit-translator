@@ -21,7 +21,7 @@ extern "C" <%= lib_signature_for(function) %>;
 function[:parameters].map { |param_name, _| "__skparam__#{param_name}" }.join(', ')
 %>);
 <% unless is_void?(function) %>
-    return __skadapter__to_sklib_<%= function[:return_type] %>(__skreturn);
+    return __skadapter__to_sklib_<%= function[:return][:type] %>(__skreturn);
 <% end %>
 }
 <% end %>
