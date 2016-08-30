@@ -4,6 +4,7 @@
     functions to and from the SK and Lib pointer typealiases.
  %>
 #define __sklib_ptr void *
+__sklib_ptr __skadapter__to_sklib_ptr(__sklib_ptr v) { return v; }
 #define __skadapter__make_typealias_adapter(type)\
 typedef __sklib_ptr __sklib_##type;\
 __sklib_ptr __skadapter__to_sklib_ptr(type v) { return static_cast<__sklib_ptr>(v); }\
