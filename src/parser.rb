@@ -414,7 +414,6 @@ class Parser::HeaderFileParser
       raise Parser::Error,
             "Typealiases to pointers must have a class attribute set"
     end
-    puts data.inspect
     data
   rescue Parser::Error => e
     raise Parser::Error.new e.message, signature
