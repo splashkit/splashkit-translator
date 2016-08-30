@@ -128,11 +128,12 @@ module Generators
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
+      puts "Reading template #{name}..."
       path = "#{generator_res_dir}/#{name}.*.erb"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1
-      template = read_res_file(files.first).strip
+      template = read_res_file(files.first).strip << "\n"
       ERB.new(template, nil, '>').result(binding)
     end
 
