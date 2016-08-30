@@ -9,7 +9,14 @@ module Generators
 
     def initialize(data, src)
       super(data, src)
-      @direct_types = %w(int float double)
+      @direct_types = [
+        'int',
+        'unsigned int',
+        'float',
+        'double',
+        'char',
+        'unsigned char'
+      ]
     end
 
     def render_templates
@@ -72,8 +79,7 @@ module Generators
     def lib_type_for(type_data)
       type = type_data[:type]
       # Handle unsigned [type] as direct
-      is_unsigned = type =~ /unsigned/
-      return type if is_unsigned
+      return type if type =~ /^unsigned\s+\w+/
       # Handle void * as __sklib_ptr
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       {
@@ -132,12 +138,28 @@ module Generators
     end
 
     def sk_adapter_fn_for(type_data)
-      "__skadapter__to_#{type_data[:type]}"
+      type =
+        if type_data[:type] == 'void' && type_data[:is_pointer]
+          # If void* then it's a sklib_ptr
+          'sklib_ptr'
+        elsif type_data[:type] =~ /^unsigned\s+\w+/
+          # Remove spaces for unsigned
+          type_data[:type].tr("\s", '_')
+        else
+          # Use standard type
+          type_data[:type]
+        end
+      "__skadapter__to_#{type}"
     end
 
     def lib_adapter_fn_for(type_data)
+      # Rip lib type first
+      puts "Raw type is #{type_data}"
       type = lib_type_for type_data
+      # Remove leading __sklib_ underscores if they exist
       type = type[2..-1] if type =~ /^\_{2}/
+      # Replace spaces with underscores for unsigned
+      type = type.tr("\s", '_')
       "__skadapter__to_#{type}"
     end
   end

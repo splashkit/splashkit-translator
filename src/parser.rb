@@ -239,7 +239,7 @@ class Parser::HeaderFileParser
   # Returns parameter type information based on the type and desc given
   #
   def parse_parameter_info(xml, param_name, ppl_type_data)
-    regex = /(?:(const)\s+)?(\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
+    regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
     array = parse_array_dimensions(xml, param_name)
     {
@@ -287,7 +287,7 @@ class Parser::HeaderFileParser
   #
   def parse_function_return_type(xml, raw_return_type = nil)
     raw_return_type ||= xml.xpath('returntype').text
-    ret_type_regex = /(\w+)\s*(?:(&)|(\*)?)/
+    ret_type_regex = /((?:unsigned\s)?\w+)\s*(?:(&)|(\*)?)/
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
     is_reference = !ref.nil?
