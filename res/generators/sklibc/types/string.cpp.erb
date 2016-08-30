@@ -15,11 +15,11 @@ typedef struct {
   int size;
 } __sklib_string;
 __sklib_string __skadapter__to_sklib_string(std::string s) {
-    __sklib_string __sklib_return_value;
-    __sklib_return_value.size = s.length();
-    __sklib_return_value.string = (char *)malloc(__sklib_return_value.size + 1);
-    strcpy(__sklib_return_value.string, s.c_str());
-    return __sklib_return_value;
+    __sklib_string __skreturn;
+    __skreturn.size = s.length();
+    __skreturn.string = (char *)malloc(__skreturn.size + 1);
+    strcpy(__skreturn.string, s.c_str());
+    return __skreturn;
 }
 void __skadapter__free_sklib_string_internal_pointer(char *s, int size) {
     free(s);
