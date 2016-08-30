@@ -5,7 +5,8 @@
  %>
 #define __sklib_ptr void *
 #define __skadapter__make_typealias_adapter(type)\
-__sklib_ptr __skadapter__to_sklib_##type(type v) { return static_cast<__sklib_ptr>(v); }\
+typedef __sklib_ptr __sklib_##type;\
+__sklib_ptr __skadapter__to_sklib_ptr(type v) { return static_cast<__sklib_ptr>(v); }\
 type __skadapter__to_##type(__sklib_ptr v) { return static_cast<type>(v); }
 <% @typealiases.each do |typealias| %>
 __skadapter__make_typealias_adapter(<%= typealias[:name] %>)

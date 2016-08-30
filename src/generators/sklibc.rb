@@ -81,7 +81,7 @@ module Generators
         'int'       => 'int',
         'float'     => 'float',
         'double'    => 'double',
-        'byte'      => 'unsigned char', # http://stackoverflow.com/a/87648/519967
+        'byte'      => 'unsigned char',
         'bool'      => 'int',
         'enum'      => 'int',
         'struct'    => "__sklib_#{type}",
@@ -129,6 +129,16 @@ module Generators
       else
         "__sklib_#{type} #{ptr_star}#{field_name}#{array_decl}"
       end
+    end
+
+    def sk_adapter_fn_for(type_data)
+      "__skadapter__to_#{type_data[:type]}"
+    end
+
+    def lib_adapter_fn_for(type_data)
+      type = lib_type_for type_data
+      type = type[2..-1] if type =~ /^\_{2}/
+      "__skadapter__to_#{type}"
     end
   end
 end

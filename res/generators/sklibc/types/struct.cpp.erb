@@ -19,11 +19,11 @@ __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= stru
 <% if field_data[:is_array] %>
 <% get_Nd_array_size_as_1d(field_data).times do |i| %>
 <%# Copy over each value in the array (1D array << {1,2}D array)  %>
-    __sklib_return_value.<%= field_name %>[<%= i %>] = __skadapter__to_sklib_<%= field_data[:type] %>(v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %>);
+    __sklib_return_value.<%= field_name %>[<%= i %>] = <%= lib_adapter_fn_for field_data %>(v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %>);
 <% end %>
 <%# Standard copy converted as lib type %>
 <% else %>
-    __sklib_return_value.<%= field_name %> = __skadapter__to_sklib_<%= field_data[:type] %>(v.<%= field_name %>);
+    __sklib_return_value.<%= field_name %> = <%= lib_adapter_fn_for field_data %>(v.<%= field_name %>);
 <% end %>
 <% end %>
     return __sklib_return_value;
@@ -36,11 +36,11 @@ __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= stru
 <% if field_data[:is_array] %>
 <% get_Nd_array_size_as_1d(field_data).times do |i| %>
 <%# Copy over each value in the array ({1,2}D array << 1D array)  %>
-    __sklib_return_value.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %> = __skadapter__to_<%= field_data[:type] %>(v.<%= field_name %>[<%= i %>]);
+    __sklib_return_value.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %> = <%= sk_adapter_fn_for field_data[:type] %>(v.<%= field_name %>[<%= i %>]);
 <% end %>
 <%# Standard copy converted as SK type %>
 <% else %>
-    __sklib_return_value.<%= field_name %> = __skadapter__to_<%= field_data[:type] %>(v.<%= field_name %>);
+    __sklib_return_value.<%= field_name %> = <%= sk_adapter_fn_for field_data[:type] %>(v.<%= field_name %>);
 <% end %>
 <% end %>
     return __sklib_return_value;
