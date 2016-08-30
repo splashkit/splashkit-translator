@@ -4,6 +4,7 @@
     no-change/direct type.
 %>
 #define __skadapter__make_direct_adapter(type)\
+typedef type __sklib_##type;\
 type __skadapter__to_sklib_##type(type v) { return v; }\
 type __skadapter__to_##type(type v) { return v; }
 <% @direct_types.each do |type| %>
