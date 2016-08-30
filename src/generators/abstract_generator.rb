@@ -15,6 +15,7 @@ module Generators
     def initialize(data, src)
       @data = data
       @src = src
+      @direct_types = []
       @enums = @data.values.pluck(:enums).flatten
       @typealiases = @data.values.pluck(:typedefs).flatten.select do |td|
         !td[:is_function_pointer]
@@ -31,6 +32,10 @@ module Generators
     #
     def execute
       puts "Executing #{name} generator..."
+      # Ensure our structs are ordered before we continue...
+      # Must do this here so we have @direct_types defined
+      # with some overidden data
+      @structs = ordered_structs
       execute_result = render_templates
       puts '-> Done!'
       execute_result
@@ -69,6 +74,29 @@ module Generators
     private_class_method :"case_converters="
 
     private
+
+    #
+    # Returns the structs ordered by dependency between other structs
+    #
+    def ordered_structs
+      # What types do I know of
+      knows_of = @direct_types + @typealiases.pluck(:name) + @enums.pluck(:name)
+      unordered_structs = @structs
+      result = []
+      unordered_structs.each do |struct|
+        struct[:fields].each do |_, field_data|
+          field_type = field_data[:type]
+          field_struct = unordered_structs.select { |s| s[:name] == field_type }.first
+          # This is a struct type I don't know about yet
+          next if knows_of.include?(field_type) || field_struct.nil?
+          result << field_struct
+          knows_of << struct
+        end
+        result << struct
+        knows_of << struct
+      end
+      result
+    end
 
     #
     # Default case types are snake_case, unless it is overridden in a subclass
