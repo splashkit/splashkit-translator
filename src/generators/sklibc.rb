@@ -154,7 +154,6 @@ module Generators
 
     def lib_adapter_fn_for(type_data)
       # Rip lib type first
-      puts "Raw type is #{type_data}"
       type = lib_type_for type_data
       # Remove leading __sklib_ underscores if they exist
       type = type[2..-1] if type =~ /^\_{2}/
