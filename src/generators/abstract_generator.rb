@@ -83,7 +83,7 @@ module Generators
     # Return true iff function provided is void
     #
     def is_void?(function)
-      function[:return_type] == 'void'
+      function[:return][:type] == 'void' && !function[:return][:is_pointer]
     end
 
     #
