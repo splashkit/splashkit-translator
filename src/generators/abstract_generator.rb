@@ -87,13 +87,15 @@ module Generators
         struct[:fields].each do |_, field_data|
           field_type = field_data[:type]
           field_struct = unordered_structs.select { |s| s[:name] == field_type }.first
-          # This is a struct type I don't know about yet
+          # This is a struct type I know about already...
           next if knows_of.include?(field_type) || field_struct.nil?
           result << field_struct
-          knows_of << struct
+          knows_of << field_type
         end
+        # Skip this struct if was already added by a field
+        next if knows_of.include?(struct[:name])
         result << struct
-        knows_of << struct
+        knows_of << struct[:name]
       end
       result
     end
