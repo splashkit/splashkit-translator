@@ -1,0 +1,11 @@
+<%#
+    Direct adapters are made for no change between SK and Lib types. Use the
+    `__skadapter__make_direct_adapter' macro to generate adapter methods for a
+    no-change/direct type.
+%>
+#define __skadapter__make_direct_adapter(type)\
+type __skadapter__to_sklib_##type(type v) { return v; }\
+type __skadapter__to_##type(type v) { return v; }
+<% @direct_types.each do |type| %>
+__skadapter__make_direct_adapter(<%= type %>)
+<% end %>

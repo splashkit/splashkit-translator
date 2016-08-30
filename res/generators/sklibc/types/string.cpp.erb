@@ -1,0 +1,32 @@
+<%#
+    Strings from a std::string in the SK code must be allocated on heap and
+    freed after use. An example would be:
+
+    1. SK function `Foo' returns a `std::string'
+    2. Wrap `std::string' as `__sklib_string'
+    3. Return `__sklib_string'
+    4. Language `Bar' calls Lib function `Foo' returning the `__sklib_string'
+    5. Wrap the returned `__sklib_string''s underlying `char*` in `Bar::String'
+    6. Free the returned `__sklib_string' from the heap
+    7. Return the wrapped `Bar::String'
+%>
+typedef struct {
+  char *string;
+  int size;
+} __sklib_string;
+__sklib_string __skadapter__to_sklib_string(std::string s) {
+    __sklib_string __sklib_return_value;
+    __sklib_return_value.size = s.length();
+    __sklib_return_value.string = (char *)malloc(__sklib_return_value.size + 1);
+    strcpy(__sklib_return_value.string, s.c_str());
+    return __sklib_return_value;
+}
+void __skadapter__free_sklib_string_internal_pointer(char *s, int size) {
+    free(s);
+}
+void __skadapter__free_sklib_string(__sklib_string s) {
+    free(s.string);
+}
+std::string __skadapter__to_string(__sklib_string s) {
+    return std::string(s.string);
+}
