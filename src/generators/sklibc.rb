@@ -62,7 +62,9 @@ module Generators
         param_name = param.first
         param_data = param.last
         type = lib_type_for param_data
-        "#{memo}, #{type} #{param_name}"
+        ptr = param_data[:is_pointer] ? '*' : ''
+        ref = param_data[:is_reference] ? '&' : ''
+        "#{memo}, #{type} #{ptr}#{ref}#{param_name}"
       end[2..-1]
     end
 
