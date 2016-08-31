@@ -14,7 +14,7 @@ extern "C" <%= lib_signature_for(function) %>;
 <%= lib_signature_for(function) %>
 {
 <% function[:parameters].each do |param_name, param_data| %>
-    <%= param_data[:type] %> __skparam__<%= param_name %> = <%= sk_adapter_fn_for param_data %>(<%= param_name %>);
+    <%= param_data[:type] %> <%= param_data[:is_pointer] ? '*' : '' %>__skparam__<%= param_name %> = <%= sk_adapter_fn_for param_data %>(<%= param_name %>);
 <% end %>
     <% unless is_void?(function) %><%= function[:return][:type] %> __skreturn = <% end %>
 <%= function[:name] %>(<%=
