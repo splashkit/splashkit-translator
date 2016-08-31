@@ -46,7 +46,20 @@ extern "C" <%= lib_signature_for(function) %>;
 %>
     <%= func_call %>;
 <%#
-    3. Return __skreturn variable if non-void
+    3. Update all non-const references.
+%>
+<%
+    non_const_refs = function[:parameters].select do | _, param_data |
+      param_data[:is_reference] && !param_data[:is_const]
+    end # end select
+    non_const_refs.each do | param_name, _ |
+%>
+    *<%= param_name %> = __skparam__<%= param_name %>;
+<%
+    end # end non_const_ptrs.each
+%>
+<%#
+    4. Return __skreturn variable if non-void
 %>
 <%
     unless is_void?(function)
