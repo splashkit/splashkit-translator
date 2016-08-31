@@ -1,27 +1,74 @@
 <%#
-    Forward declare each function as a C-external function.
-%>
-<% @functions.each do |function| %>
-extern "C" <%= lib_signature_for(function) %>;
-<% end %>
-
-<%#
     Implement each of the function bodies calling the SK code. Three-step
     process: variableize the arguments to the SK call from their lib-type
     adapted versions, make the call (and return the call if non-void).
 %>
-<% @functions.each do |function| %>
-<%= lib_signature_for(function) %>
-{
-<% function[:parameters].each do |param_name, param_data| %>
-    <%= param_data[:type] %> __skparam__<%= param_name %> = __skadapter__to_<%= param_data[:type] %>(<%= param_name %>);
-<% end %>
-    <% unless is_void?(function) %><%= function[:return_type] %> __skreturn = <% end %>
-<%= function[:name] %>(<%=
-function[:parameters].map { |param_name, _| "__skparam__#{param_name}" }.join(', ')
-%>);
-<% unless is_void?(function) %>
-    return __skadapter__to_sklib_<%= function[:return_type] %>(__skreturn);
-<% end %>
+<%
+  @functions.each do |function|
+%>
+extern "C" <%= lib_signature_for(function) %>;
+<%= lib_signature_for(function) %> {
+<%
+    function[:parameters].each do |param_name, param_data|
+%>
+<%#
+    1. Convert each parameter using the adapter functions available
+%>
+<%
+      param_adapted =
+        if param_data[:is_pointer]
+          param_name
+        else
+          deref = param_data[:is_reference] ? '*' : ''
+          adapter_fn = sk_adapter_fn_for param_data
+          "#{adapter_fn}(#{deref}#{param_name})"
+        end
+      ptr = param_data[:is_pointer] ? '*' : ''
+      const = param_data[:is_const] ? 'const ' : ''
+      type = param_data[:type]
+      lib_param_decl = "#{const}#{type} #{ptr}__skparam__#{param_name}"
+%>
+    <%= lib_param_decl %> = <%= param_adapted %>;
+<%
+    end # end parameters.each
+%>
+<%#
+    2. Make the function call (and assign __skreturn if non-void)
+%>
+<%
+    return_val = unless is_void?(function) then
+      "#{function[:return][:type]} __skreturn = "
+    end
+    param_list = function[:parameters].map do |param_name, _|
+      "__skparam__#{param_name}"
+    end.join(', ')
+    func_call  = "#{return_val}#{function[:name]}(#{param_list})"
+%>
+    <%= func_call %>;
+<%#
+    3. Update all non-const references.
+%>
+<%
+    non_const_refs = function[:parameters].select do | _, param_data |
+      param_data[:is_reference] && !param_data[:is_const]
+    end # end select
+    non_const_refs.each do | param_name, _ |
+%>
+    *<%= param_name %> = __skparam__<%= param_name %>;
+<%
+    end # end non_const_ptrs.each
+%>
+<%#
+    4. Return __skreturn variable if non-void
+%>
+<%
+    unless is_void?(function)
+%>
+    return <%= lib_adapter_fn_for function[:return] %>(__skreturn);
+<%
+    end # end unless
+%>
 }
-<% end %>
+<%
+  end # end functions.each
+%>

@@ -1,0 +1,16 @@
+<%#
+    Enums are converted to their integer representations using static casts.
+    Use the `__skadapter__make_enum_adapter' macro to make adapter functions to
+    and from the SK and Lib enums.
+ %>
+#define __skadapter__make_enum_adapter(type)\
+typedef int __sklib_##type;\
+int __skadapter__to_sklib_##type(type v) { return static_cast<int>(v); }\
+type __skadapter__to_##type(int v) { return static_cast<type>(v); }
+<%
+  @enums.each do |enum|
+%>
+__skadapter__make_enum_adapter(<%= enum[:name] %>)
+<%
+  end # end enums.each
+%>

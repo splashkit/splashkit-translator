@@ -13,8 +13,8 @@ module CoreExtensions
     # Converts to a boolean type if applicable, or nil
     #
     def to_b
-      return true if self =~ /^(true|t|yes|y|1)$/i
-      return false if empty? || self =~ /^(false|f|no|n|0)$/i
+      return true if self =~ /^(true)$/i
+      return false if empty? || self =~ /^(false)$/i
       nil
     end
 
@@ -34,6 +34,13 @@ module CoreExtensions
       Integer(self)
     rescue ArgumentError
       nil
+    end
+
+    #
+    # Returns true if string is an int
+    #
+    def int?
+      to_i.to_s == self
     end
 
     #

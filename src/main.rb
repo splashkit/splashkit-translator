@@ -24,7 +24,7 @@ opt_parser = OptionParser.new do |opts|
               .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --input /path/to/splashkit/coresdk/src/coresdk[/file.h]
+Usage: parse.rb --input /path/to/splashkit[/coresdk/src/coresdk/file.h]
                 [--generate GENERATOR[,GENERATOR ... ]
                 [--output /path/to/write/output/to]
                 [--validate]
@@ -36,8 +36,9 @@ EOS
   help = <<-EOS
 Source header file or SplashKit CoreSDK directory
 EOS
-  opts.on('-i', '--input SOURCE', help) do |file|
-    options[:src] = file
+  opts.on('-i', '--input SOURCE', help) do |input|
+    options[:src] = input
+    options[:out] = input + '/out' unless input.end_with? '.h'
   end
   # To [using generator]
   help = <<-EOS
@@ -55,7 +56,7 @@ EOS
   end
   # Output file(s)
   help = <<-EOS
-Directory to write output to
+Directory to write output to (defaults to /path/to/splashkit/out)
 EOS
   opts.on('-o', '--output OUTPUT', help) do |out|
     options[:out] = out
@@ -76,7 +77,7 @@ begin
   opt_parser.parse!
   mandatory = [:src]
   # Add generators to mandatory if not validating
-  mandatory = [:src, :generators, :out] unless options[:validate_only]
+  mandatory << :generators unless options[:validate_only]
   missing = mandatory.select { |param| options[param].nil? }
   raise OptionParser::MissingArgument, 'Arguments missing' unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
@@ -101,7 +102,7 @@ begin
       end
     end
   end
-rescue Parser::ParserError
+rescue Parser::Error
   puts $!.to_s
   exit 1
 end

@@ -14,9 +14,15 @@ module Generators
     #
     def initialize(data, src)
       @data = data
-      @src = File.dirname src
+      @src = src
+      @direct_types = []
       @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten
+      @typealiases = @data.values.pluck(:typedefs).flatten.select do |td|
+        !td[:is_function_pointer]
+      end
+      @function_pointers = @data.values.pluck(:typedefs).flatten.select do |td|
+        td[:is_function_pointer]
+      end
       @structs = @data.values.pluck(:structs).flatten
       @functions = @data.values.pluck(:functions).flatten
     end
@@ -26,6 +32,10 @@ module Generators
     #
     def execute
       puts "Executing #{name} generator..."
+      # Ensure our structs are ordered before we continue...
+      # Must do this here so we have @direct_types defined
+      # with some overidden data
+      @structs = ordered_structs
       execute_result = render_templates
       puts '-> Done!'
       execute_result
@@ -66,6 +76,31 @@ module Generators
     private
 
     #
+    # Returns the structs ordered by dependency between other structs
+    #
+    def ordered_structs
+      # What types do I know of
+      knows_of = @direct_types + @typealiases.pluck(:name) + @enums.pluck(:name)
+      unordered_structs = @structs
+      result = []
+      unordered_structs.each do |struct|
+        struct[:fields].each do |_, field_data|
+          field_type = field_data[:type]
+          field_struct = unordered_structs.select { |s| s[:name] == field_type }.first
+          # This is a struct type I know about already...
+          next if knows_of.include?(field_type) || field_struct.nil?
+          result << field_struct
+          knows_of << field_type
+        end
+        # Skip this struct if was already added by a field
+        next if knows_of.include?(struct[:name])
+        result << struct
+        knows_of << struct[:name]
+      end
+      result
+    end
+
+    #
     # Default case types are snake_case, unless it is overridden in a subclass
     #
     self.case_converters = {
@@ -78,7 +113,7 @@ module Generators
     # Return true iff function provided is void
     #
     def is_void?(function)
-      function[:return_type] == 'void'
+      function[:return][:type] == 'void' && !function[:return][:is_pointer]
     end
 
     #
@@ -123,11 +158,12 @@ module Generators
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
+      puts "Reading template #{name}..."
       path = "#{generator_res_dir}/#{name}.*.erb"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1
-      template = read_res_file(files.first).strip
+      template = read_res_file(files.first).strip << "\n"
       ERB.new(template, nil, '>').result(binding)
     end
 

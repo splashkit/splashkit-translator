@@ -1,7 +1,19 @@
 #include <stdlib.h>
 #include <string>
-#include "<%= header_path %>/splashkit.h"
+<% if header_path.end_with? '.h' %>
+#include "<%= header_path %>"
+<% else %>
+<% @data.each do |key, _| %>
+#include "<%= header_path %>/coresdk/src/coresdk/<%= key %>"
+<% end %>
+<% end %>
 using std::string;
 
-<%= read_template 'types' %>
+<%= read_template 'types/string' %>
+<%= read_template 'types/bool' %>
+<%= read_template 'types/direct' %>
+<%= read_template 'types/typealias_pointer' %>
+<%= read_template 'types/enum' %>
+<%= read_template 'types/struct' %>
+<%= read_template 'types/function_pointer' %>
 <%= read_template 'functions' %>

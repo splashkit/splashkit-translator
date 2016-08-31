@@ -7,12 +7,9 @@ __sklib_string = record
 end;
 <%#
   `__sklib_ptr' is a wrapper for typealiases to pointer types using type
-  casts. Public type which is defined as a type pointer must be declared here.
+  casts.
 %>
 __sklib_ptr = Pointer;
-<% @typealiases.each do |typealias| %>
-__sklib_<%= typealias[:name] %>_data_type = record end;
-<% end %>
 <%#
   Naming for SK lib functions that return structs as alias to Pascal type
 %>

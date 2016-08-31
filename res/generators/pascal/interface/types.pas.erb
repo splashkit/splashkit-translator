@@ -3,6 +3,7 @@
 %>
 <% @typealiases.each do |typealias| %>
 <%= typealias[:name].type_case %> = ^__sklib_<%= typealias[:name] %>_data_type;
+__sklib_<%= typealias[:name] %>_data_type = record end;
 <% end %>
 <%#
   Record declaration from structs
