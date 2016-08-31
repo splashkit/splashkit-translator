@@ -1,0 +1,6 @@
+<%#
+    Redeclare every function pointer typealias
+%>
+<% @function_pointers.each do |fp| %>
+typedef <%= lib_type_for fp[:return] %> (__sklib_<%= fp[:name] %>)(<%= lib_parameter_list_for fp %>);
+<% end %>
