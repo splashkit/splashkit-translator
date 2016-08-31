@@ -19,13 +19,16 @@ extern "C" <%= lib_signature_for(function) %>;
         if param_data[:is_pointer]
           param_name
         else
+          deref = param_data[:is_reference] ? '*' : ''
           adapter_fn = sk_adapter_fn_for param_data
-          "#{adapter_fn}(#{param_name})"
+          "#{adapter_fn}(#{deref}#{param_name})"
         end
       ptr = param_data[:is_pointer] ? '*' : ''
-      lib_param_name = "#{ptr}__skparam__#{param_name}"
+      const = param_data[:is_const] ? 'const ' : ''
+      type = param_data[:type]
+      lib_param_decl = "#{const}#{type} #{ptr}__skparam__#{param_name}"
 %>
-    <%= param_data[:type] %> <%= lib_param_name %> = <%= param_adapted %>;
+    <%= lib_param_decl %> = <%= param_adapted %>;
 <%
     end # end parameters.each
 %>

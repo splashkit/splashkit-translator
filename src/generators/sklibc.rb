@@ -62,9 +62,10 @@ module Generators
         param_name = param.first
         param_data = param.last
         type = lib_type_for param_data
-        ptr = param_data[:is_pointer] ? '*' : ''
-        ref = param_data[:is_reference] ? '&' : ''
-        "#{memo}, #{type} #{ptr}#{ref}#{param_name}"
+        # If a C++ reference, we must convert to a C pointer
+        ptr = param_data[:is_pointer] || param_data[:is_reference] ? '*' : ''
+        const = param_data[:is_const] ? 'const ' : ''
+        "#{memo}, #{const}#{type} #{ptr}#{param_name}"
       end[2..-1]
     end
 
