@@ -9,14 +9,7 @@ module Generators
 
     def initialize(data, src)
       super(data, src)
-      @direct_types = [
-        'int',
-        'unsigned int',
-        'float',
-        'double',
-        'char',
-        'unsigned char'
-      ]
+      @direct_types = %w(int unsigned\ int float double char unsigned\ char)
     end
 
     def render_templates
@@ -82,6 +75,8 @@ module Generators
       return type if type =~ /^unsigned\s+\w+/
       # Handle void * as __sklib_ptr
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
+      # Handle function pointers
+      return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
       {
         'void'      => 'void',
         'int'       => 'int',

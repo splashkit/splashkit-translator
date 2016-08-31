@@ -3,4 +3,6 @@
 %>
 <% @function_pointers.each do |fp| %>
 typedef <%= lib_type_for fp[:return] %> (__sklib_<%= fp[:name] %>)(<%= lib_parameter_list_for fp %>);
+<%= fp[:return][:type] %> (*__skadapter__to_<%= fp[:name] %>(__sklib_<%= fp[:name] %> *v))(<%= lib_parameter_list_for fp %>) { return v; }
+<%= lib_type_for fp[:return] %> (*__skadapter__to_sklib_<%= fp[:name] %>(<%= fp[:name] %> *v))(<%= fp[:parameters].map { |pn, pd| "#{pd[:type]} #{pn}" }.join(', ')%>) { return v; }
 <% end %>
