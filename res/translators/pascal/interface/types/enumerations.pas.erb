@@ -1,0 +1,10 @@
+<%#
+  Enum declaration
+%>
+<%
+  @enums.each do |enum|
+%>
+<%= enum[:name].type_case %> = ( <%= enum[:constants].keys.join(', ') %> );
+<%
+  end # end enums.each
+%>

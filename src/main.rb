@@ -2,12 +2,12 @@
 require          'optparse'
 require          'fileutils'
 require_relative 'parser'
-require_relative 'generators/sklibc'
-require_relative 'generators/pascal'
+require_relative 'translators/sklibc'
+require_relative 'translators/pascal'
 
 # Required to run
 options = {
-  generators: [],
+  translators: [],
   src: nil,
   out: nil,
   validate_only: false
@@ -15,13 +15,13 @@ options = {
 
 # Options parse block
 opt_parser = OptionParser.new do |opts|
-  # Generators we can use
-  avaliable_gens =
-    Generators.constants
-              .select { |c| Class === Generators.const_get(c) }
-              .select { |c| c != :AbstractGenerator }
-              .map { |g| [g.upcase, Generators.const_get(g)] }
-              .to_h
+  # Translators we can use
+  avaliable_translators =
+    Translators.constants
+               .select { |c| Class === Translators.const_get(c) }
+               .select { |c| c != :AbstractTranslator }
+               .map { |t| [t.upcase, Translators.const_get(t)] }
+               .to_h
   # Setup
   help = <<-EOS
 Usage: parse.rb --input /path/to/splashkit[/coresdk/src/coresdk/file.h]
@@ -40,18 +40,18 @@ EOS
     options[:src] = input
     options[:out] = input + '/out' unless input.end_with? '.h'
   end
-  # To [using generator]
+  # Generate using translator
   help = <<-EOS
-Comma separated list of generators to run on the file(s).
+Comma separated list of translators to run on the file(s).
 EOS
-  opts.on('-g', '--generate GENERATOR[,GENERATOR ... ]', help) do |gens|
-    parsed_gens = gens.split(',')
-    options[:generators] = parsed_gens.map do |gen|
-      gen_class = avaliable_gens[gen.upcase.to_sym]
-      if gen_class.nil?
-        raise OptionParser::InvalidOption, "#{gen} - Unknown generator #{gen}"
+  opts.on('-g', '--generate TRANSLATOR[,TRANSLATOR ... ]', help) do |translators|
+    parsed_translators = translators.split(',')
+    options[:translators] = parsed_translators.map do |translator|
+      translator_class = avaliable_translators[translator.upcase.to_sym]
+      if translator_class.nil?
+        raise OptionParser::InvalidOption, "#{translator} - Unknown translator #{translator}"
       end
-      gen_class
+      translator_class
     end
   end
   # Output file(s)
@@ -69,15 +69,15 @@ EOS
     options[:validate_only] = true
   end
   opts.separator ''
-  opts.separator 'Generators:'
-  avaliable_gens.keys.each { |gen| opts.separator "    * #{gen}" }
+  opts.separator 'Translators:'
+  avaliable_translators.keys.each { |translator| opts.separator "    * #{translator}" }
 end
 # Parse block
 begin
   opt_parser.parse!
   mandatory = [:src]
-  # Add generators to mandatory if not validating
-  mandatory << :generators unless options[:validate_only]
+  # Add translators to mandatory if not validating
+  mandatory << :translators unless options[:validate_only]
   missing = mandatory.select { |param| options[param].nil? }
   raise OptionParser::MissingArgument, 'Arguments missing' unless missing.empty?
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
@@ -88,14 +88,14 @@ end
 begin
   raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
   parsed = Parser.parse(options[:src])
-  options[:generators].each do |generator_class|
-    gen = generator_class.new(parsed, options[:src])
-    out = gen.execute
+  options[:translators].each do |translator_class|
+    translator = translator_class.new(parsed, options[:src])
+    out = translator.execute
     if options[:validate_only]
       puts 'Parser succeeded with no errors 🎉'
     elsif options[:out]
       out.each do |filename, contents|
-        output = "#{options[:out]}/#{gen.name}/#{filename}"
+        output = "#{options[:out]}/#{translator.name}/#{filename}"
         FileUtils.mkdir_p File.dirname output
         puts "Writing output to #{output}..."
         File.write output, contents

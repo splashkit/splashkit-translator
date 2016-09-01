@@ -3,8 +3,10 @@ unit SplashKit;
 interface
 
 type
-  <%= read_template('interface/types').indent(2) %>
-
+  <%= read_template('interface/types/typealiases').indent(2) %>
+  <%= read_template('interface/types/enumerations').indent(2) %>
+  <%= read_template('interface/types/records').indent(2) %>
+  <%= read_template('interface/types/function_pointers').indent(2) %>
 
 <%= read_template 'interface/function_prototypes' %>
 
@@ -15,7 +17,6 @@ type
   <%= read_template('implementation/types').indent(2) %>
 
 <%= read_template 'implementation/type_adapters' %>
-
 <%= read_template 'implementation/functions' %>
 
 end.

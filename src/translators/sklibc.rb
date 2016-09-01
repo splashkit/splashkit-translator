@@ -1,10 +1,10 @@
-require_relative 'abstract_generator'
+require_relative 'abstract_translator'
 
-module Generators
+module Translators
   #
   # SplashKit C Library code generator
   #
-  class SKLibC < AbstractGenerator
+  class SKLibC < AbstractTranslator
     attr_readers :src, :header_path, :include_directory
 
     def initialize(data, src)

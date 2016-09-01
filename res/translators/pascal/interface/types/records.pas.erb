@@ -1,0 +1,18 @@
+<%#
+  Record declaration from structs
+%>
+<%
+  @structs.each do |struct|
+%>
+<%= struct[:name].type_case %> = record
+<%
+    struct[:fields].each do |field_name, field_data|
+%>
+  <%= field_name.to_s.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;
+<%
+    end # end fields.each
+%>
+end;
+<%
+  end # end structs.each
+%>

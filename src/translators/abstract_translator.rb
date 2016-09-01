@@ -1,8 +1,8 @@
-module Generators
+module Translators
   #
-  # Common helper methods for generators
+  # Common helper methods for translators
   #
-  class AbstractGenerator
+  class AbstractTranslator
     require 'erb'
     # Indentation helper
     require_relative '../../lib/core_ext/string.rb'
@@ -10,7 +10,7 @@ module Generators
     require_relative '../../lib/core_ext/array.rb'
 
     #
-    # Initializes the generator with the data and source directories provided
+    # Initializes the translator with the data and source directories provided
     #
     def initialize(data, src)
       @data = data
@@ -28,10 +28,10 @@ module Generators
     end
 
     #
-    # Executes the generator on the template file, returning a string result
+    # Executes the translator on the template file, returning a string result
     #
     def execute
-      puts "Executing #{name} generator..."
+      puts "Executing #{name} translator..."
       # Ensure our structs are ordered before we continue...
       # Must do this here so we have @direct_types defined
       # with some overidden data
@@ -42,7 +42,7 @@ module Generators
     end
 
     #
-    # Gets the full name of the generator
+    # Gets the full name of the translator
     #
     def name
       self.class.name.to_s.split('::').last.downcase
@@ -136,14 +136,14 @@ module Generators
     end
 
     #
-    # Returns the generator's resource directory
+    # Returns the translator's resource directory
     #
-    def generator_res_dir
-      File.expand_path('../../../res/generators', __FILE__) + '/' + name
+    def translator_res_dir
+      File.expand_path('../../../res/translators', __FILE__) + '/' + name
     end
 
     #
-    # Reads a file defined by res/generators/{generator_name}/{file_name}
+    # Reads a file defined by res/translators/{translator_name}/{file_name}
     #
     def read_res_file(file_path)
       file = File.new file_path, 'r'
@@ -153,13 +153,13 @@ module Generators
     end
 
     #
-    # Reads a generator's template file (defaults to the primary template file)
+    # Reads a translator's template file (defaults to the primary template file)
     #
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
       puts "Reading template #{name}..."
-      path = "#{generator_res_dir}/#{name}.*.erb"
+      path = "#{translator_res_dir}/#{name}.*.erb"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1

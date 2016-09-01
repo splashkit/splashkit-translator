@@ -1,12 +1,12 @@
-# SplashKit API Parser
+# SplashKit Translator
 
-Converts SplashKit API documentation into YAML and then anything else we want to generate...
+Translates the SplashKit C++ source into another language.
 
 # Contents
 
 <!-- MDTOC maxdepth:4 firsth1:1 numbering:0 flatten:0 bullets:1 updateOnSave:0 -->
 
-- [SplashKit API Parser](#splashkit-api-parser)
+- [SplashKit Translator](#splashkit-translator)
 - [Contents](#contents)
 - [Running](#running)
 - [SplashKit Documentation Guidelines](#splashkit-documentation-guidelines)
@@ -43,7 +43,7 @@ Install dependencies using `bundle`:
 $ bundle install
 ```
 
-Then run using `parse`.
+Then run using `translate`.
 
 ## Validating
 
@@ -51,28 +51,34 @@ To validate a single file or files, supply the `--validate` or `-v` switch and
 the `--input` or `-i` switch with the header file you wish to validate:
 
 ```bash
-$ ./parse --validate --input /path/to/splashkit/coresdk/src/coresdk/audio.h
+$ ./translate --validate --input /path/to/splashkit/coresdk/src/coresdk/audio.h
 ```
+
+This will only _validate_ input that it can be correctly parsed, but will not
+generate any translated code.
 
 Alternatively, you can validate all header files by supplying just the
 SplashKit `coresdk/src/coresdk` directory instead:
 
 ```bash
-$ ./parse -v -i /path/to/splashkit/coresdk/src/coresdk
+$ ./translate -v -i /path/to/splashkit/coresdk/src/coresdk
 ```
 
 ## Converting
 
 To convert, follow the same as the above, removing the `--validate`/`-v` switch
-and supplying the generators you would like to run using a comma-separated list
-under the `--generate` or `-g` switch and specifiying the output directory using
-the `--output` or `-o` switch:
+and supplying the translated language you would like to generate using a
+comma-separated list under the `--generate` or `-g` switch and specifying the
+output directory using the `--output` or `-o` switch:
 
 ```bash
-$ ./parse -i /path/to/splashkit/coresdk/src/coresdk/audio.h -o ~/Desktop/audio -g YAML,SKLIBC,CPP
+$ ./translate -i /path/to/splashkit -o ~/Desktop/translated -g YAML,SKLIBC,CPP
 ```
 
-To see a full list of each generator available, use the `--help` switch.
+If no output directory is used, then it will default to an `out` directory
+inside the input directory specified.
+
+To see a full list of each translator available, use the `--help` switch.
 
 # SplashKit Documentation Guidelines
 

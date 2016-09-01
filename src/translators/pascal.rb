@@ -1,10 +1,10 @@
-require_relative 'abstract_generator'
+require_relative 'abstract_translator'
 
-module Generators
+module Translators
   #
   # SplashKit C Library code generator
   #
-  class Pascal < AbstractGenerator
+  class Pascal < AbstractTranslator
     def initialize(data, src)
       super(data, src)
       @direct_types = {
