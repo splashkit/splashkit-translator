@@ -142,13 +142,10 @@ class Parser::HeaderFileParser
     # Method, self, unique, destructor, constructor, getter, setter
     # must have a class attribute also
     enforce_class_keys = [
-      :method,
       :self,
       :unique,
       :destructor,
-      :constructor,
-      :getter,
-      :setter
+      :constructor
     ]
     enforced_class_keys_found = attrs.keys & enforce_class_keys
     has_enforced_class_keys = !enforced_class_keys_found.empty?
@@ -156,6 +153,15 @@ class Parser::HeaderFileParser
       raise Parser::Error,
             "Attribute(s) `#{enforced_class_keys_found.map(&:to_s)
             .join('\', `')}' found, but `class' attribute is missing?"
+    end
+    # `Method`, `getter` or `setter` must have `class` or `static`
+    method_getter_static_keys_found = attrs.keys & [:method, :getter, :setter]
+    class_static_keys_found = attrs.keys & [:class, :static]
+    if !method_getter_static_keys_found.empty? &&
+       class_static_keys_found.empty?
+      raise Parser::Error,
+            'Attributes `getter` and `setter` must also specify either ' \
+            '`class` or `static` attributes (or both).'
     end
     # Can't have `destructor` & `constructor`
     if attrs[:destructor] && attrs[:constructor]

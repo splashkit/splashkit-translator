@@ -393,18 +393,22 @@ will be translated into Python as:
 
 ```python
 some_sound_effect_instance.play_with_loops_and_volume(3, 10.0)
+play_sound_effect_with_loops_and_volume(effect, 3, 10.0)
 ```
 
 whereas in C# it would look like:
 
 ```c#
 someSoundEffectInstance.play(3, 10.0f)
+Audio.PlaySoundEffect(effect, 3, 10.0f)
 ```
 
 ### `getter`
 
-Creates a getter method to the `class` specified. Requires `class` and `self`
-to be set.
+Creates a getter method to the `class` specified. Requires either:
+
+* `class` and `self` to be set for an instance getter, or
+* `static` to be set to make a static getter.
 
 Must be set on a function that has __exactly__ one parameter. This parameter
 must be the parameter which will be used as `self`.
@@ -431,8 +435,10 @@ if (myQueryResult.isEmpty) { ... };
 
 ### `setter`
 
-Creates a setter method to the `class` specified. Requires `class` and `self`
-to be set.
+Creates a setter method to the `class` specified. Requires either:
+
+* `class` and `self` to be set for an instance getter, or
+* `static` to be set to make a static getter.
 
 Must be set on a function that has __exactly__ two parameters:
 
