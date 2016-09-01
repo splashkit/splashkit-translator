@@ -71,7 +71,7 @@ class Parser::HeaderFileParser
     @header_file_name = name
     @header_attrs = {}
     @input_xml = input_xml
-    @unique_names = []
+    @unique_names = { unique_global: [], unique_method: [] }
   end
 
   #
@@ -321,21 +321,42 @@ class Parser::HeaderFileParser
     headerdoc_idx = fn_name.index(headerdoc_overload_tags)
     sanitized_name = headerdoc_idx ? fn_name[0..(headerdoc_idx - 1)] : fn_name
     suffix = attributes[:suffix] if attributes
+    # Make a method name if specified
+    method_name = attributes[:method] if attributes
     # Make a unique name using the suffix if specified
-    unique_name = sanitized_name + suffix if suffix
-    # Unique name was made?
-    unless unique_name.nil?
+    if suffix
+      unique_global_name = "#{sanitized_name}_#{suffix}"
+      unique_method_name = "#{method_name}_#{suffix}"
+      puts unique_global_name, unique_method_name
+    end
+    # Unique global name was made?
+    unless unique_global_name.nil?
       # Check if unique name is actually unique
-      if @unique_names.include? unique_name
+      if @unique_names[:unique_global].include? unique_global_name
+        raise Parser::Error,
+              'Generated unique name (function name + suffix) is not unique: ' \
+              "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`"
+      else
+        @unique_names[:unique_global] << unique_global_name
+      end
+    end
+    # Unique method name was made?
+    unless unique_method_name.nil?
+      # Check if unique method name is actually unique
+      if @unique_names[:unique_method].include? unique_method_name
+        raise Parser::Error,
+              'Generated unique method name (method + suffix) is not unique: ' \
+              "`#{method}` + `#{suffix}` = `#{unique_method_name}`"
       # Else register the unique name
       else
-        @unique_names << unique_name
+        @unique_names[:unique_method] << unique_method_name
       end
     end
     {
-      sanitized: sanitized_name,
-      unique: unique_name,
-      suffix: suffix
+      sanitized_name: sanitized_name,
+      method_name: method_name,
+      unique_global_name: unique_global_name,
+      unique_method_name: unique_method_name
     }
   end
 
@@ -348,18 +369,20 @@ class Parser::HeaderFileParser
     ppl = parse_ppl(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
-    fn_names = parse_function_names(xml, attributes, parameters)
+    fn_names = parse_function_names(xml, attributes)
     return_data = parse_function_return_type(xml)
     {
-      signature:   signature,
-      name:        fn_names[:sanitized],
-      unique_name: fn_names[:unique],
-      suffix_name: fn_names[:suffix],
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
-      return:      return_data,
-      parameters:  parameters,
-      attributes:  attributes
+      signature:          signature,
+      name:               fn_names[:sanitized_name],
+      method_name:        fn_names[:method_name],
+      unique_global_name: fn_names[:unique_global_name],
+      unique_method_name: fn_names[:unique_method_name],
+      suffix_name:        fn_names[:suffix],
+      description:        xml.xpath('desc').text,
+      brief:              xml.xpath('abstract').text,
+      return:             return_data,
+      parameters:         parameters,
+      attributes:         attributes
     }
   rescue Parser::Error => e
     raise Parser::Error.new e.message, signature
@@ -429,7 +452,7 @@ class Parser::HeaderFileParser
     }.merge merge_data
     if attributes && attributes[:class].nil? && data[:is_pointer]
       raise Parser::Error,
-            "Typealiases to pointers must have a class attribute set"
+            'Typealiases to pointers must have a class attribute set'
     end
     data
   rescue Parser::Error => e
