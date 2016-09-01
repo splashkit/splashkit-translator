@@ -319,7 +319,8 @@ class Parser::HeaderFileParser
   #
   def parse_function_return_type(xml, raw_return_type = nil)
     returntype_xml = xml.xpath('returntype')
-    return if returntype_xml.nil?
+    # Return if no results
+    return if returntype_xml.empty? && raw_return_type.nil?
     raw_return_type ||= returntype_xml.text
     ret_type_regex = /((?:unsigned\s)?\w+)\s*(?:(&)|(\*)?)/
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
