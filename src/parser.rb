@@ -71,6 +71,7 @@ class Parser::HeaderFileParser
     @header_file_name = name
     @header_attrs = {}
     @input_xml = input_xml
+    @unique_names = []
   end
 
   #
@@ -139,11 +140,11 @@ class Parser::HeaderFileParser
                .map { |a| parse_attribute(a) }
                .to_h
                .merge @header_attrs
-    # Method, self, unique, destructor, constructor, getter, setter
+    # Method, self, suffix, destructor, constructor, getter, setter
     # must have a class attribute also
     enforce_class_keys = [
       :self,
-      :unique,
+      :suffix,
       :destructor,
       :constructor
     ]
@@ -313,19 +314,28 @@ class Parser::HeaderFileParser
   #
   # Parses a function's name for both a unique and standard name
   #
-  def parse_function_names(xml, attributes, parameters)
+  def parse_function_names(xml, attributes)
     # Originally, headerdoc does overloaded names like name(int, const float).
     headerdoc_overload_tags = /const|\(|\,\s|\)|&|\*/
     fn_name = xml.xpath('name').text
     headerdoc_idx = fn_name.index(headerdoc_overload_tags)
     sanitized_name = headerdoc_idx ? fn_name[0..(headerdoc_idx - 1)] : fn_name
-    # Choose the unique name from the attributes specified, or make your
-    # own using double underscore (i.e., headerdoc makes unique names for
-    # us but we want to make them double underscore separated)
-    unique_name = attributes[:unique] if attributes
+    suffix = attributes[:suffix] if attributes
+    # Make a unique name using the suffix if specified
+    unique_name = sanitized_name + suffix if suffix
+    # Unique name was made?
+    unless unique_name.nil?
+      # Check if unique name is actually unique
+      if @unique_names.include? unique_name
+      # Else register the unique name
+      else
+        @unique_names << unique_name
+      end
+    end
     {
       sanitized: sanitized_name,
-      unique: unique_name
+      unique: unique_name,
+      suffix: suffix
     }
   end
 
@@ -344,6 +354,7 @@ class Parser::HeaderFileParser
       signature:   signature,
       name:        fn_names[:sanitized],
       unique_name: fn_names[:unique],
+      suffix_name: fn_names[:suffix],
       description: xml.xpath('desc').text,
       brief:       xml.xpath('abstract').text,
       return:      return_data,

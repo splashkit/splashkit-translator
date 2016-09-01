@@ -23,7 +23,7 @@ Translates the SplashKit C++ source into another language.
       - [`constructor`](#constructor)
       - [`destructor`](#destructor)
       - [`self`](#self)
-      - [`unique`](#unique)
+      - [`suffix`](#suffix)
 
 <!-- /MDTOC -->
 
@@ -372,18 +372,23 @@ the `class` attribute value of type `sound_effect`:
 void play_sound_effect(sound_effect effect, int times, float volume);
 ```
 
-### `unique`
+### `suffix`
 
 For translated languages that do not support overloaded function names, the
-name specified by `unique` name will be used instead. For example:
+name specified by `suffix` name will be used as a suffix appended to the global
+and instance name of the function/method. Suffix + method name must be unique
+within the class, suffix + function name must be unique globally.
+
+For example:
 
 ```c
 /**
  * ...
  *
+ * @attribute static  audio
  * @attribute class   sound_effect
  * @attribute method  play
- * @attribute unique  play_with_loops_and_volume
+ * @attribute suffix  with_loops_and_volume
  * @attribute self    effect
  */
 void play_sound_effect(sound_effect effect, int times, float volume);
