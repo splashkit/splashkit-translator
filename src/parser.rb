@@ -209,17 +209,42 @@ class Parser::HeaderFileParser
               "is set to parameter (`#{self_value}`) with type `#{self_type}`)"
       end
     end
-    # Getters must have 1 parameter which is self
-    if attrs[:getters] && ppl.length != 1 && attrs[:self]
+    # `getter` must be non-void
+    ret_type = parse_function_return_type(xml)
+    is_void = ret_type && ret_type[:type] == 'void' && !ret_type[:is_pointer]
+    if attrs[:getter] && is_void
       raise Parser::Error,
-            'Getters must have exactly one parameter that is the parameter'\
-            'specified by the attribute `self`'
+            'Function marked with `getter` must return something (returns void)'
     end
-    # Setters must have 2 parameters
-    if attrs[:setters] && ppl.length != 2 && attrs[:self] == ppl.keys.first
-      raise Parser::Error,
-            'Setters must have exactly two parameters of which the first'\
-            'parameter is the parameter specified by the attribute `self`'
+    # `class` rules applicable to `getter`s and `setter`s
+    if attrs[:class]
+      # Getters must have 1 parameter which is self
+      if attrs[:getters] && ppl && ppl.length != 1 && attrs[:self]
+        raise Parser::Error,
+              'A `getter` specified with `class` must have exactly one '\
+              'parameter that is the parameter specified by the '\
+              'attribute `self`'
+      end
+      # Setters must have 2 parameters
+      if attrs[:setters] && ppl && ppl.length != 2 && attrs[:self] == ppl.keys.first
+        raise Parser::Error,
+              'A `setter` specified with `class` must have exactly two '\
+              'parameters of which the first parameter is the parameter '\
+              'specified by the attribute `self`'
+      end
+    end
+    # `static` rules applicable to `getter`s and `setter`s
+    if attrs[:class]
+      # Getters must have 0 parameters
+      if attrs[:getters] && ppl && ppl.empty?
+        raise Parser::Error,
+              'A `getter` specified with `static` must have no parameters'
+      end
+      # Setters must have 2 parameters
+      if attrs[:setters] && ppl && ppl.length != 2
+        raise Parser::Error,
+              'A `setter` specified with `static` must have one parameter'
+      end
     end
     attrs
   end
@@ -293,7 +318,9 @@ class Parser::HeaderFileParser
   # Parses a function (pointer) return type
   #
   def parse_function_return_type(xml, raw_return_type = nil)
-    raw_return_type ||= xml.xpath('returntype').text
+    returntype_xml = xml.xpath('returntype')
+    return if returntype_xml.nil?
+    raw_return_type ||= returntype_xml.text
     ret_type_regex = /((?:unsigned\s)?\w+)\s*(?:(&)|(\*)?)/
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?

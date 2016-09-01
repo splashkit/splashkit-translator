@@ -412,15 +412,32 @@ Audio.PlaySoundEffect(effect, 3, 10.0f)
 
 Creates a getter method to the `class` specified. Requires either:
 
-* `class` and `self` to be set for an instance getter, or
-* `static` to be set to make a static getter.
+* `class` and `self` to make an _instance_ getter on the an instance whose class
+   is specified by `class`, or
+* `static` to make a _static_ getter on the class specified `static`.
 
-Must be set on a function that has __exactly__ one parameter. This parameter
-must be the parameter which will be used as `self`.
+Must be set on a function that:
+
+* has __exactly__ _zero_ or _one_ parameters, depending on if you are using
+  `class` or `static`, and
+* is non-void.
+
+If you are writing a __`static`__ getter, then there must be no parameters.
+
+If you are writing a __`class`__ setter, then you will need __exactly _one_
+parameter__, that being the parameter which will be used as `self`.
 
 For example, the following:
 
 ```c
+/**
+ * ...
+ *
+ * @attribute static  audio
+ * @attribute getter  is_open
+ */
+bool audio_is_open();
+
 /**
  * ...
  *
@@ -431,24 +448,33 @@ For example, the following:
 bool query_result_empty(query_result result);
 ```
 
-generates:
+generates usage for the following in C#:
 
 ```c#
-QueryResult myQueryResult = myDatabase.queryResult;
-if (myQueryResult.isEmpty) { ... };
+if (Audio.IsOpen) { ... }
+if (myDatabase.queryResult.IsEmpty) { ... };
 ```
 
 ### `setter`
 
-Creates a setter method to the `class` specified. Requires either:
+Creates a setter method. Requires either:
 
-* `class` and `self` to be set for an instance getter, or
-* `static` to be set to make a static getter.
+* `class` and `self` to make an _instance_ setter on the an instance whose class
+   is specified by `class`, or
+* `static` to make a _static_ setter on the class specified `static`.
 
-Must be set on a function that has __exactly__ two parameters:
+
+Must be set on a function that has __exactly__ _one_ or _two_ parameters, which
+depends on if you are using `class` or `static`.
+
+If you are writing a __`static`__ setter, then you will need __exactly one
+parameter__, being the the second must the value that is to be set.
+
+If you are writing a __`class`__ setter, then you will need __exactly _two_
+parameters__, where:
 
 1. the first must be the the parameter which will be used as `self`, and
-2. the second must the value that is to be set
+2. the second must the value that is to be set.
 
 For example, the following:
 
@@ -456,15 +482,24 @@ For example, the following:
 /**
  * ...
  *
+ * @attribute static  audio
+ * @attribute setter  is_open
+ */
+void audio_status(bool open);
+
+/**
+ * ...
+ *
  * @attribute class   database
- * @attribute self    effect
+ * @attribute self    db
  * @attribyte setter  last_query
  */
 void database_set_query_result(database db, query_result result);
 ```
 
-generates:
+generates usage for the following in C#:
 
 ```c#
-myDatabase.lastQuery = myQueryResult;
+Audio.IsOpen = false;
+myDatabase.LastQuery = myQueryResult;
 ```
