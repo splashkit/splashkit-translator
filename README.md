@@ -238,8 +238,8 @@ Note that typedef aliases to pointers **must** be declared with a `class` attrib
 
 #### Usage in functions
 
-Associates the `sound_effect` type to an OO-translated SplashKit code class
-_instance_.
+Associates the `sound_effect` type to an object-oriented-translated SplashKit
+class _instance_.
 
 When added to a function, the type will be associated to a class. You must
 pair this with `method`, `constructor`, `destructor`, `getter`, or `setter`
@@ -262,6 +262,14 @@ This will convert the above to an equivalent OO method:
 Audio.Close()
 ```
 
+### `static`
+
+Indicates the module or class name to which a global method or function is
+applied. Can be associated to a `method` name to create a static method on a
+class or global function on a method, or a static `getter` or `setter`.
+
+Refer to `method` for more.
+
 ### `method`
 
 Associates a function to a class. Requires the `class` or `static` attribute to
@@ -272,7 +280,7 @@ When `method` is used with the `class` attribute, an _instance method_ will be
 generated on the class whose name is specified by `class`.
 
 When `method` is used with the `static` attribute, a _static method_ will be
-generated on the class whose name is specified by `class`.
+generated on the class whose name is specified by `static`.
 
 ### `constructor`
 
