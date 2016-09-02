@@ -5,7 +5,7 @@ module Translators
   # SplashKit C Library code generator
   #
   class CLib < AbstractTranslator
-    attr_readers :src, :header_path
+    attr_readers :src, :header_path, :sk_root
 
     def initialize(data, src)
       super(data, src)
@@ -16,7 +16,7 @@ module Translators
       {
         'sklib.h' => read_template('sklib.h'),
         'sklib.cpp' => read_template('sklib.cpp'),
-        'makefile' => read_template('makefile')
+        'CMakeLists.txt' => read_template('CMakeLists.txt')
       }
     end
 
