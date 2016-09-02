@@ -75,8 +75,8 @@ output directory using the `--output` or `-o` switch:
 $ ./translate -i /path/to/splashkit -o ~/Desktop/translated -g YAML,SKLIBC,CPP
 ```
 
-If no output directory is used, then it will default to an `out` directory
-inside the input directory specified.
+If no output directory is used, then it will default to an `out/translated`
+directory inside the input directory specified.
 
 To see a full list of each translator available, use the `--help` switch.
 

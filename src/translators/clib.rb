@@ -14,7 +14,7 @@ module Translators
 
     def render_templates
       {
-        'sklib.c' => read_template,
+        'clib.cpp' => read_template,
         'makefile' => read_template('makefile')
       }
     end

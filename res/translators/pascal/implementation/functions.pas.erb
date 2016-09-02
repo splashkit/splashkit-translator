@@ -11,7 +11,7 @@
 <% end %>
 
 <%#
-  Implement Pascal functions (pas -> skclib -> pas)
+  Implement Pascal functions (pas -> clib -> pas)
 %>
 <% @functions.each do |function| %>
 <%# Function signature %>
@@ -32,11 +32,11 @@ var
   __skreturn: <%= lib_type_for(function[:return_type]) %>;
 <% end %>
 begin
-<%# Convert params to skclib type %>
+<%# Convert params to clib type %>
 <% function[:parameters].each do |param_name, param_data| %>
   __skparam__<%= param_name %> := __skadapter__to_sklib_<%= param_data[:type] %>(<%= param_name %>);
 <% end %>
-<%# Call skclib function %>
+<%# Call clib function %>
   <% unless is_void?(function) %>__skreturn := <% end %>
 <%= CLib.lib_function_name_for(function) %>(<%=
 function[:parameters].map { |param_name, _| "__skparam__#{param_name}" }.join(', ')

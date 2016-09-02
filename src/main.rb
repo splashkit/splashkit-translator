@@ -2,7 +2,7 @@
 require          'optparse'
 require          'fileutils'
 require_relative 'parser'
-require_relative 'translators/skclib'
+require_relative 'translators/clib'
 require_relative 'translators/pascal'
 
 # Required to run
@@ -38,7 +38,7 @@ Source header file or SplashKit CoreSDK directory
 EOS
   opts.on('-i', '--input SOURCE', help) do |input|
     options[:src] = input
-    options[:out] = input + '/out' unless input.end_with? '.h'
+    options[:out] = "#{input}/out/translated"
   end
   # Generate using translator
   help = <<-EOS
@@ -56,7 +56,7 @@ EOS
   end
   # Output file(s)
   help = <<-EOS
-Directory to write output to (defaults to /path/to/splashkit/out)
+Directory to write output to (defaults to /path/to/splashkit/out/translated)
 EOS
   opts.on('-o', '--output OUTPUT', help) do |out|
     options[:out] = out
