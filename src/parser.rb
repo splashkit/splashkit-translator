@@ -205,7 +205,7 @@ class Parser::HeaderFileParser
       unless class_type == self_type
         raise Parser::Error,
               'Attribute `self` must list a parameter whose type matches ' \
-              'the `class` value (`class` is `#{class_type}` but `self` ' \
+              "the `class` value (`class` is `#{class_type}` but `self` " \
               "is set to parameter (`#{self_value}`) with type `#{self_type}`)"
       end
     end
