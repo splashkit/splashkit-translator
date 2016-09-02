@@ -42,7 +42,7 @@ Source header file or SplashKit CoreSDK directory
 EOS
   opts.on('-i', '--input SOURCE', help) do |input|
     options[:src] = input
-    options[:out] = "#{input}/out/translated"
+    options[:out] = "#{input}/#{SK_TRANSLATED_OUTPUT}"
   end
   # Generate using translator
   help = <<-EOS
