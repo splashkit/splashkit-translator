@@ -51,9 +51,10 @@
     non_const_refs = function[:parameters].select do | _, param_data |
       param_data[:is_reference] && !param_data[:is_const]
     end # end select
-    non_const_refs.each do | param_name, _ |
+    non_const_refs.each do | param_name, param_data |
+      adapter_fn = lib_adapter_fn_for param_data
 %>
-    *<%= param_name %> = __skparam__<%= param_name %>;
+    *<%= param_name %> = <%= adapter_fn %>(__skparam__<%= param_name %>);
 <%
     end # end non_const_ptrs.each
 %>
