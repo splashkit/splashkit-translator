@@ -2,7 +2,7 @@
 require          'optparse'
 require          'fileutils'
 require_relative 'parser'
-require_relative 'translators/sklibc'
+require_relative 'translators/skclib'
 require_relative 'translators/pascal'
 
 # Required to run

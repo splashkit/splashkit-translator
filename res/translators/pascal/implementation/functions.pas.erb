@@ -3,7 +3,7 @@
 %>
 <% @functions.each do |function| %>
 <% if is_void?(function) %>procedure <% else %>function <% end %>
-<%= SKLibC.lib_function_name_for(function) %>(<%=
+<%= CLib.lib_function_name_for(function) %>(<%=
   function[:parameters].map do |param_name, param_data|
     param_name.to_s.variable_case + ": " + lib_type_for(param_data[:type])
   end.join('; ')
@@ -11,7 +11,7 @@
 <% end %>
 
 <%#
-  Implement Pascal functions (pas -> sklibc -> pas)
+  Implement Pascal functions (pas -> skclib -> pas)
 %>
 <% @functions.each do |function| %>
 <%# Function signature %>
@@ -32,13 +32,13 @@ var
   __skreturn: <%= lib_type_for(function[:return_type]) %>;
 <% end %>
 begin
-<%# Convert params to sklibc type %>
+<%# Convert params to skclib type %>
 <% function[:parameters].each do |param_name, param_data| %>
   __skparam__<%= param_name %> := __skadapter__to_sklib_<%= param_data[:type] %>(<%= param_name %>);
 <% end %>
-<%# Call sklibc function %>
+<%# Call skclib function %>
   <% unless is_void?(function) %>__skreturn := <% end %>
-<%= SKLibC.lib_function_name_for(function) %>(<%=
+<%= CLib.lib_function_name_for(function) %>(<%=
 function[:parameters].map { |param_name, _| "__skparam__#{param_name}" }.join(', ')
 %>);
 <%# Assign result to pas type %>

@@ -4,7 +4,7 @@ module Translators
   #
   # SplashKit C Library code generator
   #
-  class SKLibC < AbstractTranslator
+  class CLib < AbstractTranslator
     attr_readers :src, :header_path, :include_directory
 
     def initialize(data, src)
@@ -41,7 +41,7 @@ module Translators
     # Alias to static method for usage on instance
     #
     def lib_function_name_for(function)
-      SKLibC.lib_function_name_for(function)
+      CLib.lib_function_name_for(function)
     end
 
     #
