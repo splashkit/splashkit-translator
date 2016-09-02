@@ -179,17 +179,24 @@ class Parser::HeaderFileParser
             .join('\', `')}' violate `#{getter_setter_keys_found.map(&:to_s)
             .join('\', `')}'. Choose one or the other."
     end
-    # Can't have (`destructor` | `constructor`) & `method`
-    if !destructor_constructor_keys_found.empty? && !attrs[:method].nil?
+    # Can't have (`destructor` | `constructor`) & `method` if no `static`
+    marked_with_static = !attrs[:static].nil?
+    if !destructor_constructor_keys_found.empty? &&
+       !attrs[:method].nil? &&
+       !marked_with_static
       raise Parser::Error,
             "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
-            .join('\', `')}' violate `method`. Choose one or the other."
+            .join('\', `')}' violate `method`. Choose one or the other " \
+            'or mark with `static` to indicate that this is a static method.'
     end
-    # Can't have (`setter` | `getter`) & `method`
-    if !getter_setter_keys_found.empty? && attrs[:method]
+    # Can't have (`setter` | `getter`) & `method` if no `static`
+    if !getter_setter_keys_found.empty? &&
+       attrs[:method] &&
+       !marked_with_static
       raise Parser::Error,
             "Attribute(s) `#{getter_setter_keys_found.map(&:to_s)
-            .join('\', `')}' violate `method`. Choose one or the other."
+            .join('\', `')}' violate `method`. Choose one or the other " \
+            'or mark with `static` to indicate that this is a static method.'
     end
     # Ensure `self` matches a parameter
     self_value = attrs[:self]
