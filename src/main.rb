@@ -17,7 +17,7 @@ options = {
   validate_only: false
 }
 
-# Options parse block
+#=== Options parse block ===
 opt_parser = OptionParser.new do |opts|
   # Translators we can use
   avaliable_translators =
@@ -28,7 +28,7 @@ opt_parser = OptionParser.new do |opts|
                .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --input /path/to/splashkit[/#{SK_SRC_CORESDK}/file.h]
+Usage: translate --input /path/to/splashkit[/#{SK_SRC_CORESDK}/file.h]
                 [--generate GENERATOR[,GENERATOR ... ]
                 [--output /path/to/write/output/to]
                 [--validate]
@@ -83,32 +83,37 @@ begin
   # Add translators to mandatory if not validating
   mandatory << :translators unless options[:validate_only]
   missing = mandatory.select { |param| options[param].nil? }
-  raise OptionParser::MissingArgument, 'Arguments missing' unless missing.empty?
+  unless missing.empty?
+    raise OptionParser::MissingArgument, 'Missing #{missing.map(&:to_s)} arguments'
+  end
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
   exit 1
 end
-# Run block
+
+#=== Try parse ===
 begin
-  raise 'headerdoc2html is not installed!' unless Parser.headerdoc_installed?
   parsed = Parser.parse(options[:src])
-  options[:translators].each do |translator_class|
-    translator = translator_class.new(parsed, options[:src])
-    out = translator.execute
-    if options[:validate_only]
-      puts 'Parser succeeded with no errors 🎉'
-    elsif options[:out]
-      out.each do |filename, contents|
-        output = "#{options[:out]}/#{translator.name}/#{filename}"
-        FileUtils.mkdir_p File.dirname output
-        puts "Writing output to #{output}..."
-        File.write output, contents
-      end
-      puts 'Output written!'
-      puts translator.post_execute
-    end
-  end
 rescue Parser::Error
   puts $!.to_s
   exit 1
+end
+
+#=== Translate or validate ===
+if options[:validate_only]
+  puts 'Parser succeeded with no errors 🎉'
+else
+  options[:translators].each do |translator_class|
+    translator = translator_class.new(parsed, options[:src])
+    out = translator.execute
+    next unless options[:out]
+    out.each do |filename, contents|
+      output = "#{options[:out]}/#{translator.name}/#{filename}"
+      FileUtils.mkdir_p File.dirname output
+      puts "Writing output to #{output}..."
+      File.write output, contents
+    end
+    puts 'Output written!'
+    puts translator.post_execute
+  end
 end

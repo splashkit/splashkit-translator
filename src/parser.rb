@@ -19,6 +19,9 @@ module Parser
   # Parses HeaderDoc for the provided src directory into a hash
   #
   def parse(src)
+    unless Parser.headerdoc_installed?
+      raise Parser::Error 'headerdoc2html is not installed!'
+    end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
     headers_src = "#{src}/#{SK_SRC_CORESDK}/*.h" unless src.end_with? '.h'
