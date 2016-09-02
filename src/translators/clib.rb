@@ -136,6 +136,9 @@ module Translators
       end
     end
 
+    #
+    # Generate a to SK adapter function name for the given type
+    #
     def sk_adapter_fn_for(type_data)
       type =
         if type_data[:type] == 'void' && type_data[:is_pointer]
@@ -151,6 +154,9 @@ module Translators
       "__skadapter__to_#{type}"
     end
 
+    #
+    # Generate a to library adapter function name for the given type
+    #
     def lib_adapter_fn_for(type_data)
       # Rip lib type first
       type = lib_type_for type_data
