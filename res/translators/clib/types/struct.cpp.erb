@@ -8,13 +8,13 @@
   @structs.each do |struct|
 %>
 <%#
-    Definition of structs can use make_struct_field for convenience
+    Definition of structs can use lib_struct_field_for for convenience
 %>
 typedef struct {
 <%
     struct[:fields].each do |field_name, field_data|
 %>
-    <%= make_struct_field(field_name, field_data) %>;
+    <%= lib_struct_field_for(field_name, field_data) %>;
 <%
     end # end fields.each
 %>

@@ -120,7 +120,7 @@ module Translators
     #
     # Generates a field's struct information
     #
-    def make_struct_field(field_name, field_data)
+    def lib_struct_field_for(field_name, field_data)
       type = field_data[:type]
       is_pointer = field_data[:is_pointer]
       ptr_star = is_pointer ? '*' : ''
