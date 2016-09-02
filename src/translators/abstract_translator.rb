@@ -159,7 +159,9 @@ module Translators
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
       puts "Reading template #{name}..."
-      path = "#{translator_res_dir}/#{name}.*.erb"
+      # Don't prepend .* unless extension is specified
+      filename = name =~ /\.\w+$/ ? name : "#{name}.*"
+      path = "#{translator_res_dir}/#{filename}.erb"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1

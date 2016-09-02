@@ -6,7 +6,7 @@
 <%
   @functions.each do |function|
 %>
-extern "C" <%= lib_signature_for(function) %> {
+<%= lib_signature_for(function) %> {
 <%
     function[:parameters].each do |param_name, param_data|
 %>

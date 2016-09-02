@@ -1,3 +1,8 @@
+//
+// SplashKit C Generated Library Code
+//
+
+// Dependencies
 #include <stdlib.h>
 #include <string>
 <% if header_path.end_with? '.h' %>
@@ -9,6 +14,7 @@
 <% end %>
 using std::string;
 
+// Types
 <%= read_template 'types/string' %>
 <%= read_template 'types/bool' %>
 <%= read_template 'types/direct' %>
@@ -16,4 +22,6 @@ using std::string;
 <%= read_template 'types/enum' %>
 <%= read_template 'types/struct' %>
 <%= read_template 'types/function_pointer' %>
-<%= read_template 'functions' %>
+
+// Function Prototypes
+<%= read_template 'functions/prototypes' %>
