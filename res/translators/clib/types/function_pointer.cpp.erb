@@ -8,7 +8,8 @@
 %>
 <%
     fp_param_decl = fp[:parameters].map do |param_name, param_data|
-      "#{param_data[:type]} #{param_name}"
+      ptr = param_data[:is_pointer] ? '*' : ''
+      "#{param_data[:type]} #{ptr}#{param_name}"
     end.join(', ')
 %>
 typedef <%= fp[:return][:type] %> (__sklib_<%= fp[:name] %>)(<%= fp_param_decl %>);

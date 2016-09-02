@@ -23,7 +23,7 @@ Translates the SplashKit C++ source into another language.
       - [`constructor`](#constructor)
       - [`destructor`](#destructor)
       - [`self`](#self)
-      - [`unique`](#unique)
+      - [`suffix`](#suffix)
 
 <!-- /MDTOC -->
 
@@ -75,8 +75,8 @@ output directory using the `--output` or `-o` switch:
 $ ./translate -i /path/to/splashkit -o ~/Desktop/translated -g YAML,SKLIBC,CPP
 ```
 
-If no output directory is used, then it will default to an `out` directory
-inside the input directory specified.
+If no output directory is used, then it will default to an `out/translated`
+directory inside the input directory specified.
 
 To see a full list of each translator available, use the `--help` switch.
 
@@ -238,8 +238,8 @@ Note that typedef aliases to pointers **must** be declared with a `class` attrib
 
 #### Usage in functions
 
-Associates the `sound_effect` type to an OO-translated SplashKit code class
-_instance_.
+Associates the `sound_effect` type to an object-oriented-translated SplashKit
+class _instance_.
 
 When added to a function, the type will be associated to a class. You must
 pair this with `method`, `constructor`, `destructor`, `getter`, or `setter`
@@ -262,6 +262,14 @@ This will convert the above to an equivalent OO method:
 Audio.Close()
 ```
 
+### `static`
+
+Indicates the module or class name to which a global method or function is
+applied. Can be associated to a `method` name to create a static method on a
+class or global function on a method, or a static `getter` or `setter`.
+
+Refer to `method` for more.
+
 ### `method`
 
 Associates a function to a class. Requires the `class` or `static` attribute to
@@ -272,7 +280,7 @@ When `method` is used with the `class` attribute, an _instance method_ will be
 generated on the class whose name is specified by `class`.
 
 When `method` is used with the `static` attribute, a _static method_ will be
-generated on the class whose name is specified by `class`.
+generated on the class whose name is specified by `static`.
 
 ### `constructor`
 
@@ -364,18 +372,23 @@ the `class` attribute value of type `sound_effect`:
 void play_sound_effect(sound_effect effect, int times, float volume);
 ```
 
-### `unique`
+### `suffix`
 
 For translated languages that do not support overloaded function names, the
-name specified by `unique` name will be used instead. For example:
+name specified by `suffix` name will be used as a suffix appended to the global
+and instance name of the function/method. Suffix + method name must be unique
+within the class, suffix + function name must be unique globally.
+
+For example:
 
 ```c
 /**
  * ...
  *
+ * @attribute static  audio
  * @attribute class   sound_effect
  * @attribute method  play
- * @attribute unique  play_with_loops_and_volume
+ * @attribute suffix  with_loops_and_volume
  * @attribute self    effect
  */
 void play_sound_effect(sound_effect effect, int times, float volume);
@@ -385,25 +398,46 @@ will be translated into Python as:
 
 ```python
 some_sound_effect_instance.play_with_loops_and_volume(3, 10.0)
+play_sound_effect_with_loops_and_volume(effect, 3, 10.0)
 ```
 
 whereas in C# it would look like:
 
 ```c#
 someSoundEffectInstance.play(3, 10.0f)
+Audio.PlaySoundEffect(effect, 3, 10.0f)
 ```
 
 ### `getter`
 
-Creates a getter method to the `class` specified. Requires `class` and `self`
-to be set.
+Creates a getter method to the `class` specified. Requires either:
 
-Must be set on a function that has __exactly__ one parameter. This parameter
-must be the parameter which will be used as `self`.
+* `class` and `self` to make an _instance_ getter on the an instance whose class
+   is specified by `class`, or
+* `static` to make a _static_ getter on the class specified `static`.
+
+Must be set on a function that:
+
+* has __exactly__ _zero_ or _one_ parameters, depending on if you are using
+  `class` or `static`, and
+* is non-void.
+
+If you are writing a __`static`__ getter, then there must be no parameters.
+
+If you are writing a __`class`__ setter, then you will need __exactly _one_
+parameter__, that being the parameter which will be used as `self`.
 
 For example, the following:
 
 ```c
+/**
+ * ...
+ *
+ * @attribute static  audio
+ * @attribute getter  is_open
+ */
+bool audio_is_open();
+
 /**
  * ...
  *
@@ -414,22 +448,33 @@ For example, the following:
 bool query_result_empty(query_result result);
 ```
 
-generates:
+generates usage for the following in C#:
 
 ```c#
-QueryResult myQueryResult = myDatabase.queryResult;
-if (myQueryResult.isEmpty) { ... };
+if (Audio.IsOpen) { ... }
+if (myDatabase.queryResult.IsEmpty) { ... };
 ```
 
 ### `setter`
 
-Creates a setter method to the `class` specified. Requires `class` and `self`
-to be set.
+Creates a setter method. Requires either:
 
-Must be set on a function that has __exactly__ two parameters:
+* `class` and `self` to make an _instance_ setter on the an instance whose class
+   is specified by `class`, or
+* `static` to make a _static_ setter on the class specified `static`.
+
+
+Must be set on a function that has __exactly__ _one_ or _two_ parameters, which
+depends on if you are using `class` or `static`.
+
+If you are writing a __`static`__ setter, then you will need __exactly one
+parameter__, being the the second must the value that is to be set.
+
+If you are writing a __`class`__ setter, then you will need __exactly _two_
+parameters__, where:
 
 1. the first must be the the parameter which will be used as `self`, and
-2. the second must the value that is to be set
+2. the second must the value that is to be set.
 
 For example, the following:
 
@@ -437,15 +482,24 @@ For example, the following:
 /**
  * ...
  *
+ * @attribute static  audio
+ * @attribute setter  is_open
+ */
+void audio_status(bool open);
+
+/**
+ * ...
+ *
  * @attribute class   database
- * @attribute self    effect
+ * @attribute self    db
  * @attribyte setter  last_query
  */
 void database_set_query_result(database db, query_result result);
 ```
 
-generates:
+generates usage for the following in C#:
 
 ```c#
-myDatabase.lastQuery = myQueryResult;
+Audio.IsOpen = false;
+myDatabase.LastQuery = myQueryResult;
 ```

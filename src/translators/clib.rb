@@ -4,8 +4,8 @@ module Translators
   #
   # SplashKit C Library code generator
   #
-  class SKLibC < AbstractTranslator
-    attr_readers :src, :header_path, :include_directory
+  class CLib < AbstractTranslator
+    attr_readers :src, :header_path, :sk_root
 
     def initialize(data, src)
       super(data, src)
@@ -14,10 +14,18 @@ module Translators
 
     def render_templates
       {
-        'sklib.c' => read_template,
-        'makefile' => read_template('makefile')
+        'sklib.h' => read_template('sklib.h'),
+        'sklib.cpp' => read_template('sklib.cpp'),
+        'CMakeLists.txt' => read_template('CMakeLists.txt')
       }
     end
+
+    def post_execute
+      puts 'Run the cmake script generated above (CMakeLists.txt) '\
+           'to generate the SplashKit dynamic C library.'
+    end
+
+    #=== internal ===
 
     #
     # Convert the name of a function to its library represented function
@@ -41,7 +49,7 @@ module Translators
     # Alias to static method for usage on instance
     #
     def lib_function_name_for(function)
-      SKLibC.lib_function_name_for(function)
+      CLib.lib_function_name_for(function)
     end
 
     #
@@ -119,7 +127,7 @@ module Translators
     #
     # Generates a field's struct information
     #
-    def make_struct_field(field_name, field_data)
+    def lib_struct_field_for(field_name, field_data)
       type = field_data[:type]
       is_pointer = field_data[:is_pointer]
       ptr_star = is_pointer ? '*' : ''
@@ -135,6 +143,9 @@ module Translators
       end
     end
 
+    #
+    # Generate a to SK adapter function name for the given type
+    #
     def sk_adapter_fn_for(type_data)
       type =
         if type_data[:type] == 'void' && type_data[:is_pointer]
@@ -150,6 +161,9 @@ module Translators
       "__skadapter__to_#{type}"
     end
 
+    #
+    # Generate a to library adapter function name for the given type
+    #
     def lib_adapter_fn_for(type_data)
       # Rip lib type first
       type = lib_type_for type_data

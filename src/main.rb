@@ -2,8 +2,12 @@
 require          'optparse'
 require          'fileutils'
 require_relative 'parser'
-require_relative 'translators/sklibc'
+require_relative 'config'
+require_relative 'translators/clib'
 require_relative 'translators/pascal'
+
+# Access to config vars
+include Config
 
 # Required to run
 options = {
@@ -24,7 +28,7 @@ opt_parser = OptionParser.new do |opts|
                .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --input /path/to/splashkit[/coresdk/src/coresdk/file.h]
+Usage: parse.rb --input /path/to/splashkit[/#{SK_SRC_CORESDK}/file.h]
                 [--generate GENERATOR[,GENERATOR ... ]
                 [--output /path/to/write/output/to]
                 [--validate]
@@ -38,7 +42,7 @@ Source header file or SplashKit CoreSDK directory
 EOS
   opts.on('-i', '--input SOURCE', help) do |input|
     options[:src] = input
-    options[:out] = input + '/out' unless input.end_with? '.h'
+    options[:out] = "#{input}/#{SK_TRANSLATED_OUTPUT}"
   end
   # Generate using translator
   help = <<-EOS
@@ -56,7 +60,7 @@ EOS
   end
   # Output file(s)
   help = <<-EOS
-Directory to write output to (defaults to /path/to/splashkit/out)
+Directory to write output to (defaults to /path/to/splashkit/out/translated)
 EOS
   opts.on('-o', '--output OUTPUT', help) do |out|
     options[:out] = out
@@ -100,6 +104,8 @@ begin
         puts "Writing output to #{output}..."
         File.write output, contents
       end
+      puts 'Output written!'
+      puts translator.post_execute
     end
   end
 rescue Parser::Error

@@ -4,10 +4,13 @@ module Translators
   #
   class AbstractTranslator
     require 'erb'
+    # Access to config vars
+    require_relative '../config'
+    extend Config
     # Indentation helper
-    require_relative '../../lib/core_ext/string.rb'
+    require_relative '../../lib/core_ext/string'
     # Plucking for arrays of hashes
-    require_relative '../../lib/core_ext/array.rb'
+    require_relative '../../lib/core_ext/array'
 
     #
     # Initializes the translator with the data and source directories provided
@@ -37,8 +40,15 @@ module Translators
       # with some overidden data
       @structs = ordered_structs
       execute_result = render_templates
-      puts '-> Done!'
+      puts 'Done!'
       execute_result
+    end
+
+    #
+    # Override this method in the child class to do something once the
+    # execution is complete
+    #
+    def post_execute
     end
 
     #
@@ -158,8 +168,10 @@ module Translators
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
-      puts "Reading template #{name}..."
-      path = "#{translator_res_dir}/#{name}.*.erb"
+      puts "Running template #{name}..."
+      # Don't prepend .* unless extension is specified
+      filename = name =~ /\.\w+$/ ? name : "#{name}.*"
+      path = "#{translator_res_dir}/#{filename}.erb"
       files = Dir[path]
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1

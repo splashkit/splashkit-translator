@@ -21,7 +21,7 @@ module Parser
   def parse(src)
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
-    headers_src = "#{src}/coresdk/src/coresdk/*.h" unless src.end_with? '.h'
+    headers_src = "#{src}/#{SK_SRC_CORESDK}/*.h" unless src.end_with? '.h'
     parsed = Dir[headers_src || src].map do |hfile|
       puts "Parsing #{hfile}..."
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
@@ -71,6 +71,7 @@ class Parser::HeaderFileParser
     @header_file_name = name
     @header_attrs = {}
     @input_xml = input_xml
+    @unique_names = { unique_global: [], unique_method: [] }
   end
 
   #
@@ -139,16 +140,13 @@ class Parser::HeaderFileParser
                .map { |a| parse_attribute(a) }
                .to_h
                .merge @header_attrs
-    # Method, self, unique, destructor, constructor, getter, setter
+    # Method, self, suffix, destructor, constructor, getter, setter
     # must have a class attribute also
     enforce_class_keys = [
-      :method,
       :self,
-      :unique,
+      :suffix,
       :destructor,
-      :constructor,
-      :getter,
-      :setter
+      :constructor
     ]
     enforced_class_keys_found = attrs.keys & enforce_class_keys
     has_enforced_class_keys = !enforced_class_keys_found.empty?
@@ -156,6 +154,15 @@ class Parser::HeaderFileParser
       raise Parser::Error,
             "Attribute(s) `#{enforced_class_keys_found.map(&:to_s)
             .join('\', `')}' found, but `class' attribute is missing?"
+    end
+    # `Method`, `getter` or `setter` must have `class` or `static`
+    method_getter_static_keys_found = attrs.keys & [:method, :getter, :setter]
+    class_static_keys_found = attrs.keys & [:class, :static]
+    if !method_getter_static_keys_found.empty? &&
+       class_static_keys_found.empty?
+      raise Parser::Error,
+            'Attributes `getter` and `setter` must also specify either ' \
+            '`class` or `static` attributes (or both).'
     end
     # Can't have `destructor` & `constructor`
     if attrs[:destructor] && attrs[:constructor]
@@ -202,17 +209,42 @@ class Parser::HeaderFileParser
               "is set to parameter (`#{self_value}`) with type `#{self_type}`)"
       end
     end
-    # Getters must have 1 parameter which is self
-    if attrs[:getters] && ppl.length != 1 && attrs[:self]
+    # `getter` must be non-void
+    ret_type = parse_function_return_type(xml)
+    is_void = ret_type && ret_type[:type] == 'void' && !ret_type[:is_pointer]
+    if attrs[:getter] && is_void
       raise Parser::Error,
-            'Getters must have exactly one parameter that is the parameter'\
-            'specified by the attribute `self`'
+            'Function marked with `getter` must return something (returns void)'
     end
-    # Setters must have 2 parameters
-    if attrs[:setters] && ppl.length != 2 && attrs[:self] == ppl.keys.first
-      raise Parser::Error,
-            'Setters must have exactly two parameters of which the first'\
-            'parameter is the parameter specified by the attribute `self`'
+    # `class` rules applicable to `getter`s and `setter`s
+    if attrs[:class]
+      # Getters must have 1 parameter which is self
+      if attrs[:getters] && ppl && ppl.length != 1 && attrs[:self]
+        raise Parser::Error,
+              'A `getter` specified with `class` must have exactly one '\
+              'parameter that is the parameter specified by the '\
+              'attribute `self`'
+      end
+      # Setters must have 2 parameters
+      if attrs[:setters] && ppl && ppl.length != 2 && attrs[:self] == ppl.keys.first
+        raise Parser::Error,
+              'A `setter` specified with `class` must have exactly two '\
+              'parameters of which the first parameter is the parameter '\
+              'specified by the attribute `self`'
+      end
+    end
+    # `static` rules applicable to `getter`s and `setter`s
+    if attrs[:class]
+      # Getters must have 0 parameters
+      if attrs[:getters] && ppl && ppl.empty?
+        raise Parser::Error,
+              'A `getter` specified with `static` must have no parameters'
+      end
+      # Setters must have 2 parameters
+      if attrs[:setters] && ppl && ppl.length != 2
+        raise Parser::Error,
+              'A `setter` specified with `static` must have one parameter'
+      end
     end
     attrs
   end
@@ -286,7 +318,10 @@ class Parser::HeaderFileParser
   # Parses a function (pointer) return type
   #
   def parse_function_return_type(xml, raw_return_type = nil)
-    raw_return_type ||= xml.xpath('returntype').text
+    returntype_xml = xml.xpath('returntype')
+    # Return if no results
+    return if returntype_xml.empty? && raw_return_type.nil?
+    raw_return_type ||= returntype_xml.text
     ret_type_regex = /((?:unsigned\s)?\w+)\s*(?:(&)|(\*)?)/
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
@@ -307,19 +342,49 @@ class Parser::HeaderFileParser
   #
   # Parses a function's name for both a unique and standard name
   #
-  def parse_function_names(xml, attributes, parameters)
+  def parse_function_names(xml, attributes)
     # Originally, headerdoc does overloaded names like name(int, const float).
     headerdoc_overload_tags = /const|\(|\,\s|\)|&|\*/
     fn_name = xml.xpath('name').text
     headerdoc_idx = fn_name.index(headerdoc_overload_tags)
     sanitized_name = headerdoc_idx ? fn_name[0..(headerdoc_idx - 1)] : fn_name
-    # Choose the unique name from the attributes specified, or make your
-    # own using double underscore (i.e., headerdoc makes unique names for
-    # us but we want to make them double underscore separated)
-    unique_name = attributes[:unique] if attributes
+    suffix = attributes[:suffix] if attributes
+    # Make a method name if specified
+    method_name = attributes[:method] if attributes
+    # Make a unique name using the suffix if specified
+    if suffix
+      unique_global_name = "#{sanitized_name}_#{suffix}"
+      unique_method_name = "#{method_name}_#{suffix}"
+      puts unique_global_name, unique_method_name
+    end
+    # Unique global name was made?
+    unless unique_global_name.nil?
+      # Check if unique name is actually unique
+      if @unique_names[:unique_global].include? unique_global_name
+        raise Parser::Error,
+              'Generated unique name (function name + suffix) is not unique: ' \
+              "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`"
+      else
+        @unique_names[:unique_global] << unique_global_name
+      end
+    end
+    # Unique method name was made?
+    unless unique_method_name.nil?
+      # Check if unique method name is actually unique
+      if @unique_names[:unique_method].include? unique_method_name
+        raise Parser::Error,
+              'Generated unique method name (method + suffix) is not unique: ' \
+              "`#{method}` + `#{suffix}` = `#{unique_method_name}`"
+      # Else register the unique name
+      else
+        @unique_names[:unique_method] << unique_method_name
+      end
+    end
     {
-      sanitized: sanitized_name,
-      unique: unique_name
+      sanitized_name: sanitized_name,
+      method_name: method_name,
+      unique_global_name: unique_global_name,
+      unique_method_name: unique_method_name
     }
   end
 
@@ -332,17 +397,20 @@ class Parser::HeaderFileParser
     ppl = parse_ppl(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
-    fn_names = parse_function_names(xml, attributes, parameters)
+    fn_names = parse_function_names(xml, attributes)
     return_data = parse_function_return_type(xml)
     {
-      signature:   signature,
-      name:        fn_names[:sanitized],
-      unique_name: fn_names[:unique],
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
-      return:      return_data,
-      parameters:  parameters,
-      attributes:  attributes
+      signature:          signature,
+      name:               fn_names[:sanitized_name],
+      method_name:        fn_names[:method_name],
+      unique_global_name: fn_names[:unique_global_name],
+      unique_method_name: fn_names[:unique_method_name],
+      suffix_name:        fn_names[:suffix],
+      description:        xml.xpath('desc').text,
+      brief:              xml.xpath('abstract').text,
+      return:             return_data,
+      parameters:         parameters,
+      attributes:         attributes
     }
   rescue Parser::Error => e
     raise Parser::Error.new e.message, signature
@@ -412,7 +480,7 @@ class Parser::HeaderFileParser
     }.merge merge_data
     if attributes && attributes[:class].nil? && data[:is_pointer]
       raise Parser::Error,
-            "Typealiases to pointers must have a class attribute set"
+            'Typealiases to pointers must have a class attribute set'
     end
     data
   rescue Parser::Error => e
