@@ -335,7 +335,7 @@ class Parser::HeaderFileParser
     is_reference = !ref.nil?
     desc = xml.xpath('result').text
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
-      throw Parser::Error,
+      raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
     {
