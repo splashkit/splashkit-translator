@@ -2,8 +2,12 @@
 require          'optparse'
 require          'fileutils'
 require_relative 'parser'
+require_relative 'config'
 require_relative 'translators/clib'
 require_relative 'translators/pascal'
+
+# Access to config vars
+include Config
 
 # Required to run
 options = {
@@ -24,7 +28,7 @@ opt_parser = OptionParser.new do |opts|
                .to_h
   # Setup
   help = <<-EOS
-Usage: parse.rb --input /path/to/splashkit[/coresdk/src/coresdk/file.h]
+Usage: parse.rb --input /path/to/splashkit[/#{SK_SRC_CORESDK}/file.h]
                 [--generate GENERATOR[,GENERATOR ... ]
                 [--output /path/to/write/output/to]
                 [--validate]

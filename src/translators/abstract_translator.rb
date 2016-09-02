@@ -4,10 +4,13 @@ module Translators
   #
   class AbstractTranslator
     require 'erb'
+    # Access to config vars
+    require_relative '../config'
+    extend Config
     # Indentation helper
-    require_relative '../../lib/core_ext/string.rb'
+    require_relative '../../lib/core_ext/string'
     # Plucking for arrays of hashes
-    require_relative '../../lib/core_ext/array.rb'
+    require_relative '../../lib/core_ext/array'
 
     #
     # Initializes the translator with the data and source directories provided

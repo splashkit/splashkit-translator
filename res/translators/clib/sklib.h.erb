@@ -9,7 +9,7 @@
 #include "<%= header_path %>"
 <% else %>
 <% @data.each do |key, _| %>
-#include "<%= header_path %>/coresdk/src/coresdk/<%= key %>"
+#include "<%= header_path %>/<%= SK_SRC_CORESDK %>/<%= key %>"
 <% end %>
 <% end %>
 using std::string;

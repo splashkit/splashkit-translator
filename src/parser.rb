@@ -21,7 +21,7 @@ module Parser
   def parse(src)
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
-    headers_src = "#{src}/coresdk/src/coresdk/*.h" unless src.end_with? '.h'
+    headers_src = "#{src}/#{SK_SRC_CORESDK}/*.h" unless src.end_with? '.h'
     parsed = Dir[headers_src || src].map do |hfile|
       puts "Parsing #{hfile}..."
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
