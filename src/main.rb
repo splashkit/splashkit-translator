@@ -104,6 +104,8 @@ begin
         puts "Writing output to #{output}..."
         File.write output, contents
       end
+      puts 'Output written!'
+      puts translator.post_execute
     end
   end
 rescue Parser::Error

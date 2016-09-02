@@ -40,8 +40,15 @@ module Translators
       # with some overidden data
       @structs = ordered_structs
       execute_result = render_templates
-      puts '-> Done!'
+      puts 'Done!'
       execute_result
+    end
+
+    #
+    # Override this method in the child class to do something once the
+    # execution is complete
+    #
+    def post_execute
     end
 
     #
@@ -161,7 +168,7 @@ module Translators
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
-      puts "Reading template #{name}..."
+      puts "Running template #{name}..."
       # Don't prepend .* unless extension is specified
       filename = name =~ /\.\w+$/ ? name : "#{name}.*"
       path = "#{translator_res_dir}/#{filename}.erb"

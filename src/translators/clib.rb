@@ -20,6 +20,13 @@ module Translators
       }
     end
 
+    def post_execute
+      puts 'Run the cmake script generated above (CMakeLists.txt) '\
+           'to generate the SplashKit dynamic C library.'
+    end
+
+    #=== internal ===
+
     #
     # Convert the name of a function to its library represented function
     # name, that is:
