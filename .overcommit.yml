@@ -1,7 +1,3 @@
-#
-# Standard Doubtfire Overcommit Config
-# See https://gist.github.com/alexcu/6e05d64d04b32bb42b4d
-#
 CommitMsg:
   ALL:
     on_warn: fail
