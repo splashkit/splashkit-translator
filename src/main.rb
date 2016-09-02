@@ -101,7 +101,7 @@ end
 
 #=== Translate or validate ===
 if options[:validate_only]
-  puts 'Parser succeeded with no errors 🎉'
+  puts 'SplashKit API documentation valid!'
 else
   options[:translators].each do |translator_class|
     translator = translator_class.new(parsed, options[:src])
