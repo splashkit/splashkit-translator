@@ -5,13 +5,23 @@
 // Dependencies
 #include <stdlib.h>
 #include <string>
-<% if header_path.end_with? '.h' %>
+<%
+  if header_path.end_with? '.h'
+%>
 #include "<%= header_path %>"
-<% else %>
-<% @data.each do |key, _| %>
+<%
+  else # else if header does not end with .h
+%>
+<%
+    @data.each do |key, _|
+%>
 #include "<%= header_path %>/<%= SK_SRC_CORESDK %>/<%= key %>"
-<% end %>
-<% end %>
+<%
+    end # end data.each
+%>
+<%
+  end # end if
+%>
 using std::string;
 
 // Types

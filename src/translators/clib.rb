@@ -5,7 +5,7 @@ module Translators
   # SplashKit C Library code generator
   #
   class CLib < AbstractTranslator
-    attr_readers :src, :header_path, :include_directory
+    attr_readers :src, :header_path
 
     def initialize(data, src)
       super(data, src)
