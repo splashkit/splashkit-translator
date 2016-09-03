@@ -19,6 +19,9 @@ module Parser
   # Parses HeaderDoc for the provided src directory into a hash
   #
   def parse(src)
+    unless Parser.headerdoc_installed?
+      raise Parser::Error 'headerdoc2html is not installed!'
+    end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
     headers_src = "#{src}/#{SK_SRC_CORESDK}/*.h" unless src.end_with? '.h'
@@ -52,9 +55,29 @@ end
 #
 class Parser::Error < StandardError
   def initialize(message, signature = nil)
+    @message = message =~ /(?:\?|\.)$/ ? message : message << '.'
     return super(message) unless signature
     @signature = signature
-    super("HeaderDoc parser error on `#{signature}`: #{message}")
+  end
+
+  def to_s
+    if @signature
+      "HeaderDoc parser error on `#{@signature}`: #{@message}"
+    else
+      @message
+    end
+  end
+end
+
+#
+# Class for raising parsing rule errors
+#
+class Parser::RuleViolationError < Parser::Error
+  attr_accessor :signature
+  def initialize(message, rule_no)
+    super message << ' See '\
+          "https://github.com/splashkit/splashkit-translator\#rule-#{rule_no} "\
+          'for more information.'
   end
 end
 
@@ -140,62 +163,71 @@ class Parser::HeaderFileParser
                .map { |a| parse_attribute(a) }
                .to_h
                .merge @header_attrs
-    # Method, self, suffix, destructor, constructor, getter, setter
-    # must have a class attribute also
+    # Method, self, destructor, constructor must have a class attribute also
     enforce_class_keys = [
       :self,
-      :suffix,
       :destructor,
       :constructor
     ]
     enforced_class_keys_found = attrs.keys & enforce_class_keys
     has_enforced_class_keys = !enforced_class_keys_found.empty?
     if has_enforced_class_keys && attrs[:class].nil?
-      raise Parser::Error,
+      raise Parser::RuleViolationError.new(
             "Attribute(s) `#{enforced_class_keys_found.map(&:to_s)
-            .join('\', `')}' found, but `class' attribute is missing?"
+            .join('\', `')}' found, but `class' attribute is missing?", 1)
     end
-    # `Method`, `getter` or `setter` must have `class` or `static`
+    # `method`, `getter` or `setter` must have `class` or `static`
     method_getter_static_keys_found = attrs.keys & [:method, :getter, :setter]
     class_static_keys_found = attrs.keys & [:class, :static]
     if !method_getter_static_keys_found.empty? &&
        class_static_keys_found.empty?
-      raise Parser::Error,
+      raise Parser::RuleViolationError.new(
             'Attributes `getter` and `setter` must also specify either ' \
-            '`class` or `static` attributes (or both).'
+            '`class` or `static` attributes (or both).', 2)
     end
     # Can't have `destructor` & `constructor`
     if attrs[:destructor] && attrs[:constructor]
-      raise Parser::Error,
-            'Attributes `destructor` and `constructor` conflict.'
+      raise Parser::RuleViolationError.new(
+            'Attributes `destructor` and `constructor` conflict.', 3)
     end
-    # Can't have (`destructor` | `constructor`) & (`setter` | `getter`)
+    # Can't have (`destructor` | `constructor`) & (`setter` | `getter`) if
+    # not marked with `static`
+    marked_with_static = !attrs[:static].nil?
     destructor_constructor_keys_found = attrs.keys & [:constructor, :destructor]
     getter_setter_keys_found = attrs.keys & [:getter, :setter]
     if !destructor_constructor_keys_found.empty? &&
-       !getter_setter_keys_found.empty?
-      raise Parser::Error,
+       !getter_setter_keys_found.empty? &&
+       !marked_with_static
+      raise Parser::RuleViolationError.new(
             "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
             .join('\', `')}' violate `#{getter_setter_keys_found.map(&:to_s)
-            .join('\', `')}'. Choose one or the other."
+            .join('\', `')}'. Choose one or the other.", 4)
     end
-    # Can't have (`destructor` | `constructor`) & `method`
-    if !destructor_constructor_keys_found.empty? && !attrs[:method].nil?
-      raise Parser::Error,
+    # Can't have (`destructor` | `constructor`) & `method` if no `static`
+    if !destructor_constructor_keys_found.empty? &&
+       !attrs[:method].nil? &&
+       !marked_with_static
+      raise Parser::RuleViolationError.new(
             "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
-            .join('\', `')}' violate `method`. Choose one or the other."
+            .join('\', `')}' violate `method`. Choose one or the other " \
+            'or mark with `static` to indicate that this is a static ' \
+            'method.', 5)
     end
-    # Can't have (`setter` | `getter`) & `method`
-    if !getter_setter_keys_found.empty? && attrs[:method]
-      raise Parser::Error,
+    # Can't have (`setter` | `getter`) & `method` if no `static`
+    if !getter_setter_keys_found.empty? &&
+       attrs[:method] &&
+       !marked_with_static
+      raise Parser::RuleViolationError.new(
             "Attribute(s) `#{getter_setter_keys_found.map(&:to_s)
-            .join('\', `')}' violate `method`. Choose one or the other."
+            .join('\', `')}' violate `method`. Choose one or the other " \
+            'or mark with `static` to indicate that this is a static ' \
+            'method.', 6)
     end
     # Ensure `self` matches a parameter
     self_value = attrs[:self]
     if self_value && ppl && ppl[self_value.to_sym].nil?
-      raise Parser::Error,
-            'Attribute `self` must be set to the name of a parameter.'
+      raise Parser::RuleViolationError.new(
+            'Attribute `self` must be set to the name of a parameter.', 7)
     end
     # Ensure the parameter set by `self` attribute has the same type indicated
     # by the `class`
@@ -203,47 +235,50 @@ class Parser::HeaderFileParser
       class_type = attrs[:class]
       self_type  = ppl[self_value.to_sym]
       unless class_type == self_type
-        raise Parser::Error,
+        raise Parser::RuleViolationError.new(
               'Attribute `self` must list a parameter whose type matches ' \
-              'the `class` value (`class` is `#{class_type}` but `self` ' \
-              "is set to parameter (`#{self_value}`) with type `#{self_type}`)"
+              "the `class` value (`class` is `#{class_type}` but `self` " \
+              "is set to parameter (`#{self_value}`) with type " \
+              "`#{self_type}`).", 8)
       end
     end
     # `getter` must be non-void
     ret_type = parse_function_return_type(xml)
     is_void = ret_type && ret_type[:type] == 'void' && !ret_type[:is_pointer]
     if attrs[:getter] && is_void
-      raise Parser::Error,
-            'Function marked with `getter` must return something (returns void)'
+      raise Parser::RuleViolationError.new(
+            'Function marked with `getter` must return something (i.e., '\
+            'it should not return `void`).', 9)
     end
     # `class` rules applicable to `getter`s and `setter`s
     if attrs[:class]
       # Getters must have 1 parameter which is self
       if attrs[:getters] && ppl && ppl.length != 1 && attrs[:self]
-        raise Parser::Error,
+        raise Parser::RuleViolationError.new(
               'A `getter` specified with `class` must have exactly one '\
               'parameter that is the parameter specified by the '\
-              'attribute `self`'
+              'attribute `self`.', 10)
       end
       # Setters must have 2 parameters
       if attrs[:setters] && ppl && ppl.length != 2 && attrs[:self] == ppl.keys.first
-        raise Parser::Error,
+        raise Parser::RuleViolationError.new(
               'A `setter` specified with `class` must have exactly two '\
               'parameters of which the first parameter is the parameter '\
-              'specified by the attribute `self`'
+              'specified by the attribute `self`.', 11)
       end
     end
     # `static` rules applicable to `getter`s and `setter`s
     if attrs[:class]
       # Getters must have 0 parameters
       if attrs[:getters] && ppl && ppl.empty?
-        raise Parser::Error,
-              'A `getter` specified with `static` must have no parameters'
+        raise Parser::RuleViolationError.new(
+              'A `getter` specified with `static` must have no parameters',
+              12)
       end
       # Setters must have 2 parameters
       if attrs[:setters] && ppl && ppl.length != 2
-        raise Parser::Error,
-              'A `setter` specified with `static` must have one parameter'
+        raise Parser::RuleViolationError.new(
+              'A `setter` specified with `static` must have one parameter', 13)
       end
     end
     attrs
@@ -328,7 +363,7 @@ class Parser::HeaderFileParser
     is_reference = !ref.nil?
     desc = xml.xpath('result').text
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
-      throw Parser::Error,
+      raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
     {
@@ -361,9 +396,9 @@ class Parser::HeaderFileParser
     unless unique_global_name.nil?
       # Check if unique name is actually unique
       if @unique_names[:unique_global].include? unique_global_name
-        raise Parser::Error,
+        raise Parser::RuleViolationError.new(
               'Generated unique name (function name + suffix) is not unique: ' \
-              "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`"
+              "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`", 14)
       else
         @unique_names[:unique_global] << unique_global_name
       end
@@ -372,9 +407,9 @@ class Parser::HeaderFileParser
     unless unique_method_name.nil?
       # Check if unique method name is actually unique
       if @unique_names[:unique_method].include? unique_method_name
-        raise Parser::Error,
+        raise Parser::RuleViolationError.new(
               'Generated unique method name (method + suffix) is not unique: ' \
-              "`#{method}` + `#{suffix}` = `#{unique_method_name}`"
+              "`#{method}` + `#{suffix}` = `#{unique_method_name}`", 15)
       # Else register the unique name
       else
         @unique_names[:unique_method] << unique_method_name
@@ -413,7 +448,8 @@ class Parser::HeaderFileParser
       attributes:         attributes
     }
   rescue Parser::Error => e
-    raise Parser::Error.new e.message, signature
+    e.signature = signature
+    raise e
   end
 
   #
@@ -479,12 +515,13 @@ class Parser::HeaderFileParser
       is_function_pointer: is_fn_ptr
     }.merge merge_data
     if attributes && attributes[:class].nil? && data[:is_pointer]
-      raise Parser::Error,
-            'Typealiases to pointers must have a class attribute set'
+      raise Parser::RuleViolationError.new(
+            'Typealiases to pointers must have a class attribute set', 16)
     end
     data
   rescue Parser::Error => e
-    raise Parser::Error.new e.message, signature
+    e.signature = signature
+    raise e
   end
 
   #
@@ -520,7 +557,8 @@ class Parser::HeaderFileParser
       attributes:  parse_attributes(xml)
     }
   rescue Parser::Error => e
-    raise Parser::Error.new e.message, signature
+    e.signature = signature
+    raise e
   end
 
   #
@@ -564,7 +602,8 @@ class Parser::HeaderFileParser
       attributes:  parse_attributes(xml)
     }
   rescue Parser::Error => e
-    raise Parser::Error.new e.message, signature
+    e.signature = signature
+    raise e
   end
 
   #
