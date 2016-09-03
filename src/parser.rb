@@ -91,7 +91,7 @@ class Parser::HeaderFileParser
   # Initialises a header parser with required data
   #
   def initialize(name, input_xml)
-    @header_file_name = name[0..-3] # remove the '.h'
+    @header_file_name = name[0..-3].to_sym # remove the '.h'
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
