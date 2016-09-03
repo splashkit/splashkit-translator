@@ -19,15 +19,17 @@ module Translators
       @data = data
       @src = src
       @direct_types = []
-      @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten.select do |td|
-        !td[:is_function_pointer]
-      end
-      @function_pointers = @data.values.pluck(:typedefs).flatten.select do |td|
-        td[:is_function_pointer]
-      end
-      @structs = @data.values.pluck(:structs).flatten
-      @functions = @data.values.pluck(:functions).flatten
+      @enums = @data[:enums] || @data.values.pluck(:enums).flatten
+      @typealiases =
+        (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
+          !td[:is_function_pointer]
+        end
+      @function_pointers =
+        (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
+          td[:is_function_pointer]
+        end
+      @structs = @data[:structs] || @data.values.pluck(:structs).flatten
+      @functions = @data[:functions] || @data.values.pluck(:functions).flatten
     end
 
     #
@@ -83,7 +85,7 @@ module Translators
 
     private_class_method :"case_converters="
 
-    private
+    protected
 
     #
     # Returns the structs ordered by dependency between other structs

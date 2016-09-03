@@ -11,3 +11,6 @@
     end.join(', ')
 %>
 typedef <%= fp[:return][:type] %> (<%= fp[:name] %>)(<%= fp_param_decl %>);
+<%
+  end # end function_pointers.each
+%>

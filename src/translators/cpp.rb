@@ -26,7 +26,7 @@ module Translators
     #
     def cpp_signature_for(function)
       name            = function[:name]
-      return_type     = function[:return]
+      return_type     = function[:return][:type]
       parameter_list  = cpp_parameter_list_for function
       "#{return_type} #{name}(#{parameter_list})"
     end

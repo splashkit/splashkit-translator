@@ -6,6 +6,9 @@ module Parser
   require 'nokogiri'
   require_relative '../lib/core_ext/nokogiri/xml.rb'
 
+  # Case conversion helpers
+  require_relative '../lib/core_ext/string.rb'
+
   module_function
 
   #
@@ -37,7 +40,7 @@ module Parser
       end
       xml = Nokogiri.XML(hfile_xml)
       hfparser = HeaderFileParser.new(File.basename(hfile), xml)
-      [hfparser.header_file_name, hfparser.parse]
+      [hfparser.name.to_sym, hfparser.parse]
     end
     if parsed.empty?
       raise Parser::Error, %{
@@ -85,13 +88,13 @@ end
 # Class to parse a single header file
 #
 class Parser::HeaderFileParser
-  attr_reader :header_file_name
+  attr_reader :name
 
   #
   # Initialises a header parser with required data
   #
   def initialize(name, input_xml)
-    @header_file_name = name[0..-3].to_sym # remove the '.h'
+    @name = name[0..-3] # remove the '.h'
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
@@ -142,7 +145,7 @@ class Parser::HeaderFileParser
   def parse_header(xml)
     @header_attrs = parse_attributes(xml).reject { |k, _| k == :Author }
     {
-      name:         xml.xpath('name').text,
+      name:         @name.to_s.to_human_case,
       brief:        xml.xpath('abstract').text,
       description:  xml.xpath('desc').text
     }
