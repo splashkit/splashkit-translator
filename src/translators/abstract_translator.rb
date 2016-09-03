@@ -55,7 +55,7 @@ module Translators
     # Gets the full name of the translator
     #
     def name
-      self.class.name.to_s.split('::').last.downcase
+      self.class.name.to_s.split('::')[1].downcase
     end
 
     #

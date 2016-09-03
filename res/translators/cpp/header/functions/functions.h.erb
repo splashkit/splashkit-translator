@@ -1,0 +1,11 @@
+<%#
+    Implement every function prototype.
+    TODO: It will be nice to generate the documentation here also.
+%>
+<%
+  @functions.each do | fn |
+%>
+<%= cpp_signature_for fn %>;
+<%
+  end # end functions.each
+%>

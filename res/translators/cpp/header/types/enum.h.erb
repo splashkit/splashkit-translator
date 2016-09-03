@@ -1,0 +1,13 @@
+<%#
+    Redeclare all enum types
+ %>
+<%
+  @enums.each do |enum|
+    enum_defs = enum[:constants].keys.map(&:to_s).join(",\n")
+%>
+typedef enum {
+    <%= enum_defs %>.indent
+} <%= enum[:name] %>;
+<%
+  end # end enums.each
+%>
