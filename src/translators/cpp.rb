@@ -52,10 +52,16 @@ module Translators
     def cpp_struct_field_for(field_name, field_data)
       type = field_data[:type]
       ptr = field_data[:is_pointer] ? '*' : ''
-      ref = field_data[:is_pointer] ? '&' : ''
-      array_decl = field_data[:array_dimension_sizes].reduce('[') do |memo, el|
-        "#{memo}][el"
-      end << ']'
+      ref = field_data[:is_reference] ? '&' : ''
+      if field_data[:is_array]
+        array_dims = field_data[:array_dimension_sizes]
+        array_decl =
+          if array_dims.length == 1
+            "[#{array_dims.first}]"
+          else
+            "[#{array_dims.first}][#{array_dims.last}]"
+          end
+      end
       "#{type} #{ptr}#{ref}#{field_name}#{array_decl}"
     end
   end
