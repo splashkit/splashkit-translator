@@ -112,15 +112,15 @@ class Parser::HeaderFileParser
 
   #
   # A function which will default to the ppl provided if they are missing
-  # within the params
+  # within the hash provided using the parse_func provided
   #
-  def ppl_default_to(xml, params, ppl)
+  def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
     ppl.each do |p_name, p_type|
-      params[p_name] = (params[p_name] || {}).merge(
-        parse_parameter_info(xml, p_name, p_type)
-      )
+      args = [xml, p_name, p_type]
+      result = parse_func ? send(parse_func, *args) : {}
+      hash[p_name] = (hash[p_name] || {}).merge(result)
     end
-    params
+    hash
   end
 
   #
@@ -571,11 +571,18 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Parse a single enum constant data
+  #
+  def parse_enum_constant(xml)
+    { description: xml.xpath('desc').text }
+  end
+
+  #
   # Parses enum constants
   #
   def parse_enum_constants(xml, ppl)
     constants = xml.xpath('constants/constant').map do |const|
-      [const.xpath('name').text.to_sym, const.xpath('desc').text]
+      [xml.xpath('name').text.to_sym, parse_enum_constant(const)]
     end.to_h
     # after parsing <constant>, must ensure they align with the ppl
     constants.keys.each do | const |
@@ -586,7 +593,7 @@ class Parser::HeaderFileParser
               'in the enum definition.'
       end
     end
-    constants
+    ppl_default_to(xml, constants, ppl, nil)
   end
 
   #
