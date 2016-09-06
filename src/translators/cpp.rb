@@ -5,18 +5,14 @@ module Translators
   # C++ Front-End Translator
   #
   class CPP < AbstractTranslator
-    def initialize(data, src)
-      super(data, src)
-      @data[:name] = 'splashkit'
-    end
-
     def render_templates
-      @data.map do |header_key, header_data|
+      result = @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
         header_contents  = Header.new(header_data, @src)
-                                 .read_template('header/header.h')
+                                 .read_template('header/module_header.h')
         [header_file_name, header_contents]
       end.to_h
+      result.merge('sklib.h' => read_template('header/sklib_header.h'))
     end
 
     #=== internal ===
