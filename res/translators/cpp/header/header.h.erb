@@ -1,5 +1,5 @@
 /*
- * SplashKit <%= @data[:name] %>
+ * SplashKit <%= @data[:name].to_human_case %>
 
  *
  * This file is generated from the SplashKit source.
@@ -7,5 +7,17 @@
  *
  */
 
+<%
+header = "__#{@data[:name]}_h"
+%>
+#ifdef <%= header %>
+
+#define <%= header %>
+
+#include <string>
+using std::string;
+
 <%= read_template 'header/types/types' %>
 <%= read_template 'header/functions/functions' %>
+
+#endif /* <%= header %> */

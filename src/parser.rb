@@ -145,7 +145,7 @@ class Parser::HeaderFileParser
   def parse_header(xml)
     @header_attrs = parse_attributes(xml).reject { |k, _| k == :Author }
     {
-      name:         @name.to_s.to_human_case,
+      name:         @name.to_s,
       brief:        xml.xpath('abstract').text,
       description:  xml.xpath('desc').text
     }
