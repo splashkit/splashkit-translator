@@ -26,7 +26,7 @@ module Translators
     #
     def cpp_signature_for(function)
       name            = function[:name]
-      return_type     = function[:return][:type]
+      return_type     = cpp_type_for function[:return]
       parameter_list  = cpp_parameter_list_for function
       "#{return_type} #{name}(#{parameter_list})"
     end
@@ -38,7 +38,7 @@ module Translators
       function[:parameters].reduce('') do |memo, param|
         param_name = param.first
         param_data = param.last
-        type = param_data[:type]
+        type = cpp_type_for param_data
         ptr = param_data[:is_pointer]   ? '*' : ''
         ref = param_data[:is_reference] ? '&' : ''
         const = param_data[:is_const] ? 'const ' : ''
@@ -50,7 +50,7 @@ module Translators
     # Generates a field's struct information
     #
     def cpp_struct_field_for(field_name, field_data)
-      type = field_data[:type]
+      type = cpp_type_for field_data
       ptr = field_data[:is_pointer] ? '*' : ''
       ref = field_data[:is_reference] ? '&' : ''
       if field_data[:is_array]
@@ -63,6 +63,15 @@ module Translators
           end
       end
       "#{type} #{ptr}#{ref}#{field_name}#{array_decl}"
+    end
+
+    #
+    # Converts SK type to C++ type
+    #
+    def cpp_type_for(type_data)
+      # Only hardcode mapping we need
+      return 'unsigned char' if type_data[:type] == 'byte'
+      type_data[:type]
     end
   end
 end
