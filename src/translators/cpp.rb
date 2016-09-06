@@ -5,6 +5,11 @@ module Translators
   # C++ Front-End Translator
   #
   class CPP < AbstractTranslator
+    def initialize(data, src)
+      super(data, src)
+      @data[:name] = 'splashkit'
+    end
+
     def render_templates
       @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
