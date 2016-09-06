@@ -6,7 +6,7 @@
     internal_data_name = "struct _#{typealias[:name]}_data"
 %>
 <%= internal_data_name %>;
-typealias struct <%= typealias[:name] %> *<%= internal_data_name %>;
+typedef <%= internal_data_name %> *<%= typealias[:name] %>;
 <%
   end # end typealiases.each
 %>
