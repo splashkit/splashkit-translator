@@ -14,7 +14,7 @@ module Translators
     def render_templates
       result = @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
-        header_contents  = Header.new(header_data, @src)
+        header_contents  = Header.new(header_data, @src, @data)
                                  .read_template('header/module_header.h')
         [header_file_name, header_contents]
       end.to_h
@@ -28,8 +28,54 @@ module Translators
 
     private
 
-    class Header < CPP; end
-    class Implementation < CPP; end
+    class Header < CPP
+      def initialize(data, src, src_data)
+        super(data, src)
+        @src_data = src_data
+      end
+
+      #
+      # Returns dependent types for this header defined in other headers
+      # (i.e., types of fields declared in this header declared in others,
+      # parameter types declared in this header declared in others etc.)
+      #
+      def dependent_headers
+        field_types =
+          unless @structs.empty?
+            @structs.pluck(:fields)
+                    .reject(&:empty?)
+                    .map(&:values)
+                    .flatten
+                    .pluck(:type)
+                    .uniq
+          end || []
+        param_types =
+          unless @functions.empty?
+            @functions.pluck(:parameters)
+                      .reject(&:empty?)
+                      .map(&:values)
+                      .flatten
+                      .pluck(:type)
+                      .uniq
+          end || []
+        return_types =
+          unless @functions.empty?
+            @functions.pluck(:return)
+                      .reject(&:empty?)
+                      .pluck(:type)
+          end || []
+        dependent_types = (field_types + param_types + return_types)
+        @src_data.select do |_, header_data|
+          types_defined = header_data[:typedefs].pluck(:name) +
+                          header_data[:structs].pluck(:name) +
+                          header_data[:enums].pluck(:name)
+          # Accepted if this header defines some of the dependent types
+          # and not this header
+          !(types_defined & dependent_types).empty? &&
+            header_data[:name] != @data[:name]
+        end.keys
+      end
+    end
 
     #
     # Generate a C++ type signature from a SK function

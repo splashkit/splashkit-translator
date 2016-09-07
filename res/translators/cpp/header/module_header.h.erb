@@ -14,6 +14,13 @@ header = "__#{@data[:name]}_h"
 
 #define <%= header %>
 
+<%
+  dependent_headers.each do |header|
+%>
+#include "<%= header %>.h"
+<%
+  end # end dependent_headers.each
+%>
 #include <string>
 using std::string;
 
