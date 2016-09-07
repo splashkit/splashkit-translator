@@ -39,7 +39,9 @@ module Translators
         ptr = param_data[:is_pointer] ? '_ptr' : ''
         ref = param_data[:is_reference] ? '_ref' : ''
         arr = param_data[:is_array] ? '_array' : ''
-        "#{memo}__#{param_data[:type]}#{ref}#{ptr}#{arr}"
+        # Replace spaces with underscores for unsigned
+        type = param_data[:type].tr("\s", '_')
+        "#{memo}__#{type}#{ref}#{ptr}#{arr}"
       end
     end
 
