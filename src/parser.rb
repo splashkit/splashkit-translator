@@ -509,11 +509,11 @@ class Parser::HeaderFileParser
     attributes = parse_attributes(xml)
     merge_data = is_fn_ptr ? parse_function_pointer_typedef(xml) : parse_simple_typedef(xml)
     data = {
-      signature:   signature,
-      name:        xml.xpath('name').text,
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
-      attributes:  attributes,
+      signature:           signature,
+      name:                xml.xpath('name').text,
+      description:         xml.xpath('desc').text,
+      brief:               xml.xpath('abstract').text,
+      attributes:          attributes,
       is_function_pointer: is_fn_ptr
     }.merge merge_data
     if attributes && attributes[:class].nil? && data[:is_pointer]

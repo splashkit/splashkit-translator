@@ -5,6 +5,12 @@ module Translators
   # C++ Front-End Translator
   #
   class CPP < AbstractTranslator
+    def initialize(data, src)
+      super(data, src)
+      # C++ is a superset of C, so we can reuse our CLib implementations
+      @clib = CLib.new(@data, @src)
+    end
+
     def render_templates
       result = @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
@@ -12,7 +18,10 @@ module Translators
                                  .read_template('header/module_header.h')
         [header_file_name, header_contents]
       end.to_h
-      result.merge('sklib.h' => read_template('header/sklib_header.h'))
+      result.merge(
+        'sklib.h'   => read_template('header/sklib_header.h'),
+        'sklib.cpp' => read_template('implementation/implementation.cpp')
+      )
     end
 
     #=== internal ===
@@ -73,6 +82,14 @@ module Translators
       # Only hardcode mapping we need
       return 'unsigned char' if type_data[:type] == 'byte'
       type_data[:type]
+    end
+
+    #
+    # C Lib type to C++ type adapter
+    #
+    def cpp_adapter_fn_for(function)
+      # Just use clib SK adapter -- it's the same thing
+      @clib.sk_adapter_fn_for(function)
     end
   end
 end
