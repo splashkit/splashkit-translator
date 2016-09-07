@@ -152,6 +152,9 @@ module Translators
         elsif type_data[:type] =~ /^unsigned\s+\w+/
           # Remove spaces for unsigned
           type_data[:type].tr("\s", '_')
+        elsif type_data[:type] == 'byte'
+          # If byte then to unsigned char
+          'unsigned_char'
         else
           # Use standard type
           type_data[:type]
