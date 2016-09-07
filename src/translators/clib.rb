@@ -43,8 +43,6 @@ module Translators
       end
     end
 
-    private
-
     #
     # Alias to static method for usage on instance
     #
