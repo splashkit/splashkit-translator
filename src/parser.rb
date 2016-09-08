@@ -623,6 +623,26 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Parses a single define
+  #
+  def parse_define(xml)
+    definition_xpath = 'declaration/declaration_preprocessor[position() > 2]'
+    {
+      name:        xml.xpath('name').text,
+      description: xml.xpath('desc').text,
+      brief:       xml.xpath('abstract').text,
+      definition:  xml.xpath(definition_xpath).text
+    }
+  end
+
+  #
+  # Parses all hash defines in the xml provided
+  #
+  def parse_defines(xml)
+    xml.xpath('defines/pdefine').map { |d| parse_define(d) }
+  end
+
+  #
   # Parses the XML into a hash representing the object model of every header
   # file
   #
@@ -632,6 +652,7 @@ class Parser::HeaderFileParser
     parsed[:typedefs]    = parse_typedefs(xml)
     parsed[:structs]     = parse_structs(xml)
     parsed[:enums]       = parse_enums(xml)
+    parsed[:defines]     = parse_defines(xml)
     parsed
   end
 end
