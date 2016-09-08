@@ -88,18 +88,23 @@ module Translators
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       # Handle function pointers
       return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
-      {
-        'void'      => 'void',
-        'int'       => 'int',
-        'float'     => 'float',
-        'double'    => 'double',
-        'byte'      => 'unsigned char',
-        'bool'      => 'int',
-        'enum'      => 'int',
-        'struct'    => "__sklib_#{type}",
-        'string'    => '__sklib_string',
-        'typealias' => '__sklib_ptr'
-      }[raw_type_for(type)]
+      direct_map =
+        {
+          'void'      => 'void',
+          'int'       => 'int',
+          'float'     => 'float',
+          'double'    => 'double',
+          'byte'      => 'unsigned char',
+          'bool'      => 'int',
+          'enum'      => 'int',
+          'struct'    => "__sklib_#{type}",
+          'string'    => '__sklib_string',
+          'typealias' => '__sklib_ptr'
+        }
+      result = direct_map[raw_type_for(type)]
+      raise "The type `#{type}` cannot yet be translated into a compatible "\
+            "C-type for the SplashKit C Library" if result.nil?
+      result
     end
 
     #
