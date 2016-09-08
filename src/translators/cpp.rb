@@ -19,8 +19,8 @@ module Translators
         [header_file_name, header_contents]
       end.to_h
       result.merge(
-        'sklib.h'   => read_template('header/sklib_header.h'),
-        'sklib.cpp' => read_template('implementation/implementation.cpp')
+        'splashkit.h'   => read_template('header/sklib_header.h'),
+        'splashkit.cpp' => read_template('implementation/implementation.cpp')
       )
     end
 
