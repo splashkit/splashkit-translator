@@ -21,8 +21,21 @@ header = "__#{@data[:name]}_h"
 <%
   end # end dependent_headers.each
 %>
+
 #include <string>
 using std::string;
+
+<%#
+    Define macros for the header here
+%>
+<%
+  @defines.each do |define|
+%>
+#define <%= define[:name] %> <%= define[:definition] %>
+
+<%
+  end # defines.each
+%>
 
 <%= read_template 'header/types/types' %>
 <%= read_template 'header/functions/functions' %>

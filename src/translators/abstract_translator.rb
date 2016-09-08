@@ -30,6 +30,7 @@ module Translators
         end
       @structs = @data[:structs] || @data.values.pluck(:structs).flatten
       @functions = @data[:functions] || @data.values.pluck(:functions).flatten
+      @defines = @data[:defines] || @data.values.pluck(:defines).flatten
     end
 
     #
