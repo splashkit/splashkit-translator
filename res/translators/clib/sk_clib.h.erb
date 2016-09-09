@@ -24,8 +24,10 @@
 %>
 using std::string;
 
-// Types
-<%= read_template 'types/types' %>
+namespace splashkit_lib_c
+{
+    <%= read_template('types/types').indent %>
 
-// Function Prototypes
-<%= read_template 'functions/prototypes' %>
+    <%= read_template('functions/prototypes').indent %>
+
+}

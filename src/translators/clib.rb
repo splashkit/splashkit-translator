@@ -14,8 +14,8 @@ module Translators
 
     def render_templates
       {
-        'sklib.h' => read_template('sklib.h'),
-        'sklib.cpp' => read_template('sklib.cpp'),
+        'sk_clib.h' => read_template('sk_clib.h'),
+        'sk_clib.cpp' => read_template('sk_clib.cpp'),
         'CMakeLists.txt' => read_template('CMakeLists.txt')
       }
     end
