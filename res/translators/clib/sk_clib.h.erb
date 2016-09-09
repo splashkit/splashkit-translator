@@ -2,7 +2,6 @@
 // SplashKit C Generated Library Code
 //
 
-// Dependencies
 #include <stdlib.h>
 #include <string>
 <%
@@ -23,11 +22,17 @@
   end # end if
 %>
 using std::string;
+using namespace splashkit_lib;
 
-namespace splashkit_lib_c
-{
+<%#
+    Wrap types and adapter functions in a namespace to prevent symbol
+    duplication between this and front end code
+%>
+namespace __sklib_ns {
     <%= read_template('types/types').indent %>
 
-    <%= read_template('functions/prototypes').indent %>
-
 }
+
+using namespace __sklib_ns;
+
+<%= read_template('functions/prototypes') %>
