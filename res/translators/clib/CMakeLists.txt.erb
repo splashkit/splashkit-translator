@@ -3,6 +3,7 @@ project(SplashKitCLib)
 
 set(SK_ROOT "<%= sk_root %>")
 set(SK_LIB "${SK_ROOT}/coresdk/lib")
+set(SK_SRC "${SK_ROOT}/coresdk/src/coresdk")
 set(SK_OUT "${SK_ROOT}/out")
 set(SK_OUT_LIB "${SK_OUT}/lib")
 set(SK_STATIC_LIB "${SK_OUT}/lib/libSplashKitBackend.a")
@@ -59,6 +60,7 @@ file(GLOB INCLUDE_FILES "${SK_CLIB_SRC}/*.h")
 # DIRECTORY INCLUDES
 include_directories(${SK_CLIB_SRC})
 include_directories(${SK_OUT_LIB})
+include_directories(${SK_SRC})
 
 # MAKE THE LIBRARY
 add_library(SplashKit SHARED ${SOURCE_FILES} ${INCLUDE_FILES})

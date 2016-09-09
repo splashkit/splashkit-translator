@@ -14,7 +14,7 @@
 <%
     @data.each do |key, _|
 %>
-#include "<%= header_path %>/<%= SK_SRC_CORESDK %>/<%= key %>.h"
+#include "<%= key %>.h"
 <%
     end # end data.each
 %>
