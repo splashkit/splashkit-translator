@@ -45,7 +45,7 @@ EOS
 Source header file or SplashKit CoreSDK directory
 EOS
   opts.on('-i', '--input SOURCE', help) do |input|
-    options[:src] = input
+    options[:src] = File.expand_path input
     options[:out] = "#{input}/#{SK_TRANSLATED_OUTPUT}"
   end
   # Generate using translator
@@ -67,7 +67,7 @@ EOS
 Directory to write output to (defaults to /path/to/splashkit/out/translated)
 EOS
   opts.on('-o', '--output OUTPUT', help) do |out|
-    options[:out] = out
+    options[:out] = File.expand_path out
   end
   # Validate only (don't generate)
   help = <<-EOS
