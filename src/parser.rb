@@ -1,15 +1,16 @@
 #
 # Parses HeaderDoc into Ruby
 #
-module Parser
+class Parser
   # Monkey patch Nokogiri to squash data down
   require 'nokogiri'
   require_relative '../lib/core_ext/nokogiri/xml.rb'
 
+  # Improved IO
+  require 'open3'
+
   # Case conversion helpers
   require_relative '../lib/core_ext/string.rb'
-
-  module_function
 
   #
   # Checks if HeaderDoc is installed
@@ -18,33 +19,62 @@ module Parser
     system %(which headerdoc2html > /dev/null)
   end
 
+  # Warning ivars
+  attr_reader :warnings, :errors
+
+  #
+  # Warning in parser
+  #
+  def warn(msg)
+    @warnings << msg
+  end
+
+  #
+  # Error in parser
+  #
+  def error(msg)
+    @errors << msg.to_s
+  end
+
+  #
+  # Initialiser with src
+  #
+  def initialize(src)
+    @src = src
+    @warnings = []
+    @errors = []
+  end
+
   #
   # Parses HeaderDoc for the provided src directory into a hash
   #
-  def parse(src)
-    unless Parser.headerdoc_installed?
+  def parse
+    unless headerdoc_installed?
       raise Parser::Error 'headerdoc2html is not installed!'
     end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
-    headers_src = "#{src}/#{SK_SRC_CORESDK}/*.h" unless src.end_with? '.h'
-    parsed = Dir[headers_src || src].map do |hfile|
+    headers_src = "#{@src}/#{SK_SRC_CORESDK}/*.h" unless @src.end_with? '.h'
+    parsed = Dir[headers_src || @src].map do |hfile|
       puts "Parsing #{hfile}..."
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
-      proc = IO.popen cmd
-      out = proc.readlines
+      _, stdout, stderr, wait_thr = Open3.popen3 cmd
+      out = stdout.readlines
+      errs = stderr.readlines.join.gsub(/-{3,}(?:.|\n)+?-(?=\n)\n/, '').split("\n")
+      errs.each { |e| warn e }
+      exit_status = wait_thr.value.exitstatus
       hfile_xml = out.empty? ? nil : out.join
-      unless $?.exitstatus.zero?
+      unless exit_status.zero?
         raise Parser::Error,
               "headerdoc2html failed. Command was #{cmd}."
       end
       xml = Nokogiri.XML(hfile_xml)
-      hfparser = HeaderFileParser.new(File.basename(hfile), xml)
+      hfparser = HeaderFileParser.new(self, File.basename(hfile), xml)
       [hfparser.name.to_sym, hfparser.parse]
     end
     if parsed.empty?
       raise Parser::Error, %{
-Nothing parsed! Check that #{src} is the correct SplashKit directory and that
+Nothing parsed! Check that #{@src} is the correct SplashKit directory and that
 coresdk/src/coresdk contains the correct C++ source. Check that HeaderDoc
 comments exist (refer to README).
 }
@@ -65,7 +95,7 @@ class Parser::Error < StandardError
 
   def to_s
     if @signature
-      "HeaderDoc parser error on `#{@signature}`: #{@message}"
+      "HeaderDoc parser violation on `#{@signature}`:\n\t#{@message}"
     else
       @message
     end
@@ -78,7 +108,7 @@ end
 class Parser::RuleViolationError < Parser::Error
   attr_accessor :signature
   def initialize(message, rule_no)
-    super message << ' See '\
+    super message << "\n\tSee "\
           "https://github.com/splashkit/splashkit-translator\#rule-#{rule_no} "\
           'for more information.'
   end
@@ -90,10 +120,19 @@ end
 class Parser::HeaderFileParser
   attr_reader :name
 
+  def error(err)
+    @parser.error err
+  end
+
+  def warn(err)
+    @parser.warn err
+  end
+
   #
   # Initialises a header parser with required data
   #
-  def initialize(name, input_xml)
+  def initialize(parser, name, input_xml)
+    @parser = parser
     @name = name[0..-3] # remove the '.h'
     @header_attrs = {}
     @input_xml = input_xml
@@ -451,7 +490,7 @@ class Parser::HeaderFileParser
     }
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
@@ -523,7 +562,7 @@ class Parser::HeaderFileParser
     data
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
@@ -560,7 +599,7 @@ class Parser::HeaderFileParser
     }
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
@@ -639,7 +678,7 @@ class Parser::HeaderFileParser
     }
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
