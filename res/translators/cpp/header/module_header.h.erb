@@ -1,0 +1,43 @@
+/*
+ * SplashKit <%= @data[:name].to_human_case %>
+
+ *
+ * This file is generated from the SplashKit source.
+ * Modifying it will cause failures.
+ *
+ */
+
+<%
+header = "__#{@data[:name]}_h"
+%>
+#ifndef <%= header %>
+
+#define <%= header %>
+
+<%
+  dependent_headers.each do |header|
+%>
+#include "<%= header %>.h"
+<%
+  end # end dependent_headers.each
+%>
+
+#include <string>
+using std::string;
+
+<%#
+    Define macros for the header here
+%>
+<%
+  @defines.each do |define|
+%>
+#define <%= define[:name] %> <%= define[:definition] %>
+
+<%
+  end # defines.each
+%>
+
+<%= read_template 'header/types/types' %>
+<%= read_template 'header/functions/functions' %>
+
+#endif /* <%= header %> */

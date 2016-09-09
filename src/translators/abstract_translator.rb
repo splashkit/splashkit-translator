@@ -19,15 +19,31 @@ module Translators
       @data = data
       @src = src
       @direct_types = []
-      @enums = @data.values.pluck(:enums).flatten
-      @typealiases = @data.values.pluck(:typedefs).flatten.select do |td|
-        !td[:is_function_pointer]
+      @enums = @data[:enums] || @data.values.pluck(:enums).flatten
+      @typealiases =
+        (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
+          !td[:is_function_pointer]
+        end
+      @function_pointers =
+        (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
+          td[:is_function_pointer]
+        end
+      @structs = @data[:structs] || @data.values.pluck(:structs).flatten
+      @functions = @data[:functions] || @data.values.pluck(:functions).flatten
+      @defines = @data[:defines] || @data.values.pluck(:defines).flatten
+    end
+
+    #
+    # Ensure our structs are ordered. Must do this here so we have
+    # @direct_types defined with some overidden data
+    #
+    class << self
+      alias _new :new
+      def new(*args)
+        inst = _new(*args)
+        inst.instance_variable_set(:@structs, inst.ordered_structs)
+        inst
       end
-      @function_pointers = @data.values.pluck(:typedefs).flatten.select do |td|
-        td[:is_function_pointer]
-      end
-      @structs = @data.values.pluck(:structs).flatten
-      @functions = @data.values.pluck(:functions).flatten
     end
 
     #
@@ -35,10 +51,6 @@ module Translators
     #
     def execute
       puts "Executing #{name} translator..."
-      # Ensure our structs are ordered before we continue...
-      # Must do this here so we have @direct_types defined
-      # with some overidden data
-      @structs = ordered_structs
       execute_result = render_templates
       puts 'Done!'
       execute_result
@@ -55,7 +67,7 @@ module Translators
     # Gets the full name of the translator
     #
     def name
-      self.class.name.to_s.split('::').last.downcase
+      self.class.name.to_s.split('::')[1].downcase
     end
 
     #
@@ -83,8 +95,6 @@ module Translators
 
     private_class_method :"case_converters="
 
-    private
-
     #
     # Returns the structs ordered by dependency between other structs
     #
@@ -109,6 +119,8 @@ module Translators
       end
       result
     end
+
+    protected
 
     #
     # Default case types are snake_case, unless it is overridden in a subclass

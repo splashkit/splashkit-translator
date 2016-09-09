@@ -1,0 +1,38 @@
+//
+// SplashKit C Generated Library Code
+//
+
+#include <stdlib.h>
+#include <string>
+<%
+  if header_path.end_with? '.h'
+%>
+#include "<%= header_path %>"
+<%
+  else # else if header does not end with .h
+%>
+<%
+    @data.each do |key, _|
+%>
+#include "<%= key %>.h"
+<%
+    end # end data.each
+%>
+<%
+  end # end if
+%>
+using std::string;
+using namespace splashkit_lib;
+
+<%#
+    Wrap types and adapter functions in a namespace to prevent symbol
+    duplication between this and front end code
+%>
+namespace __sklib_ns {
+    <%= read_template('types/types').indent %>
+
+}
+
+using namespace __sklib_ns;
+
+<%= read_template('functions/prototypes') %>

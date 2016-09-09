@@ -3,9 +3,10 @@ project(SplashKitCLib)
 
 set(SK_ROOT "<%= sk_root %>")
 set(SK_LIB "${SK_ROOT}/coresdk/lib")
+set(SK_SRC "${SK_ROOT}/coresdk/src/coresdk")
 set(SK_OUT "${SK_ROOT}/out")
 set(SK_OUT_LIB "${SK_OUT}/lib")
-set(SK_STATIC_LIB "${SK_OUT}/lib/libSplashKit.a")
+set(SK_STATIC_LIB "${SK_OUT}/lib/libSplashKitBackend.a")
 set(SK_CLIB_SRC "${SK_OUT}/translated/clib")
 
 # CHECK SK_STATIC_LIB EXISTS
@@ -13,7 +14,7 @@ if(NOT EXISTS ${SK_STATIC_LIB})
   message(WARNING "SplashKit static library has not been compiled yet!")
   execute_process(WORKING_DIRECTORY ${SK_ROOT}
     COMMAND cmake projects/cmake
-    COMMAND make -C projects/cmake SplashKit
+    COMMAND make -C projects/cmake SplashKitBackend
   )
   if (NOT EXISTS ${SK_STATIC_LIB})
     message(FATAL_ERROR "SplashKit static library can't be compiled.
@@ -21,7 +22,7 @@ Please try to execute the following and try again:
 
     cd ${SK_ROOT}
     cmake projects/cmake
-    make -C projects/cmake SplashKit
+    make -C projects/cmake SplashKitBackend
 
 Now aborting...")
   endif()
@@ -29,7 +30,7 @@ endif()
 
 # BASE LIB FLAGS
 set(LIB_FLAGS "-L${SK_OUT}/lib \
-               -lSplashKit")
+               -lSplashKitBackend")
 
 if (APPLE)
   # MAC OS PROJECT FLAGS
@@ -59,6 +60,7 @@ file(GLOB INCLUDE_FILES "${SK_CLIB_SRC}/*.h")
 # DIRECTORY INCLUDES
 include_directories(${SK_CLIB_SRC})
 include_directories(${SK_OUT_LIB})
+include_directories(${SK_SRC})
 
 # MAKE THE LIBRARY
 add_library(SplashKit SHARED ${SOURCE_FILES} ${INCLUDE_FILES})
@@ -69,7 +71,7 @@ target_link_libraries(SplashKit ${LIB_FLAGS})
 # SET OUTPUT FOR LIBRARY
 set_target_properties(SplashKit
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${SK_OUT_LIB}
+    LIBRARY_OUTPUT_DIRECTORY ${SK_OUT_LIB}
 )
 
 # RUN

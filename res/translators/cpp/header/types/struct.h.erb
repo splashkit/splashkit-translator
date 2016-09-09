@@ -1,0 +1,24 @@
+<%#
+    Structs must have each field converted to a compatible Lib type (i.e., the
+    field type `foo' becomes `__sklib_foo'). Then adapters must be made to and
+    from the Lib and SK code. Can't use a macro for this and cannot be a static
+    cast so we must generate the functions individually.
+ %>
+<%
+  @structs.each do |struct|
+%>
+<%#
+    Definition of structs can use lib_struct_field_for for convenience
+%>
+typedef struct {
+<%
+    struct[:fields].each do |field_name, field_data|
+%>
+    <%= cpp_struct_field_for(field_name, field_data) %>;
+<%
+    end # end fields.each
+%>
+} <%= struct[:name] %>;
+<%
+    end # end struct.each
+%>

@@ -1,0 +1,18 @@
+<%#
+    Declare function pointers
+%>
+<%
+  @function_pointers.each do |fp|
+%>
+<%
+    return_type = cpp_type_for fp[:return]
+    fp_param_decl = fp[:parameters].map do |param_name, param_data|
+      ptr = param_data[:is_pointer] ? '*' : ''
+      type = cpp_type_for param_data
+      "#{type} #{ptr}#{param_name}"
+    end.join(', ')
+%>
+typedef <%= return_type %> (<%= fp[:name] %>)(<%= fp_param_decl %>);
+<%
+  end # end function_pointers.each
+%>

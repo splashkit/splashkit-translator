@@ -1,10 +1,12 @@
 #!/usr/bin/env ruby
 require          'optparse'
 require          'fileutils'
+require          'json'
 require_relative 'parser'
 require_relative 'config'
 require_relative 'translators/clib'
 require_relative 'translators/pascal'
+require_relative 'translators/cpp'
 
 # Access to config vars
 include Config
@@ -14,7 +16,9 @@ options = {
   translators: [],
   src: nil,
   out: nil,
-  validate_only: false
+  validate_only: false,
+  write_to_cache: nil,
+  read_from_cache: nil
 }
 
 #=== Options parse block ===
@@ -72,6 +76,20 @@ EOS
   opts.on('-v', '--validate', help) do
     options[:validate_only] = true
   end
+  # Parse and cache parsed contents to file
+  help = <<-EOS
+Write parsed contents to a cache file
+EOS
+  opts.on('-w', '--writecache FILE', help) do |file|
+    options[:write_to_cache] = File.expand_path file
+  end
+  # Read parsed contents from cache
+  help = <<-EOS
+Read parsed contents from a cache file
+EOS
+  opts.on('-r', '--readcache FILE', help) do |file|
+    options[:read_from_cache] = File.expand_path file
+  end
   opts.separator ''
   opts.separator 'Translators:'
   avaliable_translators.keys.each { |translator| opts.separator "    * #{translator}" }
@@ -79,12 +97,20 @@ end
 # Parse block
 begin
   opt_parser.parse!
-  mandatory = [:src]
+  mandatory = options[:read_from_cache] ? [] : [:src]
   # Add translators to mandatory if not validating
   mandatory << :translators unless options[:validate_only]
   missing = mandatory.select { |param| options[param].nil? }
+  # Check if read cache files exist
+  if options[:read_from_cache]
+    unless File.exist?(options[:read_from_cache])
+      raise OptionParser::InvalidOption,
+            "No such cache file #{options[:read_from_cache]}"
+    end
+  end
   unless missing.empty?
-    raise OptionParser::MissingArgument, 'Missing #{missing.map(&:to_s)} arguments'
+    raise OptionParser::MissingArgument,
+          "Missing #{missing.map(&:to_s).join(', ')} arguments"
   end
 rescue OptionParser::InvalidOption, OptionParser::MissingArgument
   puts $!.to_s
@@ -93,7 +119,22 @@ end
 
 #=== Try parse ===
 begin
-  parsed = Parser.parse(options[:src])
+  # Read cache contents if exists
+  parsed =
+    if options[:read_from_cache]
+      JSON.parse(File.read(options[:read_from_cache]), symbolize_names: true)
+    else
+      Parser.parse options[:src]
+    end
+  if options[:write_to_cache]
+    out = options[:write_to_cache]
+    data = parsed.merge(__cache_src: options[:src])
+    FileUtils.mkdir_p File.dirname out
+    File.write out, JSON.pretty_generate(data)
+  elsif options[:read_from_cache]
+    options[:src] = parsed.delete(:__cache_src)
+    raise '__cache_src missing from cache. Aborting.' if options[:src].nil?
+  end
 rescue Parser::Error
   puts $!.to_s
   exit 1

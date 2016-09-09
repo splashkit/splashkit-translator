@@ -6,6 +6,9 @@ module Parser
   require 'nokogiri'
   require_relative '../lib/core_ext/nokogiri/xml.rb'
 
+  # Case conversion helpers
+  require_relative '../lib/core_ext/string.rb'
+
   module_function
 
   #
@@ -37,7 +40,7 @@ module Parser
       end
       xml = Nokogiri.XML(hfile_xml)
       hfparser = HeaderFileParser.new(File.basename(hfile), xml)
-      [hfparser.header_file_name, hfparser.parse]
+      [hfparser.name.to_sym, hfparser.parse]
     end
     if parsed.empty?
       raise Parser::Error, %{
@@ -85,13 +88,13 @@ end
 # Class to parse a single header file
 #
 class Parser::HeaderFileParser
-  attr_reader :header_file_name
+  attr_reader :name
 
   #
   # Initialises a header parser with required data
   #
   def initialize(name, input_xml)
-    @header_file_name = name
+    @name = name[0..-3] # remove the '.h'
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
@@ -109,15 +112,15 @@ class Parser::HeaderFileParser
 
   #
   # A function which will default to the ppl provided if they are missing
-  # within the params
+  # within the hash provided using the parse_func provided
   #
-  def ppl_default_to(xml, params, ppl)
+  def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
     ppl.each do |p_name, p_type|
-      params[p_name] = (params[p_name] || {}).merge(
-        parse_parameter_info(xml, p_name, p_type)
-      )
+      args = [xml, p_name, p_type]
+      result = parse_func ? send(parse_func, *args) : {}
+      hash[p_name] = (hash[p_name] || {}).merge(result)
     end
-    params
+    hash
   end
 
   #
@@ -142,7 +145,7 @@ class Parser::HeaderFileParser
   def parse_header(xml)
     @header_attrs = parse_attributes(xml).reject { |k, _| k == :Author }
     {
-      name:         xml.xpath('name').text,
+      name:         @name.to_s,
       brief:        xml.xpath('abstract').text,
       description:  xml.xpath('desc').text
     }
@@ -390,7 +393,6 @@ class Parser::HeaderFileParser
     if suffix
       unique_global_name = "#{sanitized_name}_#{suffix}"
       unique_method_name = "#{method_name}_#{suffix}"
-      puts unique_global_name, unique_method_name
     end
     # Unique global name was made?
     unless unique_global_name.nil?
@@ -507,11 +509,11 @@ class Parser::HeaderFileParser
     attributes = parse_attributes(xml)
     merge_data = is_fn_ptr ? parse_function_pointer_typedef(xml) : parse_simple_typedef(xml)
     data = {
-      signature:   signature,
-      name:        xml.xpath('name').text,
-      description: xml.xpath('desc').text,
-      brief:       xml.xpath('abstract').text,
-      attributes:  attributes,
+      signature:           signature,
+      name:                xml.xpath('name').text,
+      description:         xml.xpath('desc').text,
+      brief:               xml.xpath('abstract').text,
+      attributes:          attributes,
       is_function_pointer: is_fn_ptr
     }.merge merge_data
     if attributes && attributes[:class].nil? && data[:is_pointer]
@@ -569,11 +571,44 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Parses enum numbers on a constant
+  #
+  def parse_enum_constant_numbers(xml, constants)
+    xpath_query = "declaration/*[name() = 'declaration_var' or " \
+                  "              name() = 'declaration_number']"
+    result = xml.xpath(xpath_query)
+    result.each_with_index do |parsed, i|
+      # Is this a declaration_var?
+      if parsed.name == 'declaration_var'
+        # Does it exist in the list of constants?
+        constant_name = parsed.text.to_sym
+        if constants[constant_name]
+          # Is the next a declaration_number?
+          next_el = result[i+1]
+          next unless next_el
+          if next_el.name == 'declaration_number'
+            # This number matches the constant
+            constants[constant_name][:number] = next_el.text.to_i
+          end
+        end
+      end
+    end
+    constants
+  end
+
+  #
+  # Parse a single enum constant data
+  #
+  def parse_enum_constant(xml)
+    { description: xml.xpath('desc').text }
+  end
+
+  #
   # Parses enum constants
   #
   def parse_enum_constants(xml, ppl)
     constants = xml.xpath('constants/constant').map do |const|
-      [const.xpath('name').text.to_sym, const.xpath('desc').text]
+      [xml.xpath('name').text.to_sym, parse_enum_constant(const)]
     end.to_h
     # after parsing <constant>, must ensure they align with the ppl
     constants.keys.each do | const |
@@ -584,7 +619,8 @@ class Parser::HeaderFileParser
               'in the enum definition.'
       end
     end
-    constants
+    ppl_default_to(xml, constants, ppl, nil)
+    parse_enum_constant_numbers(xml, constants)
   end
 
   #
@@ -614,6 +650,26 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Parses a single define
+  #
+  def parse_define(xml)
+    definition_xpath = 'declaration/declaration_preprocessor[position() > 2]'
+    {
+      name:        xml.xpath('name').text,
+      description: xml.xpath('desc').text,
+      brief:       xml.xpath('abstract').text,
+      definition:  xml.xpath(definition_xpath).text
+    }
+  end
+
+  #
+  # Parses all hash defines in the xml provided
+  #
+  def parse_defines(xml)
+    xml.xpath('defines/pdefine').map { |d| parse_define(d) }
+  end
+
+  #
   # Parses the XML into a hash representing the object model of every header
   # file
   #
@@ -623,6 +679,7 @@ class Parser::HeaderFileParser
     parsed[:typedefs]    = parse_typedefs(xml)
     parsed[:structs]     = parse_structs(xml)
     parsed[:enums]       = parse_enums(xml)
+    parsed[:defines]     = parse_defines(xml)
     parsed
   end
 end

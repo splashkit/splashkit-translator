@@ -14,8 +14,8 @@ module Translators
 
     def render_templates
       {
-        'sklib.h' => read_template('sklib.h'),
-        'sklib.cpp' => read_template('sklib.cpp'),
+        'sk_clib.h' => read_template('sk_clib.h'),
+        'sk_clib.cpp' => read_template('sk_clib.cpp'),
         'CMakeLists.txt' => read_template('CMakeLists.txt')
       }
     end
@@ -39,11 +39,11 @@ module Translators
         ptr = param_data[:is_pointer] ? '_ptr' : ''
         ref = param_data[:is_reference] ? '_ref' : ''
         arr = param_data[:is_array] ? '_array' : ''
-        "#{memo}__#{param_data[:type]}#{ref}#{ptr}#{arr}"
+        # Replace spaces with underscores for unsigned
+        type = param_data[:type].tr("\s", '_')
+        "#{memo}__#{type}#{ref}#{ptr}#{arr}"
       end
     end
-
-    private
 
     #
     # Alias to static method for usage on instance
@@ -88,18 +88,23 @@ module Translators
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       # Handle function pointers
       return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
-      {
-        'void'      => 'void',
-        'int'       => 'int',
-        'float'     => 'float',
-        'double'    => 'double',
-        'byte'      => 'unsigned char',
-        'bool'      => 'int',
-        'enum'      => 'int',
-        'struct'    => "__sklib_#{type}",
-        'string'    => '__sklib_string',
-        'typealias' => '__sklib_ptr'
-      }[raw_type_for(type)]
+      direct_map =
+        {
+          'void'      => 'void',
+          'int'       => 'int',
+          'float'     => 'float',
+          'double'    => 'double',
+          'byte'      => 'unsigned char',
+          'bool'      => 'int',
+          'enum'      => 'int',
+          'struct'    => "__sklib_#{type}",
+          'string'    => '__sklib_string',
+          'typealias' => '__sklib_ptr'
+        }
+      result = direct_map[raw_type_for(type)]
+      raise "The type `#{type}` cannot yet be translated into a compatible "\
+            "C-type for the SplashKit C Library" if result.nil?
+      result
     end
 
     #
@@ -154,6 +159,9 @@ module Translators
         elsif type_data[:type] =~ /^unsigned\s+\w+/
           # Remove spaces for unsigned
           type_data[:type].tr("\s", '_')
+        elsif type_data[:type] == 'byte'
+          # If byte then to unsigned char
+          'unsigned_char'
         else
           # Use standard type
           type_data[:type]
