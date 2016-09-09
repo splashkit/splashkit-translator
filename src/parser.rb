@@ -571,6 +571,32 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Parses enum numbers on a constant
+  #
+  def parse_enum_constant_numbers(xml, constants)
+    xpath_query = "declaration/*[name() = 'declaration_var' or " \
+                  "              name() = 'declaration_number']"
+    result = xml.xpath(xpath_query)
+    result.each_with_index do |parsed, i|
+      # Is this a declaration_var?
+      if parsed.name == 'declaration_var'
+        # Does it exist in the list of constants?
+        constant_name = parsed.text.to_sym
+        if constants[constant_name]
+          # Is the next a declaration_number?
+          next_el = result[i+1]
+          next unless next_el
+          if next_el.name == 'declaration_number'
+            # This number matches the constant
+            constants[constant_name][:number] = next_el.text.to_i
+          end
+        end
+      end
+    end
+    constants
+  end
+
+  #
   # Parse a single enum constant data
   #
   def parse_enum_constant(xml)
@@ -594,6 +620,7 @@ class Parser::HeaderFileParser
       end
     end
     ppl_default_to(xml, constants, ppl, nil)
+    parse_enum_constant_numbers(xml, constants)
   end
 
   #
