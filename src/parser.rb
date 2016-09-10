@@ -392,7 +392,7 @@ class Parser::HeaderFileParser
     # Make a unique name using the suffix if specified
     if suffix
       unique_global_name = "#{sanitized_name}_#{suffix}"
-      unique_method_name = "#{method_name}_#{suffix}"
+      unique_method_name = "#{method_name}_#{suffix}" unless method_name.nil?
     end
     # Unique global name was made?
     unless unique_global_name.nil?
