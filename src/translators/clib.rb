@@ -99,7 +99,8 @@ module Translators
           'enum'      => 'int',
           'struct'    => "__sklib_#{type}",
           'string'    => '__sklib_string',
-          'typealias' => '__sklib_ptr'
+          'typealias' => '__sklib_ptr',
+          'vector'    => "__sklib_vector_#{type_data[:type_p]}"
         }
       result = direct_map[raw_type_for(type)]
       raise "The type `#{type}` cannot yet be translated into a compatible "\
