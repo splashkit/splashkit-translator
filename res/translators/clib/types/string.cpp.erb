@@ -10,23 +10,28 @@
     6. Free the returned `__sklib_string' from the heap
     7. Return the wrapped `Bar::String'
 %>
-typedef struct {
+typedef struct
+{
   char *string;
   int size;
 } __sklib_string;
-__sklib_string __skadapter__to_sklib_string(std::string s) {
+__sklib_string __skadapter__to_sklib_string(const std::string &s)
+{
     __sklib_string __skreturn;
     __skreturn.size = (int)s.length();
     __skreturn.string = (char *)malloc(__skreturn.size + 1);
     strcpy(__skreturn.string, s.c_str());
     return __skreturn;
 }
-void __skadapter__free_sklib_string_internal_pointer(char *s, int size) {
-    free(s);
-}
-void __skadapter__free_sklib_string(__sklib_string s) {
+void __skadapter__free__sklib_string(__sklib_string s) //TODO: Needs to be callable from adapter (in lib)
+{
     free(s.string);
 }
-std::string __skadapter__to_string(__sklib_string s) {
-    return std::string(s.string);
+std::string __skadapter__to_string(const __sklib_string &s)
+{
+    std:string result = std::string(s.string);
+#ifdef BUILDING_SK_ADAPTER
+    __skadapter__free__sklib_string(s); //TODO: Should be calling __sklib__ to free as it created this!
+#endif
+     return result;
 }

@@ -313,7 +313,7 @@ class Parser::HeaderFileParser
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
 
     #Grab template <T> value for parameter
-    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; <declaration_param>#{param_name}<\/declaration_param>/
+    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; (\s*&amp;)?<declaration_param>#{param_name}<\/declaration_param>/
     _, type_p = *(xml.to_s.match regex)
 
     array = parse_array_dimensions(xml, param_name)
@@ -322,7 +322,7 @@ class Parser::HeaderFileParser
       description: xml.xpath('desc').text,
       is_pointer: !ptr.nil?,
       is_const: !const.nil?,
-      is_reference: !ref.nil?,
+      is_reference: (!ref.nil?) && (const.nil?), # copy const refs
       is_array: !array.empty?,
       array_dimension_sizes: array,
       type_p: type_p
