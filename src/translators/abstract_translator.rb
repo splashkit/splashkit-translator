@@ -41,7 +41,6 @@ module Translators
           result << fn[:parameters].values.select { |param| param[:type] == "vector" }.map { |param| { type_p: param[:type_p] } }
           result
         end.flatten.uniq
-      puts "vector types: #{@vector_types}"
     end
 
     #

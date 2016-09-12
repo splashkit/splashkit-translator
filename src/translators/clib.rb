@@ -78,6 +78,26 @@ module Translators
     end
 
     #
+    # Map the type name to a C-library type
+    #
+    def lib_map_type_for(type_name)
+      direct_map =
+        {
+          'void'      => 'void',
+          'int'       => 'int',
+          'float'     => 'float',
+          'double'    => 'double',
+          'byte'      => 'unsigned char',
+          'bool'      => 'int',
+          'enum'      => 'int',
+          'struct'    => "__sklib_#{type_name}",
+          'string'    => '__sklib_string',
+          'typealias' => '__sklib_ptr',
+        }
+      result = direct_map[raw_type_for(type_name)]
+    end
+
+    #
     # Convert a SK type to a C-library type
     #
     def lib_type_for(type_data)
@@ -88,21 +108,8 @@ module Translators
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       # Handle function pointers
       return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
-      direct_map =
-        {
-          'void'      => 'void',
-          'int'       => 'int',
-          'float'     => 'float',
-          'double'    => 'double',
-          'byte'      => 'unsigned char',
-          'bool'      => 'int',
-          'enum'      => 'int',
-          'struct'    => "__sklib_#{type}",
-          'string'    => '__sklib_string',
-          'typealias' => '__sklib_ptr',
-          'vector'    => "__sklib_vector_#{type_data[:type_p]}"
-        }
-      result = direct_map[raw_type_for(type)]
+      return "__sklib_vector_#{type_data[:type_p]}" if type == 'vector'
+      result = lib_map_type_for(type)
       raise "The type `#{type}` cannot yet be translated into a compatible "\
             "C-type for the SplashKit C Library" if result.nil?
       result
@@ -163,10 +170,14 @@ module Translators
         elsif type_data[:type] == 'byte'
           # If byte then to unsigned char
           'unsigned_char'
+        elsif type_data[:type_p]
+          # A template
+          "#{type_data[:type]}_#{type_data[:type_p]}"
         else
           # Use standard type
           type_data[:type]
         end
+
       "__skadapter__to_#{type}"
     end
 

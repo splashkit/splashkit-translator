@@ -127,7 +127,8 @@ module Translators
     def cpp_type_for(type_data)
       # Only hardcode mapping we need
       return 'unsigned char' if type_data[:type] == 'byte'
-      type_data[:type]
+      type_p = type_data[:type_p] ? "<#{type_data[:type_p]}>" : ''
+      "#{type_data[:type]}#{type_p}"
     end
 
     #

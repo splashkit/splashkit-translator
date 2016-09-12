@@ -1,0 +1,52 @@
+<%#
+    Dynamic arrays from a std::vector<T> in the SK code must be allocated on
+    the heap and freed after use. An example would be:
+
+    1. SK function `Foo' returns a `std::vector<T>' (eg `vector<int>`)
+    2. Convert `std::vector<T>' as `__sklib_vector_<T>'
+       (eg `__sklib_vector_int`)
+    3. Return `__sklib_vector_<T>'
+    4. Language `Bar' calls Lib function `Foo' returning the
+       `__sklib_vector_<T>`
+    5. A dynamic array is created in language `Bar`
+    6. The contents of the `__sklib_vector_<T>`
+    6. Free the returned `__sklib_string' from the heap
+    7. Return the wrapped `Bar::String'
+%>
+<%
+  @vector_types.each do |vector|
+%>
+typedef struct {
+    <%= lib_map_type_for(vector[:type_p]) %> *data;
+    unsigned int size;
+} __sklib_vector_<%= vector[:type_p] %>;
+__sklib_vector_<%= vector[:type_p] %> __skadapter__to_sklib_vector_<%= vector[:type_p] %>(std::vector<<%= vector[:type_p] %>> &input)
+{
+    __sklib_vector_<%= vector[:type_p] %> __skreturn;
+    __skreturn.size = input.size();
+    __skreturn.data = (<%= lib_map_type_for(vector[:type_p]) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(vector[:type_p]) %>));
+    int i = 0;
+    for(<%= vector[:type_p] %> d : input)
+    {
+      __skreturn.data[i] = __skadapter__to_sklib_<%= vector[:type_p] %>(d);
+      i++;
+    }
+    return __skreturn;
+}
+void __skadapter__free_sklib_vector_<%= vector[:type_p] %>(__sklib_vector_<%= vector[:type_p] %> &to_free)
+{
+    free(to_free.data);
+}
+vector<<%= vector[:type_p] %>> __skadapter__to_vector_<%= vector[:type_p] %>(__sklib_vector_<%= vector[:type_p] %> &input)
+{
+    vector<<%= vector[:type_p] %>> __skreturn;
+    for(int i = 0; i < input.size; i++)
+    {
+        __skreturn.push_back(__skadapter__to_<%= vector[:type_p] %>(input.data[i]));
+    }
+    __skadapter__free_sklib_vector_<%= vector[:type_p] %>(input);
+    return __skreturn;
+}
+<%
+  end # end functions.each
+%>
