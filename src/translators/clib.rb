@@ -71,7 +71,7 @@ module Translators
         param_data = param.last
         type = lib_type_for param_data
         # If a C++ reference, we must convert to a C pointer
-        ptr = param_data[:is_pointer] || param_data[:is_reference] ? '*' : ''
+        ptr = param_data[:is_pointer] || (param_data[:is_reference] && ! param_data[:is_const]) ? '*' : ''
         const = param_data[:is_const] ? 'const ' : ''
         "#{memo}, #{const}#{type} #{ptr}#{param_name}"
       end[2..-1]

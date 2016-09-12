@@ -3,7 +3,7 @@
 // ./translate --generate clib,cpp -i test/vectors/with_vector.h --output test/out
 //
 // Make static library:
-// clang++ clang++ -DBUILDING_SK_LIB -std=c++14 -c with_vector.cpp ../out/clib/sk_clib.cpp -I../clib -I../..
+// clang++ -DBUILDING_SK_LIB -std=c++14 -c with_vector.cpp ../out/clib/sk_clib.cpp -I../clib -I../..
 // libtool -static -o libSplashKitBackend.a with_vector.o sk_clib.o
 //
 // Make dynamic library

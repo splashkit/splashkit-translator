@@ -96,8 +96,8 @@ module Translators
         param_data = param.last
         type = cpp_type_for param_data
         ptr = param_data[:is_pointer]   ? '*' : ''
-        ref = param_data[:is_reference] ? '&' : ''
-        const = param_data[:is_const] ? 'const ' : ''
+        ref = (param_data[:is_reference]) ? '&' : ''
+        const = (param_data[:is_const]) ? 'const ' : ''
         "#{memo}, #{const}#{type} #{ptr}#{ref}#{param_name}"
       end[2..-1]
     end

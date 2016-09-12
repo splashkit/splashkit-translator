@@ -42,7 +42,7 @@
     end
     lib_fn_name = @clib.lib_function_name_for(function)
     param_list = function[:parameters].map do |param_name, param_data|
-      address_of_oper = param_data[:is_reference] ? '&' : ''
+      address_of_oper = (param_data[:is_reference] && !param_data[:is_const]) ? '&' : ''
       "#{address_of_oper}__skparam__#{param_name}"
     end.join(', ')
     func_call  = "#{return_val}#{lib_fn_name}(#{param_list})"

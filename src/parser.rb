@@ -322,7 +322,7 @@ class Parser::HeaderFileParser
       description: xml.xpath('desc').text,
       is_pointer: !ptr.nil?,
       is_const: !const.nil?,
-      is_reference: (!ref.nil?) && (const.nil?), # copy const refs
+      is_reference: (!ref.nil?),
       is_array: !array.empty?,
       array_dimension_sizes: array,
       type_p: type_p

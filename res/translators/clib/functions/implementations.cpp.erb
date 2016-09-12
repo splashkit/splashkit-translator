@@ -18,12 +18,12 @@
         if param_data[:is_pointer]
           param_name
         else
-          deref = param_data[:is_reference] ? '*' : ''
+          deref = (param_data[:is_reference] && ! param_data[:is_const]) ? '*' : ''
           adapter_fn = sk_adapter_fn_for param_data
           "#{adapter_fn}(#{deref}#{param_name})"
         end
       ptr = param_data[:is_pointer] ? '*' : ''
-      const = param_data[:is_const] ? 'const ' : ''
+      const = (param_data[:is_const] && !param_data[:is_reference]) ? 'const ' : ''
       type = param_data[:type]
       type_p = param_data[:type_p] ? "<#{param_data[:type_p]}>" : ''
       lib_param_decl = "#{const}#{type}#{type_p} #{ptr}__skparam__#{param_name}"
