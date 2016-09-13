@@ -314,6 +314,7 @@ class Parser::HeaderFileParser
 
     # Grab template <T> value for parameter
     type_parameter = parse_type_parameter xml
+    is_vector = type == 'vector'
 
     array = parse_array_dimensions(xml, param_name)
     {
@@ -324,6 +325,7 @@ class Parser::HeaderFileParser
       is_reference: !ref.nil?,
       is_array: !array.empty?,
       array_dimension_sizes: array,
+      is_vector: is_vector,
       type_parameter: type_parameter
     }
   end
@@ -379,6 +381,7 @@ class Parser::HeaderFileParser
 
     # Extract <T> from generic returns
     type_parameter = parse_type_parameter xml
+    is_vector = type == 'vector'
 
     desc = xml.xpath('result').text
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
@@ -390,8 +393,9 @@ class Parser::HeaderFileParser
       type: type,
       is_pointer: is_pointer,
       is_reference: is_reference,
+      is_vector: is_vector,
       description: desc,
-      type_parameter: type_parameter
+      type_parameter: type_parameter,
     }
   end
 
