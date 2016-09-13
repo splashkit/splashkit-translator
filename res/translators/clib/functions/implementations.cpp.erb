@@ -25,8 +25,8 @@
       ptr = param_data[:is_pointer] ? '*' : ''
       const = (param_data[:is_const] && !param_data[:is_reference]) ? 'const ' : ''
       type = param_data[:type]
-      type_p = param_data[:type_p] ? "<#{param_data[:type_p]}>" : ''
-      lib_param_decl = "#{const}#{type}#{type_p} #{ptr}__skparam__#{param_name}"
+      type_parameter = param_data[:type_parameter] ? "<#{param_data[:type_parameter]}>" : ''
+      lib_param_decl = "#{const}#{type}#{type_parameter} #{ptr}__skparam__#{param_name}"
 %>
     <%= lib_param_decl %> = <%= param_adapted %>;
 <%
@@ -37,8 +37,8 @@
 %>
 <%
     return_val = unless is_void?(function) then
-      type_p = function[:return][:type_p] ? "<#{function[:return][:type_p]}>" : ''
-      "#{function[:return][:type]}#{type_p} __skreturn = "
+      type_parameter = function[:return][:type_parameter] ? "<#{function[:return][:type_parameter]}>" : ''
+      "#{function[:return][:type]}#{type_parameter} __skreturn = "
     end
     param_list = function[:parameters].map do |param_name, _|
       "__skparam__#{param_name}"
