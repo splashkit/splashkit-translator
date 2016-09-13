@@ -14,8 +14,7 @@
     7. Return the wrapped `Bar::String'
 %>
 <%
-  @vector_types.each do |vector|
-    type = vector[:type_parameter]
+  @vector_types.each do |type|
 %>
 typedef struct {
     <%= lib_map_type_for(type) %> *data;
