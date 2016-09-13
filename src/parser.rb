@@ -1,16 +1,21 @@
+require_relative 'logger'
+
 #
 # Parses HeaderDoc into Ruby
 #
 class Parser
   # Monkey patch Nokogiri to squash data down
   require 'nokogiri'
-  require_relative '../lib/core_ext/nokogiri/xml.rb'
+  require_relative '../lib/core_ext/nokogiri/xml'
 
   # Improved IO
   require 'open3'
 
+  # Logging support
+  include Logger
+
   # Case conversion helpers
-  require_relative '../lib/core_ext/string.rb'
+  require_relative '../lib/core_ext/string'
 
   #
   # Checks if HeaderDoc is installed
@@ -19,30 +24,11 @@ class Parser
     system %(which headerdoc2html > /dev/null)
   end
 
-  # Warning ivars
-  attr_reader :warnings, :errors
-
-  #
-  # Warning in parser
-  #
-  def warn(msg)
-    @warnings << msg
-  end
-
-  #
-  # Error in parser
-  #
-  def error(msg)
-    @errors << msg.to_s
-  end
-
   #
   # Initialiser with src
   #
   def initialize(src)
     @src = src
-    @warnings = []
-    @errors = []
   end
 
   #
@@ -69,7 +55,7 @@ class Parser
               "headerdoc2html failed. Command was #{cmd}."
       end
       xml = Nokogiri.XML(hfile_xml)
-      hfparser = HeaderFileParser.new(self, File.basename(hfile), xml)
+      hfparser = HeaderFileParser.new(File.basename(hfile), xml)
       [hfparser.name.to_sym, hfparser.parse]
     end
     if parsed.empty?
@@ -87,6 +73,8 @@ end
 # Class for raising parsing errors
 #
 class Parser::Error < StandardError
+  attr_accessor :signature
+
   def initialize(message, signature = nil)
     @message = message =~ /(?:\?|\.)$/ ? message : message << '.'
     return super(message) unless signature
@@ -106,7 +94,6 @@ end
 # Class for raising parsing rule errors
 #
 class Parser::RuleViolationError < Parser::Error
-  attr_accessor :signature
   def initialize(message, rule_no)
     super message << "\n\tSee "\
           "https://github.com/splashkit/splashkit-translator\#rule-#{rule_no} "\
@@ -120,19 +107,13 @@ end
 class Parser::HeaderFileParser
   attr_reader :name
 
-  def error(err)
-    @parser.error err
-  end
-
-  def warn(err)
-    @parser.warn err
-  end
+  # Logging support
+  include Logger
 
   #
   # Initialises a header parser with required data
   #
-  def initialize(parser, name, input_xml)
-    @parser = parser
+  def initialize(name, input_xml)
     @name = name[0..-3] # remove the '.h'
     @header_attrs = {}
     @input_xml = input_xml
