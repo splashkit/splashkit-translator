@@ -81,8 +81,7 @@ module Translators
     # Map the type name to a C-library type
     #
     def lib_map_type_for(type_name)
-      direct_map =
-        {
+      {
           'void'      => 'void',
           'int'       => 'int',
           'float'     => 'float',
@@ -92,9 +91,8 @@ module Translators
           'enum'      => 'int',
           'struct'    => "__sklib_#{type_name}",
           'string'    => '__sklib_string',
-          'typealias' => '__sklib_ptr',
-        }
-      result = direct_map[raw_type_for(type_name)]
+          'typealias' => '__sklib_ptr'
+      }[raw_type_for(type_name)]
     end
 
     #

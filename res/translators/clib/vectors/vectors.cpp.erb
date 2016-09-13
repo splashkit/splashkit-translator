@@ -15,50 +15,45 @@
 %>
 <%
   @vector_types.each do |vector|
+    type = vector[:type_parameter]
 %>
 typedef struct {
-    <%= lib_map_type_for(vector[:type_p]) %> *data;
+    <%= lib_map_type_for(type) %> *data;
     unsigned int size;
-} __sklib_vector_<%= vector[:type_p] %>;
-__sklib_vector_<%= vector[:type_p] %> __skadapter__to_sklib_vector_<%= vector[:type_p] %>(const std::vector<<%= vector[:type_p] %>> &input)
-{
-    __sklib_vector_<%= vector[:type_p] %> __skreturn;
-    __skreturn.size = input.size();
-    __skreturn.data = (<%= lib_map_type_for(vector[:type_p]) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(vector[:type_p]) %>));
+} __sklib_vector_<%= type %>;
+void __skadapter__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
+<%
+    if type == 'string'
+%>
+    for (int i = 0; i < v.size; i++) {
+        __skadapter__free__sklib_string(v.data[i]);
+    }
+<%
+    end # end if
+%>
+    free(v.data);
+}
+__sklib_vector_<%= type %> __skadapter__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v) {
+    __sklib_vector_<%= type %> __skreturn;
+    __skreturn.size = v.size();
+    __skreturn.data = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(type) %>));
     int i = 0;
-    for(<%= vector[:type_p] %> d : input)
-    {
-      __skreturn.data[i] = __skadapter__to_sklib_<%= vector[:type_p] %>(d);
-      i++;
+    for (<%= type %> d : v) {
+        __skreturn.data[i] = __skadapter__to_sklib_<%= type %>(d);
+        i++;
     }
     return __skreturn;
 }
-void __skadapter__free__sklib_vector_<%= vector[:type_p] %>(__sklib_vector_<%= vector[:type_p] %> to_free)
-{
-<%
-  if( vector[:type_p] == 'string' )
-%>
-    for(int i = 0; i < to_free.size; i++)
-    {
-        __skadapter__free__sklib_string(to_free.data[i]);
-    }
-<%
-  end
-%>
-    free(to_free.data);
-}
-vector<<%= vector[:type_p] %>> __skadapter__to_vector_<%= vector[:type_p] %>(const __sklib_vector_<%= vector[:type_p] %> &input)
-{
-    vector<<%= vector[:type_p] %>> __skreturn;
-    for(int i = 0; i < input.size; i++)
-    {
-        __skreturn.push_back(__skadapter__to_<%= vector[:type_p] %>(input.data[i]));
+vector<<%= type %>> __skadapter__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v) {
+    vector<<%= type %>> __skreturn;
+    for (int i = 0; i < v.size; i++) {
+        __skreturn.push_back(__skadapter__to_<%= type %>(v.data[i]));
     }
 #ifdef BUILDING_SK_ADAPTER
-    __skadapter__free__sklib_vector_<%= vector[:type_p] %>(input); //TODO: Should be calling __sklib__ to free as it created this!
+    __skadapter__free__sklib_vector_<%= type %>(v); //TODO: Should be calling __sklib__ to free as it created this!
 #endif
     return __skreturn;
 }
 <%
-  end # end functions.each
+  end # end vectors.each
 %>
