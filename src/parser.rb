@@ -364,8 +364,10 @@ class Parser::HeaderFileParser
   #
   def parse_vector(xml, type)
     # Extract template <T> value for parameter
-    type_parameter = xml.xpath('declaration/declaration_template').text
     is_vector = type == 'vector'
+    if is_vector
+      type_parameter = xml.xpath('declaration/declaration_template').text
+    end
     # Vector of vectors...
     if is_vector && type_parameter == 'vector'
       raise Parser::Error('Vectors of vectors not yet supported!')
