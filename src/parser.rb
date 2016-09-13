@@ -313,7 +313,7 @@ class Parser::HeaderFileParser
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
 
     # Grab template <T> value for parameter
-    type_parameter = parse_type_parameter xml
+    type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
 
     array = parse_array_dimensions(xml, param_name)
@@ -360,10 +360,20 @@ class Parser::HeaderFileParser
   end
 
   #
-  # Returns type parameter information
+  # Returns vector information if a vector is parsed
   #
-  def parse_type_parameter(xml)
-    xml.xpath('declaration/declaration_template').text
+  def parse_vector(xml, type)
+    # Extract template <T> value for parameter
+    type_parameter = xml.xpath('declaration/declaration_template').text
+    is_vector = type == 'vector'
+    # Vector of vectors...
+    if is_vector && type_parameter == 'vector'
+      raise Parser::Error('Vectors of vectors not yet supported!')
+    end
+    [
+      type_parameter,
+      is_vector
+    ]
   end
 
   #
@@ -378,23 +388,20 @@ class Parser::HeaderFileParser
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
     is_reference = !ref.nil?
-
     # Extract <T> from generic returns
-    type_parameter = parse_type_parameter xml
-    is_vector = type == 'vector'
-
+    type_parameter, is_vector = *parse_vector(xml, type)
     desc = xml.xpath('result').text
+    # Check that pure functions don't have return description
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
       raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
-
     {
       type: type,
+      description: desc,
       is_pointer: is_pointer,
       is_reference: is_reference,
       is_vector: is_vector,
-      description: desc,
       type_parameter: type_parameter,
     }
   end
