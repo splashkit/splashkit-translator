@@ -170,9 +170,9 @@ module Translators
         elsif type_data[:type] == 'byte'
           # If byte then to unsigned char
           'unsigned_char'
-        elsif type_data[:type_p]
+        elsif type_data[:type_parameter]
           # A template
-          "#{type_data[:type]}_#{type_data[:type_p]}"
+          "#{type_data[:type]}_#{type_data[:type_parameter]}"
         else
           # Use standard type
           type_data[:type]
