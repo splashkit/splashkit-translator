@@ -25,13 +25,23 @@ __sklib_string __skadapter__to_sklib_string(const std::string &s)
 }
 void __skadapter__free__sklib_string(__sklib_string s) //TODO: Needs to be callable from adapter (in lib)
 {
+<%
+    # This call effectively does nothing if the translator using this template
+    # should not free heap memory (i.e., C++ using C template)
+    unless free_heap_allocated?
+%>
+    return;
+<%
+    else
+%>
     free(s.string);
+<%
+    end # end unless
+%>
 }
 std::string __skadapter__to_string(const __sklib_string &s)
 {
     std:string result = std::string(s.string);
-#ifdef BUILDING_SK_ADAPTER
     __skadapter__free__sklib_string(s); //TODO: Should be calling __sklib__ to free as it created this!
-#endif
-     return result;
+    return result;
 }

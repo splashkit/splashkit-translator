@@ -193,5 +193,26 @@ module Translators
       type = type.tr("\s", '_')
       "__skadapter__to_#{type}"
     end
+
+    #
+    # C code allocates strings and vectors on the heap. It should therefore
+    # free any allocated heap memory when it is no longer required.
+    #
+    def free_heap_allocated?
+      true
+    end
+  end
+
+  #
+  # Reusable C code for C subset langauge translators (i.e., C++, ObjC)
+  #
+  class ReusableCAdapter < CLib
+    #
+    # C++ translator should not free strings or vectors -- this is the
+    # responsibility of the C lib code that created it.
+    #
+    def free_heap_allocated?
+      false
+    end
   end
 end

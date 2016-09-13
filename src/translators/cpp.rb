@@ -7,8 +7,8 @@ module Translators
   class CPP < AbstractTranslator
     def initialize(data, src)
       super(data, src)
-      # C++ is a superset of C, so we can reuse our CLib implementations
-      @clib = CLib.new(@data, @src)
+      # C++ is a superset of C, so we can reuse our C implementations
+      @clib = ReusableCAdapter.new(@data, @src)
     end
 
     def render_templates
