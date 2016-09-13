@@ -106,7 +106,9 @@ module Translators
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       # Handle function pointers
       return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
-      return "__sklib_vector_#{type_data[:type_p]}" if type == 'vector'
+      # Handle vectors
+      return "__sklib_vector_#{type}" if type_data[:is_vector]
+      # Map directly otherwise...
       result = lib_map_type_for(type)
       raise "The type `#{type}` cannot yet be translated into a compatible "\
             "C-type for the SplashKit C Library" if result.nil?
