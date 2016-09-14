@@ -96,8 +96,8 @@ module Translators
         param_data = param.last
         type = cpp_type_for param_data
         ptr = param_data[:is_pointer]   ? '*' : ''
-        ref = param_data[:is_reference] ? '&' : ''
-        const = param_data[:is_const] ? 'const ' : ''
+        ref = (param_data[:is_reference]) ? '&' : ''
+        const = (param_data[:is_const]) ? 'const ' : ''
         "#{memo}, #{const}#{type} #{ptr}#{ref}#{param_name}"
       end[2..-1]
     end
@@ -127,7 +127,8 @@ module Translators
     def cpp_type_for(type_data)
       # Only hardcode mapping we need
       return 'unsigned char' if type_data[:type] == 'byte'
-      type_data[:type]
+      type_p = type_data[:type_p] ? "<#{type_data[:type_p]}>" : ''
+      "#{type_data[:type]}#{type_p}"
     end
 
     #

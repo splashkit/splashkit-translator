@@ -42,7 +42,7 @@
     end
     lib_fn_name = @clib.lib_function_name_for(function)
     param_list = function[:parameters].map do |param_name, param_data|
-      address_of_oper = param_data[:is_reference] ? '&' : ''
+      address_of_oper = (param_data[:is_reference] && !param_data[:is_const]) ? '&' : ''
       "#{address_of_oper}__skparam__#{param_name}"
     end.join(', ')
     func_call  = "#{return_val}#{lib_fn_name}(#{param_list})"
@@ -63,7 +63,21 @@
     end # end non_const_ptrs.each
 %>
 <%#
-    4. Return __skreturn variable if non-void
+    4. Free any string or vector parameters
+%>
+<%
+    params_to_free = function[:parameters].select do | _, param_data |
+      param_data[:type] == 'string' || param_data[:type] == 'vector'
+    end # end select
+    params_to_free.each do | param_name, param_data |
+      type_name = @clib.lib_type_for(param_data)
+%>
+    __skadapter__free<%=type_name%>(__skparam__<%=param_name%>);
+<%
+    end # end do
+%>
+<%#
+    5. Return __skreturn variable if non-void
 %>
 <%
     unless is_void?(function)

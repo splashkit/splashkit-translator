@@ -311,15 +311,21 @@ class Parser::HeaderFileParser
   def parse_parameter_info(xml, param_name, ppl_type_data)
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
+
+    #Grab template <T> value for parameter
+    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; (\s*&amp;)?<declaration_param>#{param_name}<\/declaration_param>/
+    _, type_p = *(xml.to_s.match regex)
+
     array = parse_array_dimensions(xml, param_name)
     {
       type: type,
       description: xml.xpath('desc').text,
       is_pointer: !ptr.nil?,
       is_const: !const.nil?,
-      is_reference: !ref.nil?,
+      is_reference: (!ref.nil?),
       is_array: !array.empty?,
-      array_dimension_sizes: array
+      array_dimension_sizes: array,
+      type_p: type_p
     }
   end
 
@@ -364,16 +370,23 @@ class Parser::HeaderFileParser
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
     is_reference = !ref.nil?
+
+    # Extract <T> from generic returns
+    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; <declaration_function>/
+    _, type_p = *(xml.to_s.match regex)
+
     desc = xml.xpath('result').text
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
       raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
+
     {
       type: type,
       is_pointer: is_pointer,
       is_reference: is_reference,
-      description: desc
+      description: desc,
+      type_p: type_p
     }
   end
 
