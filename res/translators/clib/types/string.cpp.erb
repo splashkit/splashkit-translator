@@ -23,11 +23,19 @@ __sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s)
     strcpy(__skreturn.string, s.c_str());
     return __skreturn;
 }
-void <%= func_prefix %>__free__sklib_string(__sklib_string s)
+<%
+    # If responsible for freeing allocated heap memory, these functions
+    # need to be exposed (i.e., for every vector and every string) --
+    # hence mark with extern "C"
+    extern_c = 'extern "C" ' if free_heap_allocated?
+%>
+<%= extern_c %>void <%= func_prefix %>__free__sklib_string(__sklib_string s)
 {
 <%
-    # This call effectively does nothing if the translator using this template
-    # should not free heap memory (i.e., C++ using C template)
+    # This call effectively selects which way it should free the heap memory.
+    # If it should free heap allocated memory, then it will using free (i.e.,
+    # C Library code) otherwise it will call the CLib implementation of the
+    # free code (i.e., C++ code).
     unless free_heap_allocated?
 %>
     <%= CLib::FUNC_PREFIX %>__free__sklib_string(s);

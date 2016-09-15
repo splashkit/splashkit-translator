@@ -206,6 +206,12 @@ module Translators
     # Prefix to use for all functions
     #
     FUNC_PREFIX = '__sklib'.freeze
+
+    #
+    # Accessor on instance to FUNC_PREFIX. This is because the templates only
+    # have access to the AbstractTranslator instance -- of which the class
+    # AbstractTranslator does not define FUNC_PREFIX.
+    #
     def func_prefix
       FUNC_PREFIX
     end
@@ -228,6 +234,11 @@ module Translators
     # should be different than the one in CLib
     #
     FUNC_PREFIX = '__skadapter'.freeze
+
+    #
+    # Redeclare func_prefix as superclass implementation refers back to
+    # superclass declaration of FUNC_PREFIX
+    #
     def func_prefix
       FUNC_PREFIX
     end
