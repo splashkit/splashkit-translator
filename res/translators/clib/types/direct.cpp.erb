@@ -7,8 +7,8 @@
     utype = type.tr("\s", "_")
 %>
 typedef <%= type %> __sklib_<%= utype %>;
-__sklib_<%= utype %> __skadapter__to_sklib_<%= utype %>(<%= type %> v) { return v; }
-<%= type %> __skadapter__to_<%= utype %>(<%= type %> v) { return v; }
+__sklib_<%= utype %> <%= func_prefix %>__to_sklib_<%= utype %>(<%= type %> v) { return v; }
+<%= type %> <%= func_prefix %>__to_<%= utype %>(<%= type %> v) { return v; }
 <%
   end # end direct_types.each
 %>

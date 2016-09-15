@@ -1,0 +1,78 @@
+<%#
+    Dynamic arrays from a std::vector<T> in the SK code must be allocated on
+    the heap and freed after use. An example would be:
+
+    1. SK function `Foo' returns a `std::vector<T>' (eg `vector<int>`)
+    2. Convert `std::vector<T>' as `__sklib_vector_<T>'
+       (eg `__sklib_vector_int`)
+    3. Return `__sklib_vector_<T>'
+    4. Language `Bar' calls Lib function `Foo' returning the
+       `__sklib_vector_<T>`
+    5. A dynamic array is created in language `Bar`
+    6. The contents of the `__sklib_vector_<T>`
+    6. Free the returned `__sklib_vector' from the heap
+    7. Return the wrapped `Bar::Vector'
+%>
+<%
+  @vector_types.each do |type|
+%>
+typedef struct {
+    <%= lib_map_type_for(type) %> *data;
+    unsigned int size;
+} __sklib_vector_<%= type %>;
+<%
+    # Must forward declare C Library free function if not yet declared
+    # before we declare the non-C Library free function
+    unless free_heap_allocated?
+%>
+void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%
+    end # end unless
+%>
+void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
+<%
+    # This call effectively does nothing if the translator using this template
+    # should not free heap memory (i.e., C++ using C template)
+    unless free_heap_allocated?
+%>
+    <%= CLib::FUNC_PREFIX %>__free__sklib_string(v);
+<%
+    else
+%>
+<%
+      # Free all heap-alloacted strings in the vector
+      if type == 'string'
+%>
+    for (int i = 0; i < v.size; i++) {
+        <%= func_prefix %>__free__sklib_string(v.data[i]);
+    }
+<%
+      end # end if type is string
+%>
+    free(v.data);
+<%
+    end # end unless free_heap_allocated
+%>
+}
+__sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v) {
+    __sklib_vector_<%= type %> __skreturn;
+    __skreturn.size = v.size();
+    __skreturn.data = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(type) %>));
+    int i = 0;
+    for (<%= type %> d : v) {
+        __skreturn.data[i] = <%= func_prefix %>__to_sklib_<%= type %>(d);
+        i++;
+    }
+    return __skreturn;
+}
+vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v) {
+    vector<<%= type %>> __skreturn;
+    for (int i = 0; i < v.size; i++) {
+        __skreturn.push_back(<%= func_prefix %>__to_<%= type %>(v.data[i]));
+    }
+    <%= func_prefix %>__free__sklib_vector_<%= type %>(v);
+    return __skreturn;
+}
+<%
+  end # end vectors.each
+%>

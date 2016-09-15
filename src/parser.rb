@@ -332,9 +332,9 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
 
-    #Grab template <T> value for parameter
-    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; (\s*&amp;)?<declaration_param>#{param_name}<\/declaration_param>/
-    _, type_p = *(xml.to_s.match regex)
+    # Grab template <T> value for parameter
+    type_parameter, is_vector = *parse_vector(xml, type)
+    is_vector = type == 'vector'
 
     array = parse_array_dimensions(xml, param_name)
     {
@@ -342,10 +342,11 @@ class Parser::HeaderFileParser
       description: xml.xpath('desc').text,
       is_pointer: !ptr.nil?,
       is_const: !const.nil?,
-      is_reference: (!ref.nil?),
+      is_reference: !ref.nil?,
       is_array: !array.empty?,
       array_dimension_sizes: array,
-      type_p: type_p
+      is_vector: is_vector,
+      type_parameter: type_parameter
     }
   end
 
@@ -379,6 +380,25 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Returns vector information if a vector is parsed
+  #
+  def parse_vector(xml, type)
+    # Extract template <T> value for parameter
+    is_vector = type == 'vector'
+    if is_vector
+      type_parameter = xml.xpath('declaration/declaration_template').text
+    end
+    # Vector of vectors...
+    if is_vector && type_parameter == 'vector'
+      raise Parser::Error('Vectors of vectors not yet supported!')
+    end
+    [
+      type_parameter,
+      is_vector
+    ]
+  end
+
+  #
   # Parses a function (pointer) return type
   #
   def parse_function_return_type(xml, raw_return_type = nil)
@@ -390,23 +410,21 @@ class Parser::HeaderFileParser
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
     is_reference = !ref.nil?
-
     # Extract <T> from generic returns
-    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; <declaration_function>/
-    _, type_p = *(xml.to_s.match regex)
-
+    type_parameter, is_vector = *parse_vector(xml, type)
     desc = xml.xpath('result').text
+    # Check that pure functions don't have return description
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
       raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
-
     {
       type: type,
+      description: desc,
       is_pointer: is_pointer,
       is_reference: is_reference,
-      description: desc,
-      type_p: type_p
+      is_vector: is_vector,
+      type_parameter: type_parameter,
     }
   end
 

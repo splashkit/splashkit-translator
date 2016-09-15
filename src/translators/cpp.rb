@@ -7,8 +7,8 @@ module Translators
   class CPP < AbstractTranslator
     def initialize(data, src)
       super(data, src)
-      # C++ is a superset of C, so we can reuse our CLib implementations
-      @clib = CLib.new(@data, @src)
+      # C++ is a superset of C, so we can reuse our C implementations
+      @clib = ReusableCAdapter.new(@data, @src)
     end
 
     def render_templates
@@ -127,8 +127,8 @@ module Translators
     def cpp_type_for(type_data)
       # Only hardcode mapping we need
       return 'unsigned char' if type_data[:type] == 'byte'
-      type_p = type_data[:type_p] ? "<#{type_data[:type_p]}>" : ''
-      "#{type_data[:type]}#{type_p}"
+      type_parameter = type_data[:type_parameter] ? "<#{type_data[:type_parameter]}>" : ''
+      "#{type_data[:type]}#{type_parameter}"
     end
 
     #

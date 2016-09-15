@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <string>
+#include <vector>
 <%
   if header_path.end_with? '.h'
 %>
@@ -22,18 +23,8 @@
   end # end if
 %>
 using std::string;
+using std::vector;
 using namespace splashkit_lib;
 
-<%#
-    Wrap types and adapter functions in a namespace to prevent symbol
-    duplication between this and front end code
-%>
-namespace __sklib_ns {
-    <%= read_template('types/types').indent %>
-
-    <%= read_template('vectors/vectors').indent %>
-}
-
-using namespace __sklib_ns;
-
+<%= read_template('types/types') %>
 <%= read_template('functions/prototypes') %>
