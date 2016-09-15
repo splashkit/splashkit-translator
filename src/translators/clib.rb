@@ -34,13 +34,14 @@ module Translators
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
     def self.lib_function_name_for(function)
-      function[:parameters].reduce("__sklib__#{function[:name]}") do |memo, param|
+      function[:parameters].reduce("#{FUNC_PREFIX}__#{function[:name]}") do |memo, param|
         param_data = param.last
         ptr = param_data[:is_pointer] ? '_ptr' : ''
         ref = param_data[:is_reference] ? '_ref' : ''
         arr = param_data[:is_array] ? '_array' : ''
         # Replace spaces with underscores for unsigned
         type = param_data[:type].tr("\s", '_')
+        type += "_#{param_data[:type_parameter]}" if param_data[:is_vector]
         "#{memo}__#{type}#{ref}#{ptr}#{arr}"
       end
     end
@@ -81,8 +82,7 @@ module Translators
     # Map the type name to a C-library type
     #
     def lib_map_type_for(type_name)
-      direct_map =
-        {
+      {
           'void'      => 'void',
           'int'       => 'int',
           'float'     => 'float',
@@ -92,9 +92,8 @@ module Translators
           'enum'      => 'int',
           'struct'    => "__sklib_#{type_name}",
           'string'    => '__sklib_string',
-          'typealias' => '__sklib_ptr',
-        }
-      result = direct_map[raw_type_for(type_name)]
+          'typealias' => "__sklib_#{type_name}" 
+      }[raw_type_for(type_name)]
     end
 
     #
@@ -108,7 +107,9 @@ module Translators
       return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
       # Handle function pointers
       return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
-      return "__sklib_vector_#{type_data[:type_p]}" if type == 'vector'
+      # Handle vectors
+      return "__sklib_vector_#{type_data[:type_parameter]}" if type_data[:is_vector]
+      # Map directly otherwise...
       result = lib_map_type_for(type)
       raise "The type `#{type}` cannot yet be translated into a compatible "\
             "C-type for the SplashKit C Library" if result.nil?
@@ -170,15 +171,15 @@ module Translators
         elsif type_data[:type] == 'byte'
           # If byte then to unsigned char
           'unsigned_char'
-        elsif type_data[:type_p]
+        elsif type_data[:type_parameter]
           # A template
-          "#{type_data[:type]}_#{type_data[:type_p]}"
+          "#{type_data[:type]}_#{type_data[:type_parameter]}"
         else
           # Use standard type
           type_data[:type]
         end
 
-      "__skadapter__to_#{type}"
+      "#{func_prefix}__to_#{type}"
     end
 
     #
@@ -191,7 +192,63 @@ module Translators
       type = type[2..-1] if type =~ /^\_{2}/
       # Replace spaces with underscores for unsigned
       type = type.tr("\s", '_')
-      "__skadapter__to_#{type}"
+      "#{func_prefix}__to_#{type}"
+    end
+
+    #
+    # C code allocates strings and vectors on the heap. It should therefore
+    # free any allocated heap memory when it is no longer required.
+    #
+    def free_heap_allocated?
+      true
+    end
+
+    #
+    # Prefix to use for all functions
+    #
+    FUNC_PREFIX = '__sklib'.freeze
+
+    #
+    # Accessor on instance to FUNC_PREFIX. This is because the templates only
+    # have access to the AbstractTranslator instance -- of which the class
+    # AbstractTranslator does not define FUNC_PREFIX.
+    #
+    def func_prefix
+      FUNC_PREFIX
+    end
+  end
+
+  #
+  # Reusable C code for C subset langauge translators (i.e., C++, ObjC)
+  #
+  class ReusableCAdapter < CLib
+    #
+    # C++ translator should not free strings or vectors -- this is the
+    # responsibility of the C lib code that created it.
+    #
+    def free_heap_allocated?
+      false
+    end
+
+    #
+    # Prefix to use for all functions -- to prevent symbol errors this
+    # should be different than the one in CLib
+    #
+    FUNC_PREFIX = '__skadapter'.freeze
+
+    #
+    # Redeclare func_prefix as superclass implementation refers back to
+    # superclass declaration of FUNC_PREFIX
+    #
+    def func_prefix
+      FUNC_PREFIX
+    end
+
+    #
+    # Ensure name is the same as the parent class for template lookup
+    #
+    def name
+      'CLib'
     end
   end
 end

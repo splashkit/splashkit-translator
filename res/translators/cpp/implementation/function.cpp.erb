@@ -67,14 +67,14 @@
 %>
 <%
     params_to_free = function[:parameters].select do | _, param_data |
-      param_data[:type] == 'string' || param_data[:type] == 'vector'
+      param_data[:type] == 'string' || param_data[:is_vector]
     end # end select
     params_to_free.each do | param_name, param_data |
       type_name = @clib.lib_type_for(param_data)
 %>
     __skadapter__free<%=type_name%>(__skparam__<%=param_name%>);
 <%
-    end # end do
+    end # end each
 %>
 <%#
     5. Return __skreturn variable if non-void
