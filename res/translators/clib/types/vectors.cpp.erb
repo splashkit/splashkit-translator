@@ -35,7 +35,7 @@ void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type 
       if type == 'string'
 %>
     for (int i = 0; i < v.size; i++) {
-        __skadapter__free__sklib_string(v.data[i]);
+        <%= func_prefix %>__free__sklib_string(v.data[i]);
     }
 <%
       end # end if type is string
@@ -51,7 +51,7 @@ __sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const
     __skreturn.data = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(type) %>));
     int i = 0;
     for (<%= type %> d : v) {
-        __skreturn.data[i] = __skadapter__to_sklib_<%= type %>(d);
+        __skreturn.data[i] = <%= func_prefix %>__to_sklib_<%= type %>(d);
         i++;
     }
     return __skreturn;
@@ -59,9 +59,9 @@ __sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const
 vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v) {
     vector<<%= type %>> __skreturn;
     for (int i = 0; i < v.size; i++) {
-        __skreturn.push_back(__skadapter__to_<%= type %>(v.data[i]));
+        __skreturn.push_back(<%= func_prefix %>__to_<%= type %>(v.data[i]));
     }
-    __skadapter__free__sklib_vector_<%= type %>(v); //TODO: Should be calling __sklib__ to free as it created this!
+    <%= func_prefix %>__free__sklib_vector_<%= type %>(v);
     return __skreturn;
 }
 <%

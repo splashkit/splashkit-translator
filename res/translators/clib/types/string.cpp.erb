@@ -42,6 +42,6 @@ void <%= func_prefix %>__free__sklib_string(__sklib_string s)
 std::string <%= func_prefix %>__to_string(const __sklib_string &s)
 {
     std:string result = std::string(s.string);
-    __skadapter__free__sklib_string(s);
+    <%= func_prefix %>__free__sklib_string(s);
     return result;
 }
