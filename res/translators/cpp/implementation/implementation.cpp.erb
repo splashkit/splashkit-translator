@@ -5,13 +5,11 @@
 using std::string;
 using std::vector;
 
-
 <%#
     Can re-use the templates for C library types (and adapters)
     and function prototypes seeing as they would be the same
 %>
 <%= @clib.read_template 'types/types' %>
-<%= @clib.read_template 'vectors/vectors' %>
 <%= @clib.read_template 'functions/prototypes' %>
 
 <%#

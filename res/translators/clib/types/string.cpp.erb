@@ -15,23 +15,44 @@ typedef struct
   char *string;
   int size;
 } __sklib_string;
-__sklib_string __skadapter__to_sklib_string(const std::string &s)
+<%
+    # Must forward declare C Library free function as external "C" if not yet declared
+    # before we declare the non-C Library free function
+    unless free_heap_allocated?
+%>
+extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_string(__sklib_string s);
+<%
+    end # end unless
+%>
+void <%= func_prefix %>__free__sklib_string(__sklib_string s)
 {
-    __sklib_string __skreturn;
-    __skreturn.size = (int)s.length();
-    __skreturn.string = (char *)malloc(__skreturn.size + 1);
-    strcpy(__skreturn.string, s.c_str());
-    return __skreturn;
-}
-void __skadapter__free__sklib_string(__sklib_string s) //TODO: Needs to be callable from adapter (in lib)
-{
+<%
+    # This call effectively selects which way it should free the heap memory.
+    # If it should free heap allocated memory, then it will using free (i.e.,
+    # C Library code) otherwise it will call the CLib implementation of the
+    # free code (i.e., C++ code).
+    unless free_heap_allocated?
+%>
+    <%= CLib::FUNC_PREFIX %>__free__sklib_string(s);
+<%
+    else
+%>
     free(s.string);
+<%
+    end # end unless
+%>
 }
-std::string __skadapter__to_string(const __sklib_string &s)
+__sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s)
+{
+  __sklib_string __skreturn;
+  __skreturn.size = (int)s.length();
+  __skreturn.string = (char *)malloc(__skreturn.size + 1);
+  strcpy(__skreturn.string, s.c_str());
+  return __skreturn;
+}
+std::string <%= func_prefix %>__to_string(const __sklib_string &s)
 {
     std:string result = std::string(s.string);
-#ifdef BUILDING_SK_ADAPTER
-    __skadapter__free__sklib_string(s); //TODO: Should be calling __sklib__ to free as it created this!
-#endif
-     return result;
+    <%= func_prefix %>__free__sklib_string(s);
+    return result;
 }

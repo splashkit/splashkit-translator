@@ -31,16 +31,17 @@ module Translators
       @structs = @data[:structs] || @data.values.pluck(:structs).flatten
       @functions = @data[:functions] || @data.values.pluck(:functions).flatten
       @defines = @data[:defines] || @data.values.pluck(:defines).flatten
-
       @vector_types =
-        @functions.map do |fn|
-          result = []
-          if fn[:return][:type] == "vector"
-            result << { type_p: fn[:return][:type_p] }
-          end
-          result << fn[:parameters].values.select { |param| param[:type] == "vector" }.map { |param| { type_p: param[:type_p] } }
-          result
-        end.flatten.uniq
+        @functions
+        .map { |fn| fn[:return] }                       # Return types...
+        .select { |rettype| rettype [:is_vector] }      # that are vectors
+        .concat(
+          @functions
+          .map { |fn| fn[:parameters].values }.flatten  # Parameter types...
+          .select { |param| param[:is_vector] }         # that are vectors
+        )
+        .map { |param| param[:type_parameter] }         # Map to their type
+        .uniq                                           # unique type params
     end
 
     #

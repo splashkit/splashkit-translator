@@ -1,15 +1,21 @@
+require_relative 'logger'
+
 #
 # Parses HeaderDoc into Ruby
 #
-module Parser
+class Parser
   # Monkey patch Nokogiri to squash data down
   require 'nokogiri'
-  require_relative '../lib/core_ext/nokogiri/xml.rb'
+  require_relative '../lib/core_ext/nokogiri/xml'
+
+  # Improved IO
+  require 'open3'
+
+  # Logging support
+  include Logger
 
   # Case conversion helpers
-  require_relative '../lib/core_ext/string.rb'
-
-  module_function
+  require_relative '../lib/core_ext/string'
 
   #
   # Checks if HeaderDoc is installed
@@ -19,22 +25,32 @@ module Parser
   end
 
   #
+  # Initialiser with src
+  #
+  def initialize(src)
+    @src = src
+  end
+
+  #
   # Parses HeaderDoc for the provided src directory into a hash
   #
-  def parse(src)
-    unless Parser.headerdoc_installed?
+  def parse
+    unless headerdoc_installed?
       raise Parser::Error 'headerdoc2html is not installed!'
     end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
-    headers_src = "#{src}/#{SK_SRC_CORESDK}/*.h" unless src.end_with? '.h'
-    parsed = Dir[headers_src || src].map do |hfile|
+    headers_src = "#{@src}/#{SK_SRC_CORESDK}/*.h" unless @src.end_with? '.h'
+    parsed = Dir[headers_src || @src].map do |hfile|
       puts "Parsing #{hfile}..."
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
-      proc = IO.popen cmd
-      out = proc.readlines
+      _, stdout, stderr, wait_thr = Open3.popen3 cmd
+      out = stdout.readlines
+      errs = stderr.readlines.join.gsub(/-{3,}(?:.|\n)+?-(?=\n)\n/, '').split("\n")
+      errs.each { |e| warn e }
+      exit_status = wait_thr.value.exitstatus
       hfile_xml = out.empty? ? nil : out.join
-      unless $?.exitstatus.zero?
+      unless exit_status.zero?
         raise Parser::Error,
               "headerdoc2html failed. Command was #{cmd}."
       end
@@ -44,7 +60,7 @@ module Parser
     end
     if parsed.empty?
       raise Parser::Error, %{
-Nothing parsed! Check that #{src} is the correct SplashKit directory and that
+Nothing parsed! Check that #{@src} is the correct SplashKit directory and that
 coresdk/src/coresdk contains the correct C++ source. Check that HeaderDoc
 comments exist (refer to README).
 }
@@ -57,6 +73,8 @@ end
 # Class for raising parsing errors
 #
 class Parser::Error < StandardError
+  attr_accessor :signature
+
   def initialize(message, signature = nil)
     @message = message =~ /(?:\?|\.)$/ ? message : message << '.'
     return super(message) unless signature
@@ -65,7 +83,7 @@ class Parser::Error < StandardError
 
   def to_s
     if @signature
-      "HeaderDoc parser error on `#{@signature}`: #{@message}"
+      "HeaderDoc parser violation on `#{@signature}`:\n\t#{@message}"
     else
       @message
     end
@@ -76,9 +94,8 @@ end
 # Class for raising parsing rule errors
 #
 class Parser::RuleViolationError < Parser::Error
-  attr_accessor :signature
   def initialize(message, rule_no)
-    super message << ' See '\
+    super message << "\n\tSee "\
           "https://github.com/splashkit/splashkit-translator\#rule-#{rule_no} "\
           'for more information.'
   end
@@ -89,6 +106,9 @@ end
 #
 class Parser::HeaderFileParser
   attr_reader :name
+
+  # Logging support
+  include Logger
 
   #
   # Initialises a header parser with required data
@@ -312,9 +332,9 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data.match regex)
 
-    #Grab template <T> value for parameter
-    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; (\s*&amp;)?<declaration_param>#{param_name}<\/declaration_param>/
-    _, type_p = *(xml.to_s.match regex)
+    # Grab template <T> value for parameter
+    type_parameter, is_vector = *parse_vector(xml, type)
+    is_vector = type == 'vector'
 
     array = parse_array_dimensions(xml, param_name)
     {
@@ -322,10 +342,11 @@ class Parser::HeaderFileParser
       description: xml.xpath('desc').text,
       is_pointer: !ptr.nil?,
       is_const: !const.nil?,
-      is_reference: (!ref.nil?),
+      is_reference: !ref.nil?,
       is_array: !array.empty?,
       array_dimension_sizes: array,
-      type_p: type_p
+      is_vector: is_vector,
+      type_parameter: type_parameter
     }
   end
 
@@ -359,6 +380,25 @@ class Parser::HeaderFileParser
   end
 
   #
+  # Returns vector information if a vector is parsed
+  #
+  def parse_vector(xml, type)
+    # Extract template <T> value for parameter
+    is_vector = type == 'vector'
+    if is_vector
+      type_parameter = xml.xpath('declaration/declaration_template').text
+    end
+    # Vector of vectors...
+    if is_vector && type_parameter == 'vector'
+      raise Parser::Error('Vectors of vectors not yet supported!')
+    end
+    [
+      type_parameter,
+      is_vector
+    ]
+  end
+
+  #
   # Parses a function (pointer) return type
   #
   def parse_function_return_type(xml, raw_return_type = nil)
@@ -370,23 +410,21 @@ class Parser::HeaderFileParser
     _, type, ref, ptr = *(raw_return_type.match ret_type_regex)
     is_pointer = !ptr.nil?
     is_reference = !ref.nil?
-
     # Extract <T> from generic returns
-    regex = /<declaration_type>vector<\/declaration_type>&lt;<declaration_template>(\w+?)<\/declaration_template>&gt; <declaration_function>/
-    _, type_p = *(xml.to_s.match regex)
-
+    type_parameter, is_vector = *parse_vector(xml, type)
     desc = xml.xpath('result').text
+    # Check that pure functions don't have return description
     if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
       raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
     end
-
     {
       type: type,
+      description: desc,
       is_pointer: is_pointer,
       is_reference: is_reference,
-      description: desc,
-      type_p: type_p
+      is_vector: is_vector,
+      type_parameter: type_parameter,
     }
   end
 
@@ -464,7 +502,7 @@ class Parser::HeaderFileParser
     }
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
@@ -536,7 +574,7 @@ class Parser::HeaderFileParser
     data
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
@@ -573,7 +611,7 @@ class Parser::HeaderFileParser
     }
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
@@ -652,7 +690,7 @@ class Parser::HeaderFileParser
     }
   rescue Parser::Error => e
     e.signature = signature
-    raise e
+    error e
   end
 
   #
