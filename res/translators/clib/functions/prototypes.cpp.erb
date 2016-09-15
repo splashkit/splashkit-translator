@@ -8,3 +8,15 @@ extern "C" <%= lib_signature_for(function) %>;
 <%
   end # end functions.each
 %>
+<%#
+    If responsible for freeing allocated heap memory, these functions
+    need to be exposed (i.e., for every vector and every string)
+%>
+extern "C" void <%= func_prefix %>__free__sklib_string(__sklib_string s);
+<%
+  @vector_types.each do |type|
+%>
+extern "C" void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%
+  end # end vector_types.each
+%>
