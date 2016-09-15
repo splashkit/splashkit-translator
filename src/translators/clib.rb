@@ -41,6 +41,7 @@ module Translators
         arr = param_data[:is_array] ? '_array' : ''
         # Replace spaces with underscores for unsigned
         type = param_data[:type].tr("\s", '_')
+        type += "_#{param_data[:type_parameter]}" if param_data[:is_vector]
         "#{memo}__#{type}#{ref}#{ptr}#{arr}"
       end
     end
