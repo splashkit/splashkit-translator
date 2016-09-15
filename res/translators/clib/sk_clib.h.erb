@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <string>
+#include <vector>
 <%
   if header_path.end_with? '.h'
 %>
@@ -22,6 +23,7 @@
   end # end if
 %>
 using std::string;
+using std::vector;
 using namespace splashkit_lib;
 
 <%= read_template('types/types') %>
