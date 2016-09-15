@@ -21,12 +21,15 @@ typedef struct {
     unsigned int size;
 } __sklib_vector_<%= type %>;
 <%
-    # If responsible for freeing allocated heap memory, these functions
-    # need to be exposed (i.e., for every vector and every string) --
-    # hence mark with extern "C"
-    extern_c = 'extern "C" ' if free_heap_allocated?
+    # Must forward declare C Library free function if not yet declared
+    # before we declare the non-C Library free function
+    unless free_heap_allocated?
 %>
-<%= extern_c %>void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
+void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%
+    end # end unless
+%>
+void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
 <%
     # This call effectively does nothing if the translator using this template
     # should not free heap memory (i.e., C++ using C template)
