@@ -173,12 +173,13 @@ module Translators
           'unsigned_char'
         elsif type_data[:type_parameter]
           # A template
-          "#{type_data[:type]}_#{type_data[:type_parameter]}"
+          lib_type_for(type_data)
         else
           # Use standard type
           type_data[:type]
         end
-
+      # Remove leading __sklib_ underscores if they exist
+      type = type[2..-1] if type =~ /^\_{2}/
       "#{func_prefix}__to_#{type}"
     end
 
