@@ -2,6 +2,7 @@
 require          'optparse'
 require          'fileutils'
 require          'json'
+require          'colorize'
 require_relative 'parser'
 require_relative 'config'
 require_relative 'translators/clib'
@@ -18,7 +19,8 @@ options = {
   out: nil,
   validate_only: false,
   write_to_cache: nil,
-  read_from_cache: nil
+  read_from_cache: nil,
+  verbose: nil
 }
 
 #=== Options parse block ===
@@ -45,7 +47,7 @@ EOS
 Source header file or SplashKit CoreSDK directory
 EOS
   opts.on('-i', '--input SOURCE', help) do |input|
-    options[:src] = input
+    options[:src] = File.expand_path input
     options[:out] = "#{input}/#{SK_TRANSLATED_OUTPUT}"
   end
   # Generate using translator
@@ -67,7 +69,7 @@ EOS
 Directory to write output to (defaults to /path/to/splashkit/out/translated)
 EOS
   opts.on('-o', '--output OUTPUT', help) do |out|
-    options[:out] = out
+    options[:out] = File.expand_path out
   end
   # Validate only (don't generate)
   help = <<-EOS
@@ -89,6 +91,14 @@ Read parsed contents from a cache file
 EOS
   opts.on('-r', '--readcache FILE', help) do |file|
     options[:read_from_cache] = File.expand_path file
+  end
+  opts.separator ''
+  # Show warnings at the end of parsing
+  help = <<-EOS
+Log HeaderDoc warnings after parsing
+EOS
+  opts.on('-b', '--verbose', help) do |level|
+    options[:verbose] = true
   end
   opts.separator ''
   opts.separator 'Translators:'
@@ -124,7 +134,23 @@ begin
     if options[:read_from_cache]
       JSON.parse(File.read(options[:read_from_cache]), symbolize_names: true)
     else
-      Parser.parse options[:src]
+      parser = Parser.new options[:src]
+      parsed = parser.parse
+      if options[:verbose]
+        parser.warnings.each do |msg|
+          print '[WARN]'.yellow
+          puts " #{msg}"
+        end
+      end
+      unless parser.errors.empty?
+        parser.errors.each do |msg|
+          print '[ERR]'.red
+          puts " #{msg}"
+        end
+        puts 'Errors detected during parsing. Exiting.'
+        exit 1
+      end
+      parsed
     end
   if options[:write_to_cache]
     out = options[:write_to_cache]
