@@ -92,7 +92,7 @@ module Translators
           'enum'      => 'int',
           'struct'    => "__sklib_#{type_name}",
           'string'    => '__sklib_string',
-          'typealias' => '__sklib_ptr'
+          'typealias' => "__sklib_#{type_name}" 
       }[raw_type_for(type_name)]
     end
 

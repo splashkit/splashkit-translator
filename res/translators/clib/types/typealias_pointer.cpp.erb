@@ -7,7 +7,7 @@
 __sklib_ptr <%= func_prefix %>__to_sklib_ptr(__sklib_ptr v) { return v; }
 #define <%= func_prefix %>__make_typealias_adapter(type)\
 typedef __sklib_ptr __sklib_##type;\
-__sklib_ptr <%= func_prefix %>__to_sklib_ptr(type v) { return static_cast<__sklib_ptr>(v); }\
+__sklib_ptr <%= func_prefix %>__to_sklib_##type(type v) { return static_cast<__sklib_ptr>(v); }\
 type <%= func_prefix %>__to_##type(__sklib_ptr v) { return static_cast<type>(v); }
 <%
   @typealiases.each do |typealias|
