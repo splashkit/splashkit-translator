@@ -20,13 +20,13 @@ typedef struct {
     <%= lib_map_type_for(type) %> *data;
     unsigned int size;
 } __sklib_vector_<%= type %>;
-void __skadapter__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
+void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
 <%
     # This call effectively does nothing if the translator using this template
     # should not free heap memory (i.e., C++ using C template)
     unless free_heap_allocated?
 %>
-    return;
+    <%= CLib::FUNC_PREFIX %>__free__sklib_string(v);
 <%
     else
 %>
@@ -45,7 +45,7 @@ void __skadapter__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
     end # end unless free_heap_allocated
 %>
 }
-__sklib_vector_<%= type %> __skadapter__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v) {
+__sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v) {
     __sklib_vector_<%= type %> __skreturn;
     __skreturn.size = v.size();
     __skreturn.data = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(type) %>));
@@ -56,7 +56,7 @@ __sklib_vector_<%= type %> __skadapter__to_sklib_vector_<%= type %>(const std::v
     }
     return __skreturn;
 }
-vector<<%= type %>> __skadapter__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v) {
+vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v) {
     vector<<%= type %>> __skreturn;
     for (int i = 0; i < v.size; i++) {
         __skreturn.push_back(__skadapter__to_<%= type %>(v.data[i]));

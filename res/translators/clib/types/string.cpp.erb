@@ -15,7 +15,7 @@ typedef struct
   char *string;
   int size;
 } __sklib_string;
-__sklib_string __skadapter__to_sklib_string(const std::string &s)
+__sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s)
 {
     __sklib_string __skreturn;
     __skreturn.size = (int)s.length();
@@ -23,14 +23,14 @@ __sklib_string __skadapter__to_sklib_string(const std::string &s)
     strcpy(__skreturn.string, s.c_str());
     return __skreturn;
 }
-void __skadapter__free__sklib_string(__sklib_string s) //TODO: Needs to be callable from adapter (in lib)
+void <%= func_prefix %>__free__sklib_string(__sklib_string s)
 {
 <%
     # This call effectively does nothing if the translator using this template
     # should not free heap memory (i.e., C++ using C template)
     unless free_heap_allocated?
 %>
-    return;
+    <%= CLib::FUNC_PREFIX %>__free__sklib_string(s);
 <%
     else
 %>
@@ -39,9 +39,9 @@ void __skadapter__free__sklib_string(__sklib_string s) //TODO: Needs to be calla
     end # end unless
 %>
 }
-std::string __skadapter__to_string(const __sklib_string &s)
+std::string <%= func_prefix %>__to_string(const __sklib_string &s)
 {
     std:string result = std::string(s.string);
-    __skadapter__free__sklib_string(s); //TODO: Should be calling __sklib__ to free as it created this!
+    __skadapter__free__sklib_string(s);
     return result;
 }

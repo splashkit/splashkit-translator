@@ -34,7 +34,7 @@ module Translators
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
     def self.lib_function_name_for(function)
-      function[:parameters].reduce("__sklib__#{function[:name]}") do |memo, param|
+      function[:parameters].reduce("#{FUNC_PREFIX}__#{function[:name]}") do |memo, param|
         param_data = param.last
         ptr = param_data[:is_pointer] ? '_ptr' : ''
         ref = param_data[:is_reference] ? '_ref' : ''
@@ -178,7 +178,7 @@ module Translators
           type_data[:type]
         end
 
-      "__skadapter__to_#{type}"
+      "#{func_prefix}__to_#{type}"
     end
 
     #
@@ -191,7 +191,7 @@ module Translators
       type = type[2..-1] if type =~ /^\_{2}/
       # Replace spaces with underscores for unsigned
       type = type.tr("\s", '_')
-      "__skadapter__to_#{type}"
+      "#{func_prefix}__to_#{type}"
     end
 
     #
@@ -200,6 +200,14 @@ module Translators
     #
     def free_heap_allocated?
       true
+    end
+
+    #
+    # Prefix to use for all functions
+    #
+    FUNC_PREFIX = '__sklib'.freeze
+    def func_prefix
+      FUNC_PREFIX
     end
   end
 
@@ -213,6 +221,22 @@ module Translators
     #
     def free_heap_allocated?
       false
+    end
+
+    #
+    # Prefix to use for all functions -- to prevent symbol errors this
+    # should be different than the one in CLib
+    #
+    FUNC_PREFIX = '__skadapter'.freeze
+    def func_prefix
+      FUNC_PREFIX
+    end
+
+    #
+    # Ensure name is the same as the parent class for template lookup
+    #
+    def name
+      'CLib'
     end
   end
 end

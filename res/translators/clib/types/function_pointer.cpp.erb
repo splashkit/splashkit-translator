@@ -13,8 +13,8 @@
     end.join(', ')
 %>
 typedef <%= fp[:return][:type] %> (__sklib_<%= fp[:name] %>)(<%= fp_param_decl %>);
-<%= fp[:return][:type] %> (*__skadapter__to_<%= fp[:name] %>(__sklib_<%= fp[:name] %> *v))(<%= fp_param_decl %>) { return v; }
-<%= lib_type_for fp[:return] %> (*__skadapter__to_sklib_<%= fp[:name] %>(<%= fp[:name] %> *v))(<%= fp_param_decl %>) { return v; }
+<%= fp[:return][:type] %> (*<%= func_prefix %>__to_<%= fp[:name] %>(__sklib_<%= fp[:name] %> *v))(<%= fp_param_decl %>) { return v; }
+<%= lib_type_for fp[:return] %> (*<%= func_prefix %>__to_sklib_<%= fp[:name] %>(<%= fp[:name] %> *v))(<%= fp_param_decl %>) { return v; }
 <%
   end # end function_pointers.each
 %>
