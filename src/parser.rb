@@ -49,8 +49,8 @@ class Parser
       out = stdout.readlines
       errs = stderr.readlines.join.gsub(/-{3,}(?:.|\n)+?-(?=\n)\n/, '').split("\n")
       errs.each do |e|
-        unless e =~ /Warning: UID/
-          warn "\n#{e}"
+        unless e =~ /(Warning: UID.*)|(No default encoding.*)|(specifying an appropriate value.*)/
+          warn "#{e}"
         end
       end
       exit_status = wait_thr.value.exitstatus

@@ -145,13 +145,13 @@ begin
       parsed = parser.parse
       if options[:verbose]
         parser.warnings.each do |msg|
-          print '[WARN]'.yellow
+          print 'translator: ', 'warning:'.yellow
           puts " #{msg}"
         end
       end
       unless parser.errors.empty?
         parser.errors.each do |msg|
-          print '[ERR]'.red
+          print 'translator: ', 'error:'.red
           puts " #{msg}"
         end
         puts 'Errors detected during parsing. Exiting.'
