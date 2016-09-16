@@ -155,11 +155,15 @@ class Parser::HeaderFileParser
   # Parses HeaderDoc's parsedparameterlist (ppl) element
   #
   def parse_ppl(xml)
-    # puts "In parse ppl"
-    # puts "**************"
-    # puts xml
-    # puts "**************"
+     xml.xpath('parsedparameterlist/parsedparameter').map do |p|
+      [p.xpath('name').text.to_sym, p.xpath('type').text]
+    end.to_h
+  end
 
+  #
+  # Parses the parameter declaration
+  #
+  def parse_parameter_declaration(xml)
     # Extract declaration details from the xml
     decl = xml.xpath('declaration')
     decl_types = decl.xpath('declaration_type')
@@ -549,7 +553,7 @@ class Parser::HeaderFileParser
   def parse_function(xml)
     signature = parse_signature(xml)
     # Values from the <parsedparameter> elements
-    ppl = parse_ppl(xml)
+    ppl = parse_parameter_declaration(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
 
