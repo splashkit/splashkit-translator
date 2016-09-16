@@ -49,6 +49,8 @@ class Parser
       out = stdout.readlines
       errs = stderr.readlines.join.gsub(/-{3,}(?:.|\n)+?-(?=\n)\n/, '').split("\n")
       errs.each do |e|
+        #fix headerdoc warning of unknown fields
+        e = e.gsub(/:Unknown field type/, ': warning: Unknown field type')
         unless e =~ /(Warning: UID.*)|(No default encoding.*)|(specifying an appropriate value.*)/
           warn "#{e}"
         end

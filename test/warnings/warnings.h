@@ -33,8 +33,9 @@ void extra_return();
 
 /**
  * The enum decl
- * 
+ *
  * @constant A  Test A
+ * @fred
  */
 enum Test
 {
