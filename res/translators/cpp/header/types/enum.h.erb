@@ -10,7 +10,7 @@ typedef enum {
       is_last = constant_key == enum[:constants].keys.last
       has_numb = constant_data[:number].is_a? Integer
       numb = " = #{constant_data[:number]}" if has_numb
-      last = ',' if is_last
+      last = ',' unless is_last
       constant_decl = "#{constant_key}#{numb}#{last}"
 %>
     <%= constant_decl %>
