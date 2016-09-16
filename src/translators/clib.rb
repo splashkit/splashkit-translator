@@ -9,7 +9,16 @@ module Translators
 
     def initialize(data, src)
       super(data, src)
-      @direct_types = %w(int unsigned\ int float double char unsigned\ char)
+      @direct_types = %w(
+        int
+        short
+        long
+        float
+        double
+        char
+        unsigned\ int
+        unsigned\ char
+      )
     end
 
     def render_templates
