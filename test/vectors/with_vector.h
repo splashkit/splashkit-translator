@@ -37,4 +37,11 @@ namespace splashkit_lib
    * @returns Values 1 to count in a vector
    */
   vector<float> get_number_list(int count);
+
+  /**
+   * Update the passed in values..
+   *
+   * @param nums The values passed both in and out...
+   */
+  void update_numbers(vector<int> &nums);
 }

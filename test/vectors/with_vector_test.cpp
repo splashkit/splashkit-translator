@@ -1,5 +1,7 @@
 #include "with_vector.h"
 
+#include <iostream>
+
 // using namespace splashkit;
 
 int main()
@@ -23,6 +25,19 @@ int main()
 
   for (size_t i = 0; i < 100000; i++) {
     print_float_list(nums);
+  }
+
+  std:vector<int> vals;
+  vals.push_back(1);
+  vals.push_back(2);
+  vals.push_back(3);
+
+  std::cout << "Update 1,2,3" << std::endl;
+  update_numbers(vals);
+
+  for (int i : nums )
+  {
+    std::cout << i << std::endl;
   }
 
   return 0;
