@@ -196,6 +196,14 @@ module Translators
     end
 
     #
+    # Check
+    #
+    def type_can_be_directly_copies?(type_data)
+      # puts "#{type_data}"
+      return ( ! type_data[:is_vector]) && ( ! type_data[:type] == "string" )
+    end
+
+    #
     # C code allocates strings and vectors on the heap. It should therefore
     # free any allocated heap memory when it is no longer required.
     #

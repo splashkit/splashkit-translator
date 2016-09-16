@@ -44,4 +44,13 @@ namespace splashkit_lib
    * @param nums The values passed both in and out...
    */
   void update_numbers(vector<int> &nums);
+
+  /**
+   * Test multiple types of vectors...
+   * 
+   * @param ivec [description]
+   * @param svec [description]
+   * @param fvec [description]
+   */
+  void test_multiple_vectors(const vector<int> &ivec, const vector<string> &svec, const vector<float> &fvec);
 }

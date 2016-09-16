@@ -36,7 +36,7 @@ class Parser
   #
   def parse
     unless headerdoc_installed?
-      raise Parser::Error 'headerdoc2html is not installed!'
+      raise Parser::Error, 'headerdoc2html is not installed!'
     end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
     # If only parsing one file then don't amend /*.h
@@ -135,11 +135,14 @@ class Parser::HeaderFileParser
   # within the hash provided using the parse_func provided
   #
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
+    # puts "-- In ppl default to: #{ppl}"
     ppl.each do |p_name, p_type|
+      # puts " ---- #{p_name}, #{p_type}"
       args = [xml, p_name, p_type]
       result = parse_func ? send(parse_func, *args) : {}
-      hash[p_name] = (hash[p_name] || {}).merge(result)
+      hash[p_name.to_sym] = (hash[p_name.to_sym] || {}).merge(result)
     end
+    # puts "-- RETURNING:\n#{hash}\n--\n"
     hash
   end
 
@@ -147,9 +150,49 @@ class Parser::HeaderFileParser
   # Parses HeaderDoc's parsedparameterlist (ppl) element
   #
   def parse_ppl(xml)
-    xml.xpath('parsedparameterlist/parsedparameter').map do |p|
-      [p.xpath('name').text.to_sym, p.xpath('type').text]
-    end.to_h
+    # puts "In parse ppl"
+    # puts "**************"
+    # puts xml
+    # puts "**************"
+
+    # Extract declaration details from the xml
+    decl = xml.xpath('declaration')
+    decl_types = decl.xpath('declaration_type')
+
+    # Get the type of the function
+    fn_type = decl_types[0].children.to_s
+    # types of the parameters...
+    param_types = decl_types[1..-1].map { |t| t.text }
+    # names of the parameters
+    param_names = decl.xpath('declaration_param').map { |n| n.text.to_sym }
+    # names of type parameters
+    template_types = decl.xpath('declaration_template').map { |n| n.text }
+
+    # i tracks the template_types... first may be the return type
+    i = fn_type == 'vector' ? 1 : 0
+
+    param_map = Hash[*param_names.zip(param_types).map do | n, t |
+      result ={ n => { base_type: t } }
+      if t == 'vector'
+        result[n][:type_parameter] = template_types[i]
+        i = i + 1
+      end
+
+      result
+    end.collect{|h| h.to_a}.flatten]
+
+    unless i == template_types.count
+      raise Parser::Error,
+        "Unknown template type... mapped #{i + 1} or #{param_types.count + 1} templates !"
+    end
+
+    xml.xpath('parsedparameterlist/parsedparameter').each do |p|
+      param_map[p.xpath('name').text.to_sym][:type] = p.xpath('type').text
+    end
+
+    # puts param_map
+    # puts "**************"
+    param_map
   end
 
   #
@@ -330,12 +373,17 @@ class Parser::HeaderFileParser
   #
   def parse_parameter_info(xml, param_name, ppl_type_data)
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
-    _, const, type, ref, ptr = *(ppl_type_data.match regex)
+    _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
     # Grab template <T> value for parameter
-    type_parameter, is_vector = *parse_vector(xml, type)
+    # type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
     array = parse_array_dimensions(xml, param_name)
+
+    if is_vector && ppl_type_data[:type_parameter].nil?
+      raise Parser::Error, "Vector with unknown type parameter! #{param_name}, #{type_details}"
+    end
+
     {
       type: type,
       description: xml.xpath('desc').text,
@@ -345,7 +393,7 @@ class Parser::HeaderFileParser
       is_array: !array.empty?,
       array_dimension_sizes: array,
       is_vector: is_vector,
-      type_parameter: type_parameter
+      type_parameter: ppl_type_data[:type_parameter]
     }
   end
 
@@ -356,7 +404,10 @@ class Parser::HeaderFileParser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
+    # puts "Looking for #{name} in #{ppl}"
     type = ppl[name.to_sym]
+    # puts "FOUND: #{type}\n\n"
+
     if type.nil?
       raise Parser::Error,
             "Mismatched headerdoc @param '#{name}'. Check it exists in the " \
@@ -386,11 +437,16 @@ class Parser::HeaderFileParser
     # Extract template <T> value for parameter
     is_vector = type == 'vector'
     if is_vector
+      # Check if return type...
       type_parameter = xml.xpath('declaration/declaration_template').text
+      if type_parameter.nil?
+        # check if
+        raise Parser::Error, 'Unable to detect vector type!'
+      end
     end
     # Vector of vectors...
     if is_vector && type_parameter == 'vector'
-      raise Parser::Error('Vectors of vectors not yet supported!')
+      raise Parser::Error, 'Vectors of vectors not yet supported!'
     end
     [
       type_parameter,

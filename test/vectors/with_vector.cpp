@@ -81,4 +81,9 @@ namespace splashkit_lib
 
       nums.push_back(sum);
   }
+
+  void test_multiple_vectors(const vector<int> &ivec, const vector<string> &svec, const vector<float> &fvec)
+  {
+    
+  }
 }
