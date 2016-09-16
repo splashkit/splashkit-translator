@@ -50,6 +50,9 @@
     <%= func_call %>;
 <%#
     3. Update all non-const references.
+      - if they can be directly updated then just copy the param across as the
+        lib did the work for us!
+      - otherwise use the update function.
 %>
 <%
     non_const_refs = function[:parameters].select do | _, param_data |

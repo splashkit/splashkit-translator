@@ -107,7 +107,9 @@ vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vect
 <%#
     UPDATE FUNCTIONS:
 
-    These take existing vector sklib_vector values and update them.
+    These take existing vector sklib_vector values and update them. These are
+    used with pass by ref parameters to update the sklib_vector or std::vector
+    from the other component.
 %>
 
 <%
@@ -138,6 +140,7 @@ void <%= func_prefix %>__update_from_vector_<%= type %>(__sklib_vector_<%= type 
         __skreturn.push_back(d);
     }
 
+    // Now it is copied... we need to get the library to free this!
     <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(v);
 }
 <%

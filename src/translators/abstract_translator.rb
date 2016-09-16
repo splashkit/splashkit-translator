@@ -218,7 +218,25 @@ module Translators
     end
 
     #
-    # Check if the type can be copied...
+    # On an update of a ref parameter:
+    #
+    # Check if the type can be copied across the boundary directly. This will
+    # include the primitive types. These can just be directly assigned to the
+    # parameter in the adapter. So...
+    #
+    # - The library can directly assign a value to the parameter pointer
+    # - The adapter can just copy the value in the parameter copy to the
+    #   original parameter.
+    #
+    # But.. if this is false, it means that you cant just copy this directly
+    # across. Why? Its a dynamic array. The adapter will need to free the
+    # original dynamic array, so we need to update the original array. This will
+    # then pass back data in the `from_lib` fields of the struct, leaving the
+    # `from_app` fields untouched. So...
+    #
+    # - The library needs to use update to malloc into the `from_lib` fields.
+    # - The adapter will need to update the original vector/dynamic array. The
+    #   size may have changed, the values may have changed.
     #
     def type_can_be_directly_copied?(type_data)
       # puts "#{type_data}"
