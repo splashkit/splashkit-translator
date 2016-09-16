@@ -94,6 +94,8 @@ module Translators
       {
           'void'      => 'void',
           'int'       => 'int',
+          'short'     => 'short',
+          'long'      => 'long',
           'float'     => 'float',
           'double'    => 'double',
           'byte'      => 'unsigned char',
