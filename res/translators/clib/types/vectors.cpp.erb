@@ -22,9 +22,24 @@
 //-----------------------------------------------------------------------------
 
 typedef struct {
-    <%= lib_map_type_for(type) %> *data;
-    unsigned int size;
+    // Values passed to SplashKit will come in here...
+    <%= lib_map_type_for(type) %> *data_from_app;
+    unsigned int size_from_app;
+
+    // Values returns will come through here...
+    <%= lib_map_type_for(type) %> *data_from_lib;
+    unsigned int size_from_lib;
 } __sklib_vector_<%= type %>;
+
+<%
+    if is_splashkit_library?
+      update_field_suffix = "_from_lib"
+      read_field_suffix = "_from_app"
+    else
+      update_field_suffix = "_from_app"
+      read_field_suffix = "_from_lib"
+    end
+%>
 
 <%
     # Must forward declare C Library free function if not yet declared
@@ -42,25 +57,28 @@ extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib
     if type == 'string'
 %>
     // Freeing vector<string> requires us to free the strings within the vector
-    for (unsigned int i = 0; i < v.size; i++)
+    for (unsigned int i = 0; i < v.size<%= update_field_suffix %>; i++)
     {
-        <%= func_prefix %>__free__sklib_string(v.data[i]);
+        <%= func_prefix %>__free__sklib_string(v.data<%= update_field_suffix %>[i]);
     }
 <%
     end # end if type is string
 %>
-    free(v.data);
+    free(v.data<%= update_field_suffix %>);
 }
 
 __sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v)
 {
     __sklib_vector_<%= type %> __skreturn;
-    __skreturn.size = static_cast<unsigned int>(v.size());
-    __skreturn.data = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(type) %>));
-    int i = 0;
+    __skreturn.size<%= read_field_suffix %> = 0;
+    __skreturn.data<%= read_field_suffix %> = nullptr;
+
+    __skreturn.size<%= update_field_suffix %> = static_cast<unsigned int>(v.size());
+    __skreturn.data<%= update_field_suffix %> = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size<%= update_field_suffix %> * sizeof(<%= lib_map_type_for(type) %>));
+    unsigned int i = 0;
     for (<%= type %> d : v)
     {
-        __skreturn.data[i] = <%= func_prefix %>__to_sklib_<%= type %>(d);
+        __skreturn.data<%= update_field_suffix %>[i] = <%= func_prefix %>__to_sklib_<%= type %>(d);
         i++;
     }
     return __skreturn;
@@ -69,8 +87,8 @@ __sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const
 vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v)
 {
     vector<<%= type %>> __skreturn;
-    for (int i = 0; i < v.size; i++) {
-        __skreturn.push_back(<%= func_prefix %>__to_<%= type %>(v.data[i]));
+    for (int i = 0; i < v.size<%= read_field_suffix %>; i++) {
+        __skreturn.push_back(<%= func_prefix %>__to_<%= type %>(v.data<%= read_field_suffix %>[i]));
     }
 <%
     # Only the adapters need to call free on return.
@@ -85,6 +103,46 @@ vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vect
 %>
     return __skreturn;
 }
+
+<%#
+    UPDATE FUNCTIONS:
+
+    These take existing vector sklib_vector values and update them.
+%>
+
+<%
+    if is_splashkit_library?
+      # Only the library will update a __sklib__vector
+%>
+void <%= func_prefix %>__update_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v, __sklib_vector_<%= type %> *__skreturn)
+{
+    __skreturn->size<%= update_field_suffix %> = static_cast<unsigned int>(v.size());
+    __skreturn->data<%= update_field_suffix %> = (<%= lib_map_type_for(type) %> *)malloc(__skreturn->size<%= update_field_suffix %> * sizeof(<%= lib_map_type_for(type) %>));
+    unsigned int i = 0;
+    for (<%= type %> d : v)
+    {
+        __skreturn->data<%= update_field_suffix %>[i] = <%= func_prefix %>__to_sklib_<%= type %>(d);
+        i++;
+    }
+}
+<%
+    else # its an adapter... only adapters will update vectors
+%>
+void <%= func_prefix %>__update_vector_<%= type %>(__sklib_vector_<%= type %> &v, std::vector<<%= type %>> &__skreturn)
+{
+    __skreturn.clear();
+
+    for (int i = 0; i < v.size<%= read_field_suffix %>; i++)
+    {
+        <%= type %> d = <%= func_prefix %>__to_<%= type %>(v.data<%= read_field_suffix %>[i]);
+        __skreturn.push_back(d);
+    }
+
+    <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(v);
+}
+<%
+  end # end if is library
+%>
 
 <%
   end # end vectors.each
