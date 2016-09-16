@@ -9,8 +9,8 @@ typedef enum {
     enum[:constants].each do |constant_key, constant_data|
       is_last = constant_key == enum[:constants].keys.last
       has_numb = constant_data[:number].is_a? Integer
-      numb = has_numb ? " = #{constant_data[:number]}" : ''
-      last = is_last ? '' : ','
+      numb = " = #{constant_data[:number]}" if has_numb
+      last = ',' if is_last
       constant_decl = "#{constant_key}#{numb}#{last}"
 %>
     <%= constant_decl %>

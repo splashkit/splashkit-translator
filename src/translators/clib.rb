@@ -36,9 +36,9 @@ module Translators
     def self.lib_function_name_for(function)
       function[:parameters].reduce("#{FUNC_PREFIX}__#{function[:name]}") do |memo, param|
         param_data = param.last
-        ptr = param_data[:is_pointer] ? '_ptr' : ''
-        ref = param_data[:is_reference] ? '_ref' : ''
-        arr = param_data[:is_array] ? '_array' : ''
+        ptr = '_ptr' if param_data[:is_pointer]
+        ref = '_ref' if param_data[:is_reference]
+        arr = '_array' if param_data[:is_array]
         # Replace spaces with underscores for unsigned
         type = param_data[:type].tr("\s", '_')
         type += "_#{param_data[:type_parameter]}" if param_data[:is_vector]
@@ -72,8 +72,8 @@ module Translators
         param_data = param.last
         type = lib_type_for param_data
         # If a C++ reference, we must convert to a C pointer
-        ptr = param_data[:is_pointer] || (param_data[:is_reference] && ! param_data[:is_const]) ? '*' : ''
-        const = param_data[:is_const] ? 'const ' : ''
+        ptr = '*' if param_data[:is_pointer] || (param_data[:is_reference] && !param_data[:is_const])
+        const = 'const ' if param_data[:is_const]
         "#{memo}, #{const}#{type} #{ptr}#{param_name}"
       end[2..-1]
     end
@@ -112,7 +112,7 @@ module Translators
       # Map directly otherwise...
       result = lib_map_type_for(type)
       raise "The type `#{type}` cannot yet be translated into a compatible "\
-            "C-type for the SplashKit C Library" if result.nil?
+            'C-type for the SplashKit C Library' if result.nil?
       result
     end
 
@@ -144,11 +144,11 @@ module Translators
     def lib_struct_field_for(field_name, field_data)
       type = field_data[:type]
       is_pointer = field_data[:is_pointer]
-      ptr_star = is_pointer ? '*' : ''
+      ptr_star = '*' if is_pointer
       is_array   = field_data[:is_array]
       # convert n multidimensional array to 1 dimensional array
       size_of_arr = get_Nd_array_size_as_1d(field_data)
-      array_decl = is_array ? "[#{size_of_arr}]" : ''
+      array_decl = "[#{size_of_arr}]" if is_array
       # actually a __sklib_ptr == void *?
       if is_pointer && type == 'void'
         "__sklib_ptr #{field_name}"

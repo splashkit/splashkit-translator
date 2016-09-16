@@ -95,9 +95,9 @@ module Translators
         param_name = param.first
         param_data = param.last
         type = cpp_type_for param_data
-        ptr = param_data[:is_pointer]   ? '*' : ''
-        ref = (param_data[:is_reference]) ? '&' : ''
-        const = (param_data[:is_const]) ? 'const ' : ''
+        ptr = '*' if param_data[:is_pointer]
+        ref = '&' if param_data[:is_reference]
+        const = 'const' if param_data[:is_const]
         "#{memo}, #{const}#{type} #{ptr}#{ref}#{param_name}"
       end[2..-1]
     end
@@ -107,8 +107,8 @@ module Translators
     #
     def cpp_struct_field_for(field_name, field_data)
       type = cpp_type_for field_data
-      ptr = field_data[:is_pointer] ? '*' : ''
-      ref = field_data[:is_reference] ? '&' : ''
+      ptr = '*' if field_data[:is_pointer]
+      ref = '&' if field_data[:is_reference]
       if field_data[:is_array]
         array_dims = field_data[:array_dimension_sizes]
         array_decl =
@@ -127,7 +127,7 @@ module Translators
     def cpp_type_for(type_data)
       # Only hardcode mapping we need
       return 'unsigned char' if type_data[:type] == 'byte'
-      type_parameter = type_data[:type_parameter] ? "<#{type_data[:type_parameter]}>" : ''
+      type_parameter = "<#{type_data[:type_parameter]}>" if type_data[:type_parameter]
       "#{type_data[:type]}#{type_parameter}"
     end
 

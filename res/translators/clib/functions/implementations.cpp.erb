@@ -18,14 +18,14 @@
         if param_data[:is_pointer]
           param_name
         else
-          deref = (param_data[:is_reference] && ! param_data[:is_const]) ? '*' : ''
+          deref = '*' if (param_data[:is_reference] && ! param_data[:is_const])
           adapter_fn = sk_adapter_fn_for param_data
           "#{adapter_fn}(#{deref}#{param_name})"
         end
-      ptr = param_data[:is_pointer] ? '*' : ''
-      const = (param_data[:is_const] && !param_data[:is_reference]) ? 'const ' : ''
+      ptr = '*' if param_data[:is_pointer]
+      const = 'const ' if param_data[:is_const] && !param_data[:is_reference]
       type = param_data[:type]
-      type_parameter = param_data[:type_parameter] ? "<#{param_data[:type_parameter]}>" : ''
+      type_parameter = "<#{param_data[:type_parameter]}>" if param_data[:type_parameter]
       lib_param_decl = "#{const}#{type}#{type_parameter} #{ptr}__skparam__#{param_name}"
 %>
     <%= lib_param_decl %> = <%= param_adapted %>;
@@ -37,7 +37,7 @@
 %>
 <%
     return_val = unless is_void?(function) then
-      type_parameter = function[:return][:type_parameter] ? "<#{function[:return][:type_parameter]}>" : ''
+      type_parameter = "<#{function[:return][:type_parameter]}>" if function[:return][:type_parameter]
       "#{function[:return][:type]}#{type_parameter} __skreturn = "
     end
     param_list = function[:parameters].map do |param_name, _|
