@@ -97,7 +97,7 @@ module Translators
         type = cpp_type_for param_data
         ptr = '*' if param_data[:is_pointer]
         ref = '&' if param_data[:is_reference]
-        const = 'const' if param_data[:is_const]
+        const = 'const ' if param_data[:is_const]
         "#{memo}, #{const}#{type} #{ptr}#{ref}#{param_name}"
       end[2..-1]
     end
