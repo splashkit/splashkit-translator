@@ -308,7 +308,7 @@ class Parser::HeaderFileParser
     # by the `class`
     if self_value && ppl
       class_type = attrs[:class]
-      self_type  = ppl[self_value.to_sym]
+      self_type  = ppl[self_value.to_sym][:type]
       unless class_type == self_type
         raise Parser::RuleViolationError.new(
               'Attribute `self` must list a parameter whose type matches ' \
