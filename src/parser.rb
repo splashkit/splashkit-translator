@@ -156,7 +156,7 @@ class Parser::HeaderFileParser
   #
   def parse_ppl(xml)
      xml.xpath('parsedparameterlist/parsedparameter').map do |p|
-      [p.xpath('name').text.to_sym, p.xpath('type').text]
+      [p.xpath('name').text.to_sym, { type: p.xpath('type').text } ]
     end.to_h
   end
 
