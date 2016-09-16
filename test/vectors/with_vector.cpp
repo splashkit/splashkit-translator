@@ -1,14 +1,13 @@
 //
 // Generate adapter
-// ./translate --generate clib,cpp -i test/vectors/with_vector.h --output test/out
+// ../../translate --generate clib,cpp -i with_vector.h --output ../out
 //
 // Make static library:
 // clang++ -DBUILDING_SK_LIB -std=c++14 -c with_vector.cpp ../out/clib/sk_clib.cpp -I../clib -I../..
 // libtool -static -o libSplashKitBackend.a with_vector.o sk_clib.o
 //
 // Make dynamic library
-// clang++ -DBUILDING_SK_ADAPTER -std=c++14 -shared -g splashkit.cpp -I../clib -I../../.. -L../../vectors -lSplashKitBackend -o libSplashKit.dylib -Wl,-install_name,'@rpath/libSplashKit.dylib'
-// mv libSplashKit.dylib ../../vectors/
+// clang++ -DBUILDING_SK_ADAPTER -std=c++14 -shared -g ../out/cpp/splashkit.cpp -I../out/clib -I../out/cpp -L. -lSplashKitBackend -o libSplashKit.dylib -Wl,-install_name,'@rpath/libSplashKit.dylib'
 //
 // Compile program
 // mv with_vector.h with_vector.h.old

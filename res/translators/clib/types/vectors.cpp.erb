@@ -16,63 +16,76 @@
 <%
   @vector_types.each do |type|
 %>
+
+//-----------------------------------------------------------------------------
+// SplashKit vector<<%= type %>> mapping functions
+//-----------------------------------------------------------------------------
+
 typedef struct {
     <%= lib_map_type_for(type) %> *data;
     unsigned int size;
 } __sklib_vector_<%= type %>;
+
 <%
     # Must forward declare C Library free function if not yet declared
     # before we declare the non-C Library free function
-    unless free_heap_allocated?
+    unless is_splashkit_library? # if it is the splashkit c library...
 %>
-void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
 <%
     end # end unless
 %>
-void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
+
+<%= "extern \"C\" " if is_splashkit_library? %>void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v)
+{
 <%
-    # This call effectively does nothing if the translator using this template
-    # should not free heap memory (i.e., C++ using C template)
-    unless free_heap_allocated?
+    if type == 'string'
 %>
-    <%= CLib::FUNC_PREFIX %>__free__sklib_string(v);
-<%
-    else
-%>
-<%
-      # Free all heap-alloacted strings in the vector
-      if type == 'string'
-%>
-    for (int i = 0; i < v.size; i++) {
+    // Freeing vector<string> requires us to free the strings within the vector
+    for (unsigned int i = 0; i < v.size; i++)
+    {
         <%= func_prefix %>__free__sklib_string(v.data[i]);
     }
 <%
-      end # end if type is string
+    end # end if type is string
 %>
     free(v.data);
-<%
-    end # end unless free_heap_allocated
-%>
 }
-__sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v) {
+
+__sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v)
+{
     __sklib_vector_<%= type %> __skreturn;
-    __skreturn.size = v.size();
+    __skreturn.size = static_cast<unsigned int>(v.size());
     __skreturn.data = (<%= lib_map_type_for(type) %> *)malloc(__skreturn.size * sizeof(<%= lib_map_type_for(type) %>));
     int i = 0;
-    for (<%= type %> d : v) {
+    for (<%= type %> d : v)
+    {
         __skreturn.data[i] = <%= func_prefix %>__to_sklib_<%= type %>(d);
         i++;
     }
     return __skreturn;
 }
-vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v) {
+
+vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v)
+{
     vector<<%= type %>> __skreturn;
     for (int i = 0; i < v.size; i++) {
         __skreturn.push_back(<%= func_prefix %>__to_<%= type %>(v.data[i]));
     }
-    <%= func_prefix %>__free__sklib_vector_<%= type %>(v);
+<%
+    # Only the adapters need to call free on return.
+    unless is_splashkit_library?
+      # We are an adapter... therefore on returning a vector, we need to ask
+      # the SplashKit Library to free the space it allocated for this dynamic
+      # array. Then we return our copy of this.
+%>
+    <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(v);
+<%
+    end
+%>
     return __skreturn;
 }
+
 <%
   end # end vectors.each
 %>

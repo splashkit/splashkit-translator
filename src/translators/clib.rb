@@ -92,7 +92,7 @@ module Translators
           'enum'      => 'int',
           'struct'    => "__sklib_#{type_name}",
           'string'    => '__sklib_string',
-          'typealias' => "__sklib_#{type_name}" 
+          'typealias' => "__sklib_#{type_name}"
       }[raw_type_for(type_name)]
     end
 
@@ -199,7 +199,7 @@ module Translators
     # C code allocates strings and vectors on the heap. It should therefore
     # free any allocated heap memory when it is no longer required.
     #
-    def free_heap_allocated?
+    def is_splashkit_library?
       true
     end
 
@@ -226,7 +226,7 @@ module Translators
     # C++ translator should not free strings or vectors -- this is the
     # responsibility of the C lib code that created it.
     #
-    def free_heap_allocated?
+    def is_splashkit_library?
       false
     end
 
