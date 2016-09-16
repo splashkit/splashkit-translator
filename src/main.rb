@@ -21,7 +21,8 @@ options = {
   write_to_cache: nil,
   read_from_cache: nil,
   verbose: nil,
-  logging: nil
+  logging: nil,
+  ide: nil
 }
 
 #=== Options parse block ===
@@ -107,6 +108,12 @@ EOS
   opts.on('-l', '--logging', help) do |level|
     options[:logging] = true
   end
+  help = <<-EOS
+Format messages without colors
+EOS
+  opts.on('', '--ide', help) do |level|
+    options[:ide] = true
+  end
   opts.separator ''
   opts.separator 'Translators:'
   avaliable_translators.keys.each { |translator| opts.separator "    * #{translator}" }
@@ -145,14 +152,14 @@ begin
       parsed = parser.parse
       if options[:verbose]
         parser.warnings.each do |msg|
-          print 'translator: ', 'warning:'.yellow
-          puts " #{msg}"
+          print options[:ide] ? '' : '[WARN] '.yellow
+          puts "#{msg}"
         end
       end
       unless parser.errors.empty?
         parser.errors.each do |msg|
-          print 'translator: ', 'error:'.red
-          puts " #{msg}"
+          print options[:ide] ? 'error: ' : '[ERR] '.red
+          puts "#{msg}"
         end
         puts 'Errors detected during parsing. Exiting.'
         exit 1
