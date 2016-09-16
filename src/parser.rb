@@ -27,14 +27,15 @@ class Parser
   #
   # Initialiser with src
   #
-  def initialize(src)
+  def initialize(src, logging)
     @src = src
+    @logging = logging
   end
 
   #
   # Parses HeaderDoc for the provided src directory into a hash
   #
-  def parse
+  def parse ()
     unless headerdoc_installed?
       raise Parser::Error, 'headerdoc2html is not installed!'
     end
@@ -42,12 +43,16 @@ class Parser
     # If only parsing one file then don't amend /*.h
     headers_src = "#{@src}/#{SK_SRC_CORESDK}/*.h" unless @src.end_with? '.h'
     parsed = Dir[headers_src || @src].map do |hfile|
-      puts "Parsing #{hfile}..."
+      puts "Parsing #{hfile}..." if @logging
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
       _, stdout, stderr, wait_thr = Open3.popen3 cmd
       out = stdout.readlines
       errs = stderr.readlines.join.gsub(/-{3,}(?:.|\n)+?-(?=\n)\n/, '').split("\n")
-      errs.each { |e| warn e }
+      errs.each do |e|
+        unless e =~ /Warning: UID/
+          warn "\n#{e}"
+        end
+      end
       exit_status = wait_thr.value.exitstatus
       hfile_xml = out.empty? ? nil : out.join
       unless exit_status.zero?
@@ -137,10 +142,10 @@ class Parser::HeaderFileParser
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
     # puts "-- In ppl default to: #{ppl}"
     ppl.each do |p_name, p_type|
-      # puts " ---- #{p_name}, #{p_type}"
+      # puts " ---- #{p_name}, #{p_type}, #{hash[p_name.to_sym]}, #{xml}"
       args = [xml, p_name, p_type]
-      result = parse_func ? send(parse_func, *args) : {}
-      hash[p_name.to_sym] = (hash[p_name.to_sym] || {}).merge(result)
+      # Assign has the value it has... or if null, calculate it
+      hash[p_name.to_sym] = (hash[p_name.to_sym] || (parse_func ? send(parse_func, *args) : {}))
     end
     # puts "-- RETURNING:\n#{hash}\n--\n"
     hash
@@ -375,6 +380,8 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
+    # puts "getting info: #{param_name}: #{xml.xpath('desc').text}"
+
     # Grab template <T> value for parameter
     # type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
@@ -404,7 +411,8 @@ class Parser::HeaderFileParser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
-    # puts "Looking for #{name} in #{ppl}"
+    # puts "Parse #{name} in #{xml}"
+
     type = ppl[name.to_sym]
     # puts "FOUND: #{type}\n\n"
 
@@ -427,7 +435,10 @@ class Parser::HeaderFileParser
     params = xml.map do |p|
       parse_parameter(p, ppl)
     end.to_h
-    ppl_default_to(xml, params, ppl)
+    # puts "PARAMS: #{params}"
+    # At this point the params that can be parsed have been taken
+    # from the xml... so pass in an empty xml for others.
+    ppl_default_to(Nokogiri::XML(""), params, ppl)
   end
 
   #
@@ -541,8 +552,22 @@ class Parser::HeaderFileParser
     ppl = parse_ppl(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
+
+    params_with_no_desc = parameters.select { |k, p| p[:description].nil? }.map { |k,p| k }
+
+    # puts parameters
+
+    if params_with_no_desc.count > 0
+      error "Function: #{signature} missing parameters: #{params_with_no_desc}"
+    end
+
     fn_names = parse_function_names(xml, attributes)
     return_data = parse_function_return_type(xml)
+
+    if return_data[:type] != 'void' && return_data[:description].nil?
+      error "Function #{signature} missing return documentation!"
+    end
+
     {
       signature:          signature,
       name:               fn_names[:sanitized_name],

@@ -7,8 +7,8 @@ module Translators
   class CLib < AbstractTranslator
     attr_readers :src, :header_path, :sk_root
 
-    def initialize(data, src)
-      super(data, src)
+    def initialize(data, src, logging)
+      super(data, src, logging)
       @direct_types = %w(int unsigned\ int float double char unsigned\ char)
     end
 

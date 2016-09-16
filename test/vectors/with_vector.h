@@ -34,6 +34,7 @@ namespace splashkit_lib
    * the given `string` key.
    *
    * @param count The number of values
+   * 
    * @returns Values 1 to count in a vector
    */
   vector<float> get_number_list(int count);
@@ -47,7 +48,7 @@ namespace splashkit_lib
 
   /**
    * Test multiple types of vectors...
-   * 
+   *
    * @param ivec [description]
    * @param svec [description]
    * @param fvec [description]

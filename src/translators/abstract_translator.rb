@@ -15,9 +15,10 @@ module Translators
     #
     # Initializes the translator with the data and source directories provided
     #
-    def initialize(data, src)
+    def initialize(data, src, logging)
       @data = data
       @src = src
+      @logging = logging
       @direct_types = []
       @enums = @data[:enums] || @data.values.pluck(:enums).flatten
       @typealiases =
@@ -191,7 +192,7 @@ module Translators
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
-      puts "Running template #{name}..."
+      puts "Running template #{name}..." if @logging
       # Don't prepend .* unless extension is specified
       filename = name =~ /\.\w+$/ ? name : "#{name}.*"
       path = "#{translator_res_dir}/#{filename}.erb"

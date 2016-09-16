@@ -5,8 +5,8 @@ module Translators
   # SplashKit C Library code generator
   #
   class Pascal < AbstractTranslator
-    def initialize(data, src)
-      super(data, src)
+    def initialize(data, src, logging)
+      super(data, src, logging)
       @direct_types = {
         'int'     => 'Integer',
         'float'   => 'Single',
