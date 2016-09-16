@@ -335,7 +335,6 @@ class Parser::HeaderFileParser
     # Grab template <T> value for parameter
     type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
-
     array = parse_array_dimensions(xml, param_name)
     {
       type: type,
@@ -373,7 +372,8 @@ class Parser::HeaderFileParser
   # Parses all parameters in a docblock
   #
   def parse_parameters(xml, ppl)
-    params = xml.xpath('parameters/parameter').map do |p|
+    xml = xml.xpath('parameterlist/parameter')
+    params = xml.map do |p|
       parse_parameter(p, ppl)
     end.to_h
     ppl_default_to(xml, params, ppl)
