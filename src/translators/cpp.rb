@@ -138,5 +138,13 @@ module Translators
       # Just use clib SK adapter -- it's the same thing
       @clib.sk_adapter_fn_for(function)
     end
+
+    #
+    # C Lib type to C++ type adapter
+    #
+    def cpp_update_fn_for(function)
+      # Just use clib SK adapter -- it's the same thing
+      @clib.sk_update_fn_for(function)
+    end
   end
 end

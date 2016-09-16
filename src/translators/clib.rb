@@ -183,6 +183,22 @@ module Translators
     end
 
     #
+    # Generate a function name to update a type
+    #
+    def sk_update_fn_for(type_data)
+      type =
+        if type_data[:type_parameter]
+          # A template
+          "from_#{type_data[:type]}_#{type_data[:type_parameter]}"
+        else
+          # Use standard type
+          raise Parser::Error, "Attempt to use invalid update function...."
+        end
+
+      "#{func_prefix}__update_#{type}"
+    end
+
+    #
     # Generate a to library adapter function name for the given type
     #
     def lib_adapter_fn_for(type_data)
@@ -193,14 +209,6 @@ module Translators
       # Replace spaces with underscores for unsigned
       type = type.tr("\s", '_')
       "#{func_prefix}__to_#{type}"
-    end
-
-    #
-    # Check
-    #
-    def type_can_be_directly_copies?(type_data)
-      # puts "#{type_data}"
-      return ( ! type_data[:is_vector]) && ( ! type_data[:type] == "string" )
     end
 
     #

@@ -216,5 +216,18 @@ module Translators
         type
       end
     end
+
+    #
+    # Check if the type can be copied...
+    #
+    def type_can_be_directly_copied?(type_data)
+      # puts "#{type_data}"
+      if type_data[:type] == "string"
+        raise Parser::Error, "At this stage we cant handle string passed by ref"
+      end
+
+      return ( ! type_data[:is_vector] )
+    end
+
   end
 end

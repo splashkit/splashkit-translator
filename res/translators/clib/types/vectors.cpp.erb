@@ -114,7 +114,7 @@ vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vect
     if is_splashkit_library?
       # Only the library will update a __sklib__vector
 %>
-void <%= func_prefix %>__update_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v, __sklib_vector_<%= type %> *__skreturn)
+void <%= func_prefix %>__update_from_vector_<%= type %>(const std::vector<<%= type %>> &v, __sklib_vector_<%= type %> *__skreturn)
 {
     __skreturn->size<%= update_field_suffix %> = static_cast<unsigned int>(v.size());
     __skreturn->data<%= update_field_suffix %> = (<%= lib_map_type_for(type) %> *)malloc(__skreturn->size<%= update_field_suffix %> * sizeof(<%= lib_map_type_for(type) %>));
@@ -128,7 +128,7 @@ void <%= func_prefix %>__update_sklib_vector_<%= type %>(const std::vector<<%= t
 <%
     else # its an adapter... only adapters will update vectors
 %>
-void <%= func_prefix %>__update_vector_<%= type %>(__sklib_vector_<%= type %> &v, std::vector<<%= type %>> &__skreturn)
+void <%= func_prefix %>__update_from_vector_<%= type %>(__sklib_vector_<%= type %> &v, std::vector<<%= type %>> &__skreturn)
 {
     __skreturn.clear();
 
