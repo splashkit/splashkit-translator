@@ -208,7 +208,7 @@ class Parser::HeaderFileParser
   # Parses the docblock at the start of a .h file
   #
   def parse_header(xml)
-    @header_attrs = parse_attributes(xml).reject { |k, _| k == :Author }
+    @header_attrs = parse_attributes(xml)
     {
       name:         @name.to_s,
       brief:        xml.xpath('abstract').text,
@@ -229,8 +229,28 @@ class Parser::HeaderFileParser
   def parse_attributes(xml, ppl = nil)
     attrs = xml.xpath('attributes/attribute')
                .map { |a| parse_attribute(a) }
+               .reject { |k, _| k == :Author }
                .to_h
                .merge @header_attrs
+    # Accepted attributes check
+    accepted_attributes = [
+      :group,
+      :class,
+      :static,
+      :method,
+      :constructor,
+      :destructor,
+      :self,
+      :suffix,
+      :getter,
+      :setter
+    ]
+    # Check for unknown keys
+    unknown_attributes = attrs.keys - accepted_attributes
+    unless unknown_attributes.empty?
+      raise Parser::Error 'Unknown attribute keys are present: '\
+                          "#{unknown_keys.join}"
+    end
     # Method, self, destructor, constructor must have a class attribute also
     enforce_class_keys = [
       :self,
