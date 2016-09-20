@@ -105,6 +105,9 @@ A header file should begin with a docblock consisting of:
 3. `@brief [description]` - A brief, one sentence description of what
    functionality is added in this 'module'.
 4. A longer description of the functionality. The description accepts Markdown.
+5. `@attribute group [group]` - Groups the contents of the file under a specific
+   group name. E.g., `audio.h`, `sound.h`, `music.h` could all be `group`ed as
+   just `audio`.
 
 Example, `audio.h`:
 
