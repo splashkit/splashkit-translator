@@ -248,8 +248,8 @@ class Parser::HeaderFileParser
     # Check for unknown keys
     unknown_attributes = attrs.keys - accepted_attributes
     unless unknown_attributes.empty?
-      raise Parser::Error 'Unknown attribute keys are present: '\
-                          "#{unknown_attributes.join}"
+      raise Parser::Error, 'Unknown attribute keys are present: '\
+                           "#{unknown_attributes.join}"
     end
     # Method, self, destructor, constructor must have a class attribute also
     enforce_class_keys = [
