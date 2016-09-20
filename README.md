@@ -30,6 +30,7 @@ Translates the SplashKit C++ source into another language.
       - [`suffix`](#suffix)
       - [`getter`](#getter)
       - [`setter`](#setter)
+      - [`group`](#group)
    - [Summary Rules](#summary-rules)
 
 <!-- /MDTOC -->
@@ -106,8 +107,7 @@ A header file should begin with a docblock consisting of:
    functionality is added in this 'module'.
 4. A longer description of the functionality. The description accepts Markdown.
 5. `@attribute group [group]` - Groups the contents of the file under a specific
-   group name. E.g., `audio.h`, `sound.h`, `music.h` could all be `group`ed as
-   just `audio`.
+   group name. Refer to [group](#group) for more.
 
 Example, `audio.h`:
 
@@ -591,6 +591,18 @@ generates usage for the following in C#:
 Audio.IsOpen = false;
 myDatabase.LastQuery = myQueryResult;
 ```
+
+### `group`
+
+Applicable only to header file HeaderDoc blocks. The value associated to group
+means that this particular header file is `group`ed under the group specified
+by this attribute. Related header files may be applicable to just the one, e.g.:
+
+* `audio.h`,
+* `sound_effect.h`, and
+* `music.h`
+
+could all be `group`ed under the `Audio` group.
 
 ## Summary of Parser Rules
 
