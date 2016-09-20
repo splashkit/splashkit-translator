@@ -20,7 +20,9 @@ options = {
   validate_only: false,
   write_to_cache: nil,
   read_from_cache: nil,
-  verbose: nil
+  verbose: nil,
+  logging: nil,
+  ide: nil
 }
 
 #=== Options parse block ===
@@ -100,6 +102,18 @@ EOS
   opts.on('-b', '--verbose', help) do |level|
     options[:verbose] = true
   end
+  help = <<-EOS
+Output log messages
+EOS
+  opts.on('-l', '--logging', help) do |level|
+    options[:logging] = true
+  end
+  help = <<-EOS
+Format messages without colors
+EOS
+  opts.on('', '--ide', help) do |level|
+    options[:ide] = true
+  end
   opts.separator ''
   opts.separator 'Translators:'
   avaliable_translators.keys.each { |translator| opts.separator "    * #{translator}" }
@@ -134,18 +148,18 @@ begin
     if options[:read_from_cache]
       JSON.parse(File.read(options[:read_from_cache]), symbolize_names: true)
     else
-      parser = Parser.new options[:src]
+      parser = Parser.new options[:src], options[:logging]
       parsed = parser.parse
       if options[:verbose]
         parser.warnings.each do |msg|
-          print '[WARN]'.yellow
-          puts " #{msg}"
+          print options[:ide] ? '' : '[WARN] '.yellow
+          puts "#{msg}"
         end
       end
       unless parser.errors.empty?
         parser.errors.each do |msg|
-          print '[ERR]'.red
-          puts " #{msg}"
+          print options[:ide] ? 'error: ' : '[ERR] '.red
+          puts "#{msg}"
         end
         puts 'Errors detected during parsing. Exiting.'
         exit 1
@@ -171,13 +185,13 @@ if options[:validate_only]
   puts 'SplashKit API documentation valid!'
 else
   options[:translators].each do |translator_class|
-    translator = translator_class.new(parsed, options[:src])
+    translator = translator_class.new(parsed, options[:src], options[:logging])
     out = translator.execute
     next unless options[:out]
     out.each do |filename, contents|
       output = "#{options[:out]}/#{translator.name}/#{filename}"
       FileUtils.mkdir_p File.dirname output
-      puts "Writing output to #{output}..."
+      puts "Writing output to #{output}..." if options[:logging]
       File.write output, contents
     end
     puts 'Output written!'

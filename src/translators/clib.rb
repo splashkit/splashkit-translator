@@ -7,8 +7,8 @@ module Translators
   class CLib < AbstractTranslator
     attr_readers :src, :header_path, :sk_root
 
-    def initialize(data, src)
-      super(data, src)
+    def initialize(data, src, logging)
+      super(data, src, logging)
       @direct_types = %w(int unsigned\ int float double char unsigned\ char)
     end
 
@@ -180,6 +180,22 @@ module Translators
         end
 
       "#{func_prefix}__to_#{type}"
+    end
+
+    #
+    # Generate a function name to update a type
+    #
+    def sk_update_fn_for(type_data)
+      type =
+        if type_data[:type_parameter]
+          # A template
+          "from_#{type_data[:type]}_#{type_data[:type_parameter]}"
+        else
+          # Use standard type
+          raise Parser::Error, "Attempt to use invalid update function...."
+        end
+
+      "#{func_prefix}__update_#{type}"
     end
 
     #
