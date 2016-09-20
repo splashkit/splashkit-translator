@@ -15,9 +15,10 @@ module Translators
     #
     # Initializes the translator with the data and source directories provided
     #
-    def initialize(data, src)
+    def initialize(data, src, logging)
       @data = data
       @src = src
+      @logging = logging
       @direct_types = []
       @enums = @data[:enums] || @data.values.pluck(:enums).flatten
       @typealiases =
@@ -191,7 +192,7 @@ module Translators
     def read_template(name = self.name)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
-      puts "Running template #{name}..."
+      puts "Running template #{name}..." if @logging
       # Don't prepend .* unless extension is specified
       filename = name =~ /\.\w+$/ ? name : "#{name}.*"
       path = "#{translator_res_dir}/#{filename}.erb"
@@ -216,5 +217,36 @@ module Translators
         type
       end
     end
+
+    #
+    # On an update of a ref parameter:
+    #
+    # Check if the type can be copied across the boundary directly. This will
+    # include the primitive types. These can just be directly assigned to the
+    # parameter in the adapter. So...
+    #
+    # - The library can directly assign a value to the parameter pointer
+    # - The adapter can just copy the value in the parameter copy to the
+    #   original parameter.
+    #
+    # But.. if this is false, it means that you cant just copy this directly
+    # across. Why? Its a dynamic array. The adapter will need to free the
+    # original dynamic array, so we need to update the original array. This will
+    # then pass back data in the `from_lib` fields of the struct, leaving the
+    # `from_app` fields untouched. So...
+    #
+    # - The library needs to use update to malloc into the `from_lib` fields.
+    # - The adapter will need to update the original vector/dynamic array. The
+    #   size may have changed, the values may have changed.
+    #
+    def type_can_be_directly_copied?(type_data)
+      # puts "#{type_data}"
+      if type_data[:type] == "string"
+        raise Parser::Error, "At this stage we cant handle string passed by ref"
+      end
+
+      return ( ! type_data[:is_vector] )
+    end
+
   end
 end

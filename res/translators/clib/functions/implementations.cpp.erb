@@ -48,16 +48,25 @@
     <%= func_call %>;
 <%#
     3. Update all non-const references.
+        -- if it can be directly copied... do that.
+        -- otherwise use the types update function
 %>
 <%
     non_const_refs = function[:parameters].select do | _, param_data |
       param_data[:is_reference] && !param_data[:is_const]
     end # end select
     non_const_refs.each do | param_name, param_data |
-      adapter_fn = lib_adapter_fn_for param_data
+      if type_can_be_directly_copied? param_data
+        adapter_fn = lib_adapter_fn_for param_data
 %>
     *<%= param_name %> = <%= adapter_fn %>(__skparam__<%= param_name %>);
 <%
+      else # cannot be directly copied...
+        update_fn = sk_update_fn_for param_data
+%>
+    <%= update_fn %>(__skparam__<%= param_name %>, <%= param_name %>);
+<%
+      end # end if can be directly copied
     end # end non_const_ptrs.each
 %>
 <%#

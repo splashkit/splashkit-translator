@@ -5,16 +5,16 @@ module Translators
   # C++ Front-End Translator
   #
   class CPP < AbstractTranslator
-    def initialize(data, src)
-      super(data, src)
+    def initialize(data, src, logging)
+      super(data, src, logging)
       # C++ is a superset of C, so we can reuse our C implementations
-      @clib = ReusableCAdapter.new(@data, @src)
+      @clib = ReusableCAdapter.new(@data, @src, @logging)
     end
 
     def render_templates
       result = @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
-        header_contents  = Header.new(header_data, @src, @data)
+        header_contents  = Header.new(header_data, @src, @data, @logging)
                                  .read_template('header/module_header.h')
         [header_file_name, header_contents]
       end.to_h
@@ -29,8 +29,8 @@ module Translators
     private
 
     class Header < CPP
-      def initialize(data, src, src_data)
-        super(data, src)
+      def initialize(data, src, src_data, logging)
+        super(data, src, logging)
         @src_data = src_data
       end
 
@@ -137,6 +137,14 @@ module Translators
     def cpp_adapter_fn_for(function)
       # Just use clib SK adapter -- it's the same thing
       @clib.sk_adapter_fn_for(function)
+    end
+
+    #
+    # C Lib type to C++ type adapter
+    #
+    def cpp_update_fn_for(function)
+      # Just use clib SK adapter -- it's the same thing
+      @clib.sk_update_fn_for(function)
     end
   end
 end
