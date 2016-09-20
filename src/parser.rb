@@ -142,14 +142,11 @@ class Parser::HeaderFileParser
   # within the hash provided using the parse_func provided
   #
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
-    # puts "-- In ppl default to: #{ppl}"
     ppl.each do |p_name, p_type|
-      # puts " ---- #{p_name}, #{p_type}, #{hash[p_name.to_sym]}, #{xml}"
       args = [xml, p_name, p_type]
       # Assign has the value it has... or if null, calculate it
       hash[p_name.to_sym] = (hash[p_name.to_sym] || (parse_func ? send(parse_func, *args) : {}))
     end
-    # puts "-- RETURNING:\n#{hash}\n--\n"
     hash
   end
 
@@ -169,7 +166,6 @@ class Parser::HeaderFileParser
     # Extract declaration details from the xml
     decl = xml.xpath('declaration')
     decl_types = decl.xpath('declaration_type')
-
     # Get the type of the function
     fn_type = decl_types[0].children.to_s
     # types of the parameters...
@@ -178,17 +174,14 @@ class Parser::HeaderFileParser
     param_names = decl.xpath('declaration_param').map { |n| n.text.to_sym }
     # names of type parameters
     template_types = decl.xpath('declaration_template').map { |n| n.text }
-
     # i tracks the template_types... first may be the return type
     i = fn_type == 'vector' ? 1 : 0
-
     param_map = Hash[*param_names.zip(param_types).map do | n, t |
       result ={ n => { base_type: t } }
       if t == 'vector'
         result[n][:type_parameter] = template_types[i]
         i = i + 1
       end
-
       result
     end.collect{|h| h.to_a}.flatten]
 
@@ -201,8 +194,6 @@ class Parser::HeaderFileParser
       param_map[p.xpath('name').text.to_sym][:type] = p.xpath('type').text
     end
 
-    # puts param_map
-    # puts "**************"
     param_map
   end
 
@@ -386,7 +377,6 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
-    # puts "getting info: #{param_name}: #{xml.xpath('desc').text}"
 
     # Grab template <T> value for parameter
     # type_parameter, is_vector = *parse_vector(xml, type)
@@ -417,10 +407,8 @@ class Parser::HeaderFileParser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
-    # puts "Parse #{name} in #{xml}"
 
     type = ppl[name.to_sym]
-    # puts "FOUND: #{type}\n\n"
 
     if type.nil?
       raise Parser::Error,
@@ -441,7 +429,6 @@ class Parser::HeaderFileParser
     params = xml.map do |p|
       parse_parameter(p, ppl)
     end.to_h
-    # puts "PARAMS: #{params}"
     # At this point the params that can be parsed have been taken
     # from the xml... so pass in an empty xml for others.
     ppl_default_to(Nokogiri::XML(""), params, ppl)
@@ -561,7 +548,6 @@ class Parser::HeaderFileParser
 
     params_with_no_desc = parameters.select { |k, p| p[:description].nil? }.map { |k,p| k }
 
-    # puts parameters
 
     if params_with_no_desc.count > 0
       error "Function: #{signature} missing parameters: #{params_with_no_desc}"

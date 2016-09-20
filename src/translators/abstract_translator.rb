@@ -240,7 +240,6 @@ module Translators
     #   size may have changed, the values may have changed.
     #
     def type_can_be_directly_copied?(type_data)
-      # puts "#{type_data}"
       if type_data[:type] == "string"
         raise Parser::Error, "At this stage we cant handle string passed by ref"
       end
