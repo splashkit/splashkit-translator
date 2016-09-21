@@ -143,7 +143,7 @@ class Parser::HeaderFileParser
   #
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
     ppl.each do |p_name, p_type|
-      args = [xml, p_name, p_type]
+      args = [xml || Nokogiri::XML(''), p_name, p_type]
       # Assign has the value it has... or if null, calculate it
       hash[p_name.to_sym] = (hash[p_name.to_sym] || (parse_func ? send(parse_func, *args) : {}))
     end
@@ -451,7 +451,13 @@ class Parser::HeaderFileParser
     end.to_h
     # At this point the params that can be parsed have been taken
     # from the xml... so pass in an empty xml for others.
-    ppl_default_to(Nokogiri::XML(""), params, ppl)
+    ppl_default_to(nil, params, ppl)
+    # Check for parameters that have no assigned description
+    params_with_no_desc = params.select { |_, p| p[:description].nil? }.keys
+    if params_with_no_desc.count > 0
+      raise Parser::Error, 'Missing parameters description for: '\
+                           "`#{params_with_no_desc.join('`, `')}`"
+    end
   end
 
   #
@@ -565,14 +571,6 @@ class Parser::HeaderFileParser
     ppl = parse_parameter_declaration(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
-
-    params_with_no_desc = parameters.select { |k, p| p[:description].nil? }.map { |k,p| k }
-
-
-    if params_with_no_desc.count > 0
-      error "Function: #{signature} missing parameters: #{params_with_no_desc}"
-    end
-
     fn_names = parse_function_names(xml, attributes)
     return_data = parse_function_return_type(xml)
 
