@@ -90,7 +90,7 @@ class Parser::Error < StandardError
 
   def to_s
     if @signature
-      "HeaderDoc parser violation on `#{@signature}`:\n\t#{@message}"
+      "Parser violation for `#{@signature}`: #{@message}"
     else
       @message
     end
