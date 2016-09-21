@@ -31,6 +31,7 @@ Translates the SplashKit C++ source into another language.
       - [`getter`](#getter)
       - [`setter`](#setter)
       - [`group`](#group)
+      - [`note`](#note)
    - [Summary Rules](#summary-rules)
 
 <!-- /MDTOC -->
@@ -603,6 +604,10 @@ by this attribute. Related header files may be applicable to just the one, e.g.:
 * `music.h`
 
 could all be `group`ed under the `Audio` group.
+
+### `note`
+
+Use this to add an arbitrary note to any HeaderDoc block.
 
 ## Summary of Parser Rules
 

@@ -18,7 +18,7 @@ class Parser
   require_relative '../lib/core_ext/string'
 
   #
-  # Which `@attributes` are currently allowed
+  # Which `@attribute`s are currently allowed
   #
   ALLOWED_ATTRIBUTES = %i(
     group
