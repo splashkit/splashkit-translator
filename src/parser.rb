@@ -499,10 +499,20 @@ class Parser::HeaderFileParser
     # Extract <T> from generic returns
     type_parameter, is_vector = *parse_vector(xml, type)
     desc = xml.xpath('result').text
-    # Check that pure functions don't have return description
-    if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
+    is_proc = type == 'void' &&                 # returns void
+              !(is_pointer || is_reference) &&  # not void* or void&
+              (raw_return_type.nil? ||          # with no raw_return_type
+               raw_return_type == 'void')       # or a void raw_return_type
+    is_func = !is_proc
+    # Check that procedures don't have return description
+    if is_proc && !desc.nil?
       raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
+    end
+    # Check for empty return description
+    if is_func && desc.nil?
+      raise Parser::Error,
+            'Non-void functions should have an `@returns` labelled.'
     end
     {
       type: type,
@@ -573,11 +583,6 @@ class Parser::HeaderFileParser
     parameters = parse_parameters(xml, ppl)
     fn_names = parse_function_names(xml, attributes)
     return_data = parse_function_return_type(xml)
-
-    if return_data[:type] != 'void' && return_data[:description].nil?
-      error "Function #{signature} missing return documentation!"
-    end
-
     {
       signature:          signature,
       name:               fn_names[:sanitized_name],
