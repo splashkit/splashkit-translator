@@ -22,6 +22,7 @@ class Parser
   #
   ALLOWED_ATTRIBUTES = %i{
     group
+    note
     class
     static
     method
