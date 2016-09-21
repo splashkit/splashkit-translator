@@ -20,7 +20,7 @@ class Parser
   #
   # Which `@attributes` are currently allowed
   #
-  ALLOWED_ATTRIBUTES = %i{
+  ALLOWED_ATTRIBUTES = %i(
     group
     note
     class
@@ -32,7 +32,7 @@ class Parser
     suffix
     getter
     setter
-  }
+  ).freeze
 
   #
   # Checks if HeaderDoc is installed
