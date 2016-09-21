@@ -18,6 +18,22 @@ class Parser
   require_relative '../lib/core_ext/string'
 
   #
+  # Which `@attributes` are currently allowed
+  #
+  ALLOWED_ATTRIBUTES = %i{
+    group
+    class
+    static
+    method
+    constructor
+    destructor
+    self
+    suffix
+    getter
+    setter
+  }
+
+  #
   # Checks if HeaderDoc is installed
   #
   def headerdoc_installed?
@@ -232,21 +248,8 @@ class Parser::HeaderFileParser
                .reject { |k, _| k == :Author }
                .to_h
                .merge @header_attrs
-    # Accepted attributes check
-    accepted_attributes = [
-      :group,
-      :class,
-      :static,
-      :method,
-      :constructor,
-      :destructor,
-      :self,
-      :suffix,
-      :getter,
-      :setter
-    ]
     # Check for unknown keys
-    unknown_attributes = attrs.keys - accepted_attributes
+    unknown_attributes = attrs.keys - ALLOWED_ATTRIBUTES
     unless unknown_attributes.empty?
       raise Parser::Error, 'Unknown attribute keys are present: '\
                            "`#{unknown_attributes.join('`, `')}`"
