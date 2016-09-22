@@ -462,6 +462,7 @@ class Parser::HeaderFileParser
       raise Parser::Error, 'Missing parameters description for: '\
                            "`#{params_with_no_desc.join('`, `')}`"
     end
+    params
   end
 
   #
