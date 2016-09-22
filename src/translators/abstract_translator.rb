@@ -240,11 +240,10 @@ module Translators
     #   size may have changed, the values may have changed.
     #
     def type_can_be_directly_copied?(type_data)
-      if type_data[:type] == "string"
-        raise Parser::Error, "At this stage we cant handle string passed by ref"
+      if type_data[:type] == 'string'
+        raise Parser::Error, 'At this stage we cant handle string passed by ref'
       end
-
-      return ( ! type_data[:is_vector] )
+      !type_data[:is_vector]
     end
 
   end

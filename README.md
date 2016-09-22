@@ -609,6 +609,41 @@ could all be `group`ed under the `Audio` group.
 
 Use this to add an arbitrary note to any HeaderDoc block.
 
+**It is important to place the contents of your note on a new line.**
+
+#### Unknown attribute issue
+
+Not placing your content of your note over two lines will cause issues. Refer
+to the example below:
+
+```c
+/**
+ * @attribute note This is a really cool function
+ *   that goes over two lines woohoo!
+ */
+int my_func();
+```
+
+The above will cause the following parser issue:
+
+```
+Unknown attribute keys are present: `note This is a really cool function`.
+```
+
+To fix this, you change the example to:
+
+```c
+/**
+ * @attribute note
+ *   This is a really cool function
+ *   that goes over two lines woohoo!
+ */
+int my_func();
+```
+
+Unfortunately, multi-line markdown parsing will not work, such as lists, code
+blocks and multiple paragraphs.
+
 ## Summary of Parser Rules
 
 If any of these basic rules are violated, then the parser will throw a fatal
