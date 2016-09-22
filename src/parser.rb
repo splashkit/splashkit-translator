@@ -250,7 +250,7 @@ class Parser::HeaderFileParser
                .to_h
                .merge @header_attrs
     # Check for unknown keys
-    unknown_attributes = attrs.keys - ALLOWED_ATTRIBUTES
+    unknown_attributes = attrs.keys - Parser::ALLOWED_ATTRIBUTES
     unless unknown_attributes.empty?
       raise Parser::Error, 'Unknown attribute keys are present: '\
                            "`#{unknown_attributes.join('`, `')}`"
