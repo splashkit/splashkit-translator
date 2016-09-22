@@ -17,6 +17,7 @@ module Translators
         double
         char
         unsigned\ int
+        unsigned\ short
         unsigned\ char
       )
     end
