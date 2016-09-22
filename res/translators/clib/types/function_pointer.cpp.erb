@@ -8,7 +8,7 @@
 %>
 <%
     fp_param_decl = fp[:parameters].map do |param_name, param_data|
-      ptr = param_data[:is_pointer] ? '*' : ''
+      ptr = '*' if param_data[:is_pointer]
       "#{param_data[:type]} #{ptr}#{param_name}"
     end.join(', ')
 %>

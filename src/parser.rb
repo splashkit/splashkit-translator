@@ -18,6 +18,23 @@ class Parser
   require_relative '../lib/core_ext/string'
 
   #
+  # Which `@attribute`s are currently allowed
+  #
+  ALLOWED_ATTRIBUTES = %i(
+    group
+    note
+    class
+    static
+    method
+    constructor
+    destructor
+    self
+    suffix
+    getter
+    setter
+  ).freeze
+
+  #
   # Checks if HeaderDoc is installed
   #
   def headerdoc_installed?
@@ -49,10 +66,10 @@ class Parser
       out = stdout.readlines
       errs = stderr.readlines.join.gsub(/-{3,}(?:.|\n)+?-(?=\n)\n/, '').split("\n")
       errs.each do |e|
-        #fix headerdoc warning of unknown fields
+        # Fix headerdoc warning of unknown fields
         e = e.gsub(/:Unknown field type/, ': warning: Unknown field type')
         unless e =~ /(Warning: UID.*)|(No default encoding.*)|(specifying an appropriate value.*)/
-          warn "#{e}"
+          warn e.to_s
         end
       end
       exit_status = wait_thr.value.exitstatus
@@ -90,7 +107,7 @@ class Parser::Error < StandardError
 
   def to_s
     if @signature
-      "HeaderDoc parser violation on `#{@signature}`:\n\t#{@message}"
+      "Parser violation for `#{@signature}`: #{@message}"
     else
       @message
     end
@@ -142,14 +159,11 @@ class Parser::HeaderFileParser
   # within the hash provided using the parse_func provided
   #
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
-    # puts "-- In ppl default to: #{ppl}"
     ppl.each do |p_name, p_type|
-      # puts " ---- #{p_name}, #{p_type}, #{hash[p_name.to_sym]}, #{xml}"
-      args = [xml, p_name, p_type]
+      args = [xml || Nokogiri::XML(''), p_name, p_type]
       # Assign has the value it has... or if null, calculate it
       hash[p_name.to_sym] = (hash[p_name.to_sym] || (parse_func ? send(parse_func, *args) : {}))
     end
-    # puts "-- RETURNING:\n#{hash}\n--\n"
     hash
   end
 
@@ -169,7 +183,6 @@ class Parser::HeaderFileParser
     # Extract declaration details from the xml
     decl = xml.xpath('declaration')
     decl_types = decl.xpath('declaration_type')
-
     # Get the type of the function
     fn_type = decl_types[0].children.to_s
     # types of the parameters...
@@ -178,17 +191,14 @@ class Parser::HeaderFileParser
     param_names = decl.xpath('declaration_param').map { |n| n.text.to_sym }
     # names of type parameters
     template_types = decl.xpath('declaration_template').map { |n| n.text }
-
     # i tracks the template_types... first may be the return type
     i = fn_type == 'vector' ? 1 : 0
-
     param_map = Hash[*param_names.zip(param_types).map do | n, t |
       result ={ n => { base_type: t } }
       if t == 'vector'
         result[n][:type_parameter] = template_types[i]
         i = i + 1
       end
-
       result
     end.collect{|h| h.to_a}.flatten]
 
@@ -201,8 +211,6 @@ class Parser::HeaderFileParser
       param_map[p.xpath('name').text.to_sym][:type] = p.xpath('type').text
     end
 
-    # puts param_map
-    # puts "**************"
     param_map
   end
 
@@ -217,7 +225,7 @@ class Parser::HeaderFileParser
   # Parses the docblock at the start of a .h file
   #
   def parse_header(xml)
-    @header_attrs = parse_attributes(xml).reject { |k, _| k == :Author }
+    @header_attrs = parse_attributes(xml)
     {
       name:         @name.to_s,
       brief:        xml.xpath('abstract').text,
@@ -238,8 +246,15 @@ class Parser::HeaderFileParser
   def parse_attributes(xml, ppl = nil)
     attrs = xml.xpath('attributes/attribute')
                .map { |a| parse_attribute(a) }
+               .reject { |k, _| k == :Author }
                .to_h
                .merge @header_attrs
+    # Check for unknown keys
+    unknown_attributes = attrs.keys - Parser::ALLOWED_ATTRIBUTES
+    unless unknown_attributes.empty?
+      raise Parser::Error, 'Unknown attribute keys are present: '\
+                           "`#{unknown_attributes.join('`, `')}`"
+    end
     # Method, self, destructor, constructor must have a class attribute also
     enforce_class_keys = [
       :self,
@@ -386,7 +401,6 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
-    # puts "getting info: #{param_name}: #{xml.xpath('desc').text}"
 
     # Grab template <T> value for parameter
     # type_parameter, is_vector = *parse_vector(xml, type)
@@ -417,10 +431,8 @@ class Parser::HeaderFileParser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
-    # puts "Parse #{name} in #{xml}"
 
     type = ppl[name.to_sym]
-    # puts "FOUND: #{type}\n\n"
 
     if type.nil?
       raise Parser::Error,
@@ -441,10 +453,16 @@ class Parser::HeaderFileParser
     params = xml.map do |p|
       parse_parameter(p, ppl)
     end.to_h
-    # puts "PARAMS: #{params}"
     # At this point the params that can be parsed have been taken
     # from the xml... so pass in an empty xml for others.
-    ppl_default_to(Nokogiri::XML(""), params, ppl)
+    ppl_default_to(nil, params, ppl)
+    # Check for parameters that have no assigned description
+    params_with_no_desc = params.select { |_, p| p[:description].nil? }.keys
+    if params_with_no_desc.count > 0
+      raise Parser::Error, 'Missing parameters description for: '\
+                           "`#{params_with_no_desc.join('`, `')}`"
+    end
+    params
   end
 
   #
@@ -486,10 +504,20 @@ class Parser::HeaderFileParser
     # Extract <T> from generic returns
     type_parameter, is_vector = *parse_vector(xml, type)
     desc = xml.xpath('result').text
-    # Check that pure functions don't have return description
-    if raw_return_type.nil? && type == 'void' && desc && (is_pointer || is_reference)
+    is_proc = type == 'void' &&                 # returns void
+              !(is_pointer || is_reference) &&  # not void* or void&
+              (raw_return_type.nil? ||          # with no raw_return_type
+               raw_return_type == 'void')       # or a void raw_return_type
+    is_func = !is_proc
+    # Check that procedures don't have return description
+    if is_proc && !desc.nil?
       raise Parser::Error,
             'Pure procedures should not have an `@returns` labelled.'
+    end
+    # Check for empty return description
+    if is_func && desc.nil?
+      raise Parser::Error,
+            'Non-void functions should have an `@returns` labelled.'
     end
     {
       type: type,
@@ -558,22 +586,8 @@ class Parser::HeaderFileParser
     ppl = parse_parameter_declaration(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
-
-    params_with_no_desc = parameters.select { |k, p| p[:description].nil? }.map { |k,p| k }
-
-    # puts parameters
-
-    if params_with_no_desc.count > 0
-      error "Function: #{signature} missing parameters: #{params_with_no_desc}"
-    end
-
     fn_names = parse_function_names(xml, attributes)
     return_data = parse_function_return_type(xml)
-
-    if return_data[:type] != 'void' && return_data[:description].nil?
-      error "Function #{signature} missing return documentation!"
-    end
-
     {
       signature:          signature,
       name:               fn_names[:sanitized_name],

@@ -30,6 +30,8 @@ Translates the SplashKit C++ source into another language.
       - [`suffix`](#suffix)
       - [`getter`](#getter)
       - [`setter`](#setter)
+      - [`group`](#group)
+      - [`note`](#note)
    - [Summary Rules](#summary-rules)
 
 <!-- /MDTOC -->
@@ -105,6 +107,8 @@ A header file should begin with a docblock consisting of:
 3. `@brief [description]` - A brief, one sentence description of what
    functionality is added in this 'module'.
 4. A longer description of the functionality. The description accepts Markdown.
+5. `@attribute group [group]` - Groups the contents of the file under a specific
+   group name. Refer to [group](#group) for more.
 
 Example, `audio.h`:
 
@@ -588,6 +592,57 @@ generates usage for the following in C#:
 Audio.IsOpen = false;
 myDatabase.LastQuery = myQueryResult;
 ```
+
+### `group`
+
+Applicable only to header file HeaderDoc blocks. The value associated to group
+means that this particular header file is `group`ed under the group specified
+by this attribute. Related header files may be applicable to just the one, e.g.:
+
+* `audio.h`,
+* `sound_effect.h`, and
+* `music.h`
+
+could all be `group`ed under the `Audio` group.
+
+### `note`
+
+Use this to add an arbitrary note to any HeaderDoc block.
+
+**It is important to place the contents of your note on a new line.**
+
+#### Unknown attribute issue
+
+Not placing your content of your note over two lines will cause issues. Refer
+to the example below:
+
+```c
+/**
+ * @attribute note This is a really cool function
+ *   that goes over two lines woohoo!
+ */
+int my_func();
+```
+
+The above will cause the following parser issue:
+
+```
+Unknown attribute keys are present: `note This is a really cool function`.
+```
+
+To fix this, you change the example to:
+
+```c
+/**
+ * @attribute note
+ *   This is a really cool function
+ *   that goes over two lines woohoo!
+ */
+int my_func();
+```
+
+Unfortunately, multi-line markdown parsing will not work, such as lists, code
+blocks and multiple paragraphs.
 
 ## Summary of Parser Rules
 
