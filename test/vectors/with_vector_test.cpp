@@ -6,9 +6,18 @@
 
 int main()
 {
+  std::vector<string> strs;
+  strs = get_messages();
+  update_strings(strs);
+
+  for ( string s : strs )
+  {
+      std::cout << s << std::endl;
+  }
+
   string s;
 
-  std:vector<int> vals;
+  std::vector<int> vals;
   vals.push_back(1);
   vals.push_back(2);
   vals.push_back(3);
