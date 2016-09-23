@@ -70,4 +70,9 @@ namespace splashkit_lib
   {
 
   }
+
+  void show_me(unsigned short test)
+  {
+    
+  }
 }
