@@ -60,4 +60,15 @@ namespace splashkit_lib
    * @param test [description]
    */
   void show_me(unsigned short test);
+
+  /**
+   * [update_strings description]
+   * @param strings [description]
+   */
+  void update_strings(vector<string> &strings);
+
+  /**
+   * @return An array of strings
+   */
+  vector<string> get_messages();
 }

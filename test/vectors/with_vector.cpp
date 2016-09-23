@@ -66,6 +66,18 @@ namespace splashkit_lib
       nums.push_back(sum);
   }
 
+  vector<string> get_messages()
+  {
+      vector<string> result;
+      result.push_back("Hello World!");
+      return result;
+  }
+
+  void update_strings(vector<string> &strings)
+  {
+      strings.push_back("More Messages!");
+  }
+
   void test_multiple_vectors(const vector<int> &ivec, const vector<string> &svec, const vector<float> &fvec)
   {
 
@@ -73,6 +85,6 @@ namespace splashkit_lib
 
   void show_me(unsigned short test)
   {
-    
+
   }
 }

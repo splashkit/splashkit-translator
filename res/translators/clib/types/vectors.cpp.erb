@@ -54,7 +54,11 @@ extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib
 <%= "extern \"C\" " if is_splashkit_library? %>void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v)
 {
 <%
-    if type == 'string'
+    # If it is a string... and its in the adapter... it needs to free then
+    # embedded string resources.
+    # String resources in the library will be freed when the vector is converted
+    # and each of the strings are read back.
+    if type == 'string' && ! is_splashkit_library?
 %>
     // Freeing vector<string> requires us to free the strings within the vector
     for (unsigned int i = 0; i < v.size<%= update_field_suffix %>; i++)
