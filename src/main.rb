@@ -31,7 +31,7 @@ opt_parser = OptionParser.new do |opts|
   avaliable_translators =
     Translators.constants
                .select { |c| Class === Translators.const_get(c) }
-               .select { |c| c != :AbstractTranslator }
+               .select { |c| ![:AbstractTranslator, :ReusableCAdapter].include? c }
                .map { |t| [t.upcase, Translators.const_get(t)] }
                .to_h
   # Setup
