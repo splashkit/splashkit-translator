@@ -8,6 +8,7 @@ require_relative 'config'
 require_relative 'translators/clib'
 require_relative 'translators/pascal'
 require_relative 'translators/cpp'
+require_relative 'translators/docs'
 
 # Access to config vars
 include Config

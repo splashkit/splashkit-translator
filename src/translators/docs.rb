@@ -6,6 +6,24 @@ module Translators
   #
   class Docs < AbstractTranslator
     def render_templates
+      data =
+        @data.group_by { |_, header| header[:group] }
+             .map do |group_key, group_data|
+               group_template = {
+                 brief: '',
+                 description: '',
+                 functions: [],
+                 typedefs: [],
+                 structs: [],
+                 enums: [],
+                 defines: []
+               }
+               group_data =
+                 group_data.to_h.values.reduce(group_template) do |memo, header_data|
+                   memo.merge header_data
+                 end
+               [group_key, group_data]
+             end.sort.to_h
       {
         "api.json" => JSON.pretty_generate(data)
       }

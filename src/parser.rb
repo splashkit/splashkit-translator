@@ -79,8 +79,10 @@ class Parser
               "headerdoc2html failed. Command was #{cmd}."
       end
       xml = Nokogiri.XML(hfile_xml)
-      hfparser = HeaderFileParser.new(File.basename(hfile), xml)
-      [hfparser.name.to_sym, hfparser.parse]
+      hfparsed = HeaderFileParser.new(File.basename(hfile), xml).parse
+      hfname = hfparsed[:name]
+      hfparsed.delete(:name)
+      [hfname, hfparsed]
     end
     if parsed.empty?
       raise Parser::Error, %{
@@ -137,8 +139,8 @@ class Parser::HeaderFileParser
   #
   # Initialises a header parser with required data
   #
-  def initialize(name, input_xml)
-    @name = name[0..-3] # remove the '.h'
+  def initialize(filename, input_xml)
+    @filename = filename
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
@@ -226,8 +228,18 @@ class Parser::HeaderFileParser
   #
   def parse_header(xml)
     @header_attrs = parse_attributes(xml)
+    group = @header_attrs[:group]
+    name = xml.xpath('name').text
+    name = nil if name.end_with?('.h')
+    if group.nil? && !name.nil?
+      raise Parser::Error, "Group attribute is missing for header `#{@filename}`"
+    end
+    if name.nil?
+      raise Parser::Error, "No header tag marked on parsed file `#{@filename}`"
+    end
     {
-      name:         @name.to_s,
+      name:         name,
+      group:        group,
       brief:        xml.xpath('abstract').text,
       description:  xml.xpath('desc').text
     }
@@ -826,7 +838,7 @@ class Parser::HeaderFileParser
   # file
   #
   def parse_xml(xml)
-    parsed = parse_header(xml)
+    parsed               = parse_header(xml)
     parsed[:functions]   = parse_functions(xml)
     parsed[:typedefs]    = parse_typedefs(xml)
     parsed[:structs]     = parse_structs(xml)
