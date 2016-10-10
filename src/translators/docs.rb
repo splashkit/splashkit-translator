@@ -20,7 +20,11 @@ module Translators
                }
                group_data =
                  group_data.to_h.values.reduce(group_template) do |memo, header_data|
-                   memo.merge header_data
+                   header_data.each do |key, value|
+                     next if value.nil? || !memo.key?(key)
+                     memo[key] += value unless value.empty?
+                   end
+                   memo
                  end
                [group_key, group_data]
              end.sort.to_h
