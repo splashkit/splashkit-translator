@@ -52,7 +52,7 @@ class Parser
   #
   # Parses HeaderDoc for the provided src directory into a hash
   #
-  def parse ()
+  def parse
     unless headerdoc_installed?
       raise Parser::Error, 'headerdoc2html is not installed!'
     end

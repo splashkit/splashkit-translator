@@ -148,18 +148,18 @@ begin
     if options[:read_from_cache]
       JSON.parse(File.read(options[:read_from_cache]), symbolize_names: true)
     else
-      parser = Parser.new options[:src], options[:logging]
+      parser = Parser.new(options[:src], options[:logging])
       parsed = parser.parse
       if options[:verbose]
         parser.warnings.each do |msg|
           print options[:ide] ? '' : '[WARN] '.yellow
-          puts "#{msg}"
+          puts msg
         end
       end
       unless parser.errors.empty?
         parser.errors.each do |msg|
           print options[:ide] ? 'error: ' : '[ERR] '.red
-          puts "#{msg}"
+          puts msg
         end
         puts 'Errors detected during parsing. Exiting.'
         exit 1
