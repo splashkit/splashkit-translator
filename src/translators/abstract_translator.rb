@@ -92,13 +92,13 @@ module Translators
           send("to_#{casee}".to_sym)
         end
         define_method(:type_case) do
-          send_case_conversion_method converters[:types]
+          to_s.send_case_conversion_method converters[:types]
         end
         define_method(:function_case) do
-          send_case_conversion_method converters[:functions]
+          to_s.send_case_conversion_method converters[:functions]
         end
         define_method(:variable_case) do
-          send_case_conversion_method converters[:variables]
+          to_s.send_case_conversion_method converters[:variables]
         end
       end
       string_case_module.freeze

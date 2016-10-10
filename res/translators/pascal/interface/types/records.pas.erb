@@ -8,7 +8,7 @@
 <%
     struct[:fields].each do |field_name, field_data|
 %>
-  <%= field_name.to_s.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;
+  <%= field_name.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;
 <%
     end # end fields.each
 %>
