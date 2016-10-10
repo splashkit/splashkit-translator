@@ -32,5 +32,9 @@ module Translators
         'api.json' => JSON.pretty_generate(data)
       }
     end
+
+    def post_execute
+      puts 'Place `api.json` in the `data` directory of the `splashkit.io` repo'
+    end
   end
 end
