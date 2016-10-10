@@ -771,17 +771,17 @@ class Parser::HeaderFileParser
   # Parses enum constants
   #
   def parse_enum_constants(xml, ppl)
-    constants = xml.xpath('constants/constant').map do |const|
-      [xml.xpath('name').text.to_sym, parse_enum_constant(const)]
+    constants = xml.xpath('constantlist/constant').map do |const|
+      [const.xpath('name').text.to_sym, parse_enum_constant(const)]
     end.to_h
     # after parsing <constant>, must ensure they align with the ppl
-    constants.keys.each do | const |
-      # ppl for enums have no types! Thus, just check against keys
-      unless ppl.keys.include? const
-        raise Parser::Error,
-              "Mismatched headerdoc @constant '#{const}'. Check it exists " \
-              'in the enum definition.'
-      end
+    missing_constants = (ppl.keys - constants.keys)
+    # ppl for enums have no types! Thus, just check against keys
+    unless missing_constants.empty?
+      raise Parser::Error,
+            "Constant(s) not tagged in enum definition: `'#{
+            missing_constants.join('`, `')}'`. Check it exists in the enum" \
+            'definition.'
     end
     ppl_default_to(xml, constants, ppl, nil)
     parse_enum_constant_numbers(xml, constants)

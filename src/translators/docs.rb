@@ -29,7 +29,7 @@ module Translators
                [group_key, group_data]
              end.sort.to_h
       {
-        "api.json" => JSON.pretty_generate(data)
+        'api.json' => JSON.pretty_generate(data)
       }
     end
   end
