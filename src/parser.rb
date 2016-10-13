@@ -413,7 +413,6 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
-
     # Grab template <T> value for parameter
     # type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
@@ -443,9 +442,7 @@ class Parser::HeaderFileParser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
-
     type = ppl[name.to_sym]
-
     if type.nil?
       raise Parser::Error,
             "Mismatched headerdoc @param '#{name}'. Check it exists in the " \
@@ -698,11 +695,11 @@ class Parser::HeaderFileParser
   end
 
   #
-  # Parses all fields (marked with `@param`) in a struct
+  # Parses all fields in a struct
   #
   def parse_fields(xml, ppl)
-    fields = xml.xpath('fields/field').map do |p|
-      # fields are marked with `@param`, so we just use parse_parameter
+    fields = xml.xpath('fieldlist/field').map do |p|
+      puts p
       parse_parameter(p, ppl)
     end.to_h
     ppl_default_to(xml, fields, ppl)
