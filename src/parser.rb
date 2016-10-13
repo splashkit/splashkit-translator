@@ -52,7 +52,7 @@ class Parser
   #
   # Parses HeaderDoc for the provided src directory into a hash
   #
-  def parse ()
+  def parse
     unless headerdoc_installed?
       raise Parser::Error, 'headerdoc2html is not installed!'
     end
@@ -79,8 +79,10 @@ class Parser
               "headerdoc2html failed. Command was #{cmd}."
       end
       xml = Nokogiri.XML(hfile_xml)
-      hfparser = HeaderFileParser.new(File.basename(hfile), xml)
-      [hfparser.name.to_sym, hfparser.parse]
+      hfparsed = HeaderFileParser.new(File.basename(hfile), xml).parse
+      hfname = hfparsed[:name]
+      hfparsed.delete(:name)
+      [hfname, hfparsed]
     end
     if parsed.empty?
       raise Parser::Error, %{
@@ -137,8 +139,8 @@ class Parser::HeaderFileParser
   #
   # Initialises a header parser with required data
   #
-  def initialize(name, input_xml)
-    @name = name[0..-3] # remove the '.h'
+  def initialize(filename, input_xml)
+    @filename = filename
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
@@ -226,8 +228,18 @@ class Parser::HeaderFileParser
   #
   def parse_header(xml)
     @header_attrs = parse_attributes(xml)
+    group = @header_attrs[:group]
+    name = xml.xpath('name').text
+    name = nil if name.end_with?('.h')
+    if group.nil? && !name.nil?
+      raise Parser::Error, "Group attribute is missing for header `#{@filename}`"
+    end
+    if name.nil?
+      raise Parser::Error, "No header tag marked on parsed file `#{@filename}`"
+    end
     {
-      name:         @name.to_s,
+      name:         name,
+      group:        group,
       brief:        xml.xpath('abstract').text,
       description:  xml.xpath('desc').text
     }
@@ -401,7 +413,6 @@ class Parser::HeaderFileParser
     regex = /(?:(const)\s+)?((?:unsigned\s)?\w+)\s*(?:(&amp;)|(\*)|(\[\d+\])*)?/
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
-
     # Grab template <T> value for parameter
     # type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
@@ -431,9 +442,7 @@ class Parser::HeaderFileParser
     name = xml.xpath('name').text
     # Need to find the matching type, this comes from
     # the parsed parameter list elements
-
     type = ppl[name.to_sym]
-
     if type.nil?
       raise Parser::Error,
             "Mismatched headerdoc @param '#{name}'. Check it exists in the " \
@@ -686,11 +695,10 @@ class Parser::HeaderFileParser
   end
 
   #
-  # Parses all fields (marked with `@param`) in a struct
+  # Parses all fields in a struct
   #
   def parse_fields(xml, ppl)
-    fields = xml.xpath('fields/field').map do |p|
-      # fields are marked with `@param`, so we just use parse_parameter
+    fields = xml.xpath('fieldlist/field').map do |p|
       parse_parameter(p, ppl)
     end.to_h
     ppl_default_to(xml, fields, ppl)
@@ -759,17 +767,17 @@ class Parser::HeaderFileParser
   # Parses enum constants
   #
   def parse_enum_constants(xml, ppl)
-    constants = xml.xpath('constants/constant').map do |const|
-      [xml.xpath('name').text.to_sym, parse_enum_constant(const)]
+    constants = xml.xpath('constantlist/constant').map do |const|
+      [const.xpath('name').text.to_sym, parse_enum_constant(const)]
     end.to_h
     # after parsing <constant>, must ensure they align with the ppl
-    constants.keys.each do | const |
-      # ppl for enums have no types! Thus, just check against keys
-      unless ppl.keys.include? const
-        raise Parser::Error,
-              "Mismatched headerdoc @constant '#{const}'. Check it exists " \
-              'in the enum definition.'
-      end
+    missing_constants = (ppl.keys - constants.keys)
+    # ppl for enums have no types! Thus, just check against keys
+    unless missing_constants.empty?
+      raise Parser::Error,
+            "Constant(s) not tagged in enum definition: `'#{
+            missing_constants.join('`, `')}'`. Check it exists in the enum" \
+            'definition.'
     end
     ppl_default_to(xml, constants, ppl, nil)
     parse_enum_constant_numbers(xml, constants)
@@ -826,7 +834,7 @@ class Parser::HeaderFileParser
   # file
   #
   def parse_xml(xml)
-    parsed = parse_header(xml)
+    parsed               = parse_header(xml)
     parsed[:functions]   = parse_functions(xml)
     parsed[:typedefs]    = parse_typedefs(xml)
     parsed[:structs]     = parse_structs(xml)

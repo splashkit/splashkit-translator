@@ -8,6 +8,7 @@ require_relative 'config'
 require_relative 'translators/clib'
 require_relative 'translators/pascal'
 require_relative 'translators/cpp'
+require_relative 'translators/docs'
 
 # Access to config vars
 include Config
@@ -31,7 +32,7 @@ opt_parser = OptionParser.new do |opts|
   avaliable_translators =
     Translators.constants
                .select { |c| Class === Translators.const_get(c) }
-               .select { |c| c != :AbstractTranslator }
+               .select { |c| ![:AbstractTranslator, :ReusableCAdapter].include? c }
                .map { |t| [t.upcase, Translators.const_get(t)] }
                .to_h
   # Setup
@@ -148,18 +149,18 @@ begin
     if options[:read_from_cache]
       JSON.parse(File.read(options[:read_from_cache]), symbolize_names: true)
     else
-      parser = Parser.new options[:src], options[:logging]
+      parser = Parser.new(options[:src], options[:logging])
       parsed = parser.parse
       if options[:verbose]
         parser.warnings.each do |msg|
           print options[:ide] ? '' : '[WARN] '.yellow
-          puts "#{msg}"
+          puts msg
         end
       end
       unless parser.errors.empty?
         parser.errors.each do |msg|
           print options[:ide] ? 'error: ' : '[ERR] '.red
-          puts "#{msg}"
+          puts msg
         end
         puts 'Errors detected during parsing. Exiting.'
         exit 1
