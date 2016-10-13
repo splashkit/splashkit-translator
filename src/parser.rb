@@ -699,7 +699,6 @@ class Parser::HeaderFileParser
   #
   def parse_fields(xml, ppl)
     fields = xml.xpath('fieldlist/field').map do |p|
-      puts p
       parse_parameter(p, ppl)
     end.to_h
     ppl_default_to(xml, fields, ppl)
