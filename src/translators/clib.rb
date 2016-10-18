@@ -100,6 +100,7 @@ module Translators
           'float'     => 'float',
           'double'    => 'double',
           'byte'      => 'unsigned char',
+          'char'      => 'char',
           'bool'      => 'int',
           'enum'      => 'int',
           'struct'    => "__sklib_#{type_name}",
