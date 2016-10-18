@@ -14,7 +14,7 @@ module Translators
     def render_templates
       result = @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
-        header_contents  = Header.new(header_data, @src, @data, @logging)
+        header_contents  = Header.new(header_data, header_key.to_s, @src, @data, @logging)
                                  .read_template('header/module_header.h')
         [header_file_name, header_contents]
       end.to_h
@@ -29,9 +29,10 @@ module Translators
     private
 
     class Header < CPP
-      def initialize(data, src, src_data, logging)
+      def initialize(data, header_name, src, src_data, logging)
         super(data, src, logging)
         @src_data = src_data
+        @header_name = header_name
       end
 
       #
