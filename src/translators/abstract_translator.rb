@@ -103,6 +103,7 @@ module Translators
       end
       string_case_module.freeze
       String.prepend string_case_module
+      Symbol.prepend string_case_module
     end
 
     private_class_method :"case_converters="
