@@ -157,13 +157,28 @@ class Parser::HeaderFileParser
 
   #
   # A function which will default to the ppl provided if they are missing
-  # within the hash provided using the parse_func provided
+  # within the hash provided using the parse_func provided. It will also
+  # add missing data it finds using the parse_func.
   #
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
     ppl.each do |p_name, p_type|
       args = [xml || Nokogiri::XML(''), p_name, p_type]
-      # Assign has the value it has... or if null, calculate it
-      hash[p_name.to_sym] = (hash[p_name.to_sym] || (parse_func ? send(parse_func, *args) : {}))
+      ppl_data = parse_func ? send(parse_func, *args) : {}
+      p_name = p_name.to_sym
+      hash[p_name] ||= {}
+      # Merge in data that does not exist in hash
+      ppl_data.each do |ppl_key, ppl_value|
+        old_value = hash[p_name][ppl_key]
+        # PPL parsed has an array bigger? Trust that (e.g., array_dimension_sizes)
+        array_mismatch = (old_value.is_a?(Array) && ppl_value.is_a?(Array) &&
+                          old_value.length < ppl_value.length)
+        # PPL parsed is true when original data is false? Trust that
+        truth_mismatch = (old_value === false && ppl_value === true)
+        # PPL parsed has found a key which did not exist previously
+        nil_mismatch = old_value == nil
+        # Update to PPL value if mismatch
+        hash[p_name][ppl_key] = ppl_value if array_mismatch || truth_mismatch || nil_mismatch
+      end
     end
     hash
   end
@@ -415,7 +430,6 @@ class Parser::HeaderFileParser
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
     # Grab template <T> value for parameter
-    # type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
     array = parse_array_dimensions(xml, param_name)
 
