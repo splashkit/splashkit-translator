@@ -208,7 +208,7 @@ def run_parser
     out = RunOpts.write_to_cache
     parsed[SK_CACHE_SOURCE_KEY] = RunOpts.src
     FileUtils.mkdir_p File.dirname out
-    File.write out, JSON.pretty_generate(data)
+    File.write out, JSON.pretty_generate(parsed)
   elsif RunOpts.read_from_cache
     RunOpts.src = parsed.delete(SK_CACHE_SOURCE_KEY)
     if RunOpts.src.nil?
