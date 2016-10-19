@@ -221,7 +221,7 @@ def run_parser
   # Write to cache file
   if RunOpts.write_to_cache
     out = RunOpts.write_to_cache
-    data = parsed
+    data = parsed.clone
     data[SK_CACHE_SOURCE_KEY] = RunOpts.src
     FileUtils.mkdir_p File.dirname out
     File.write out, JSON.pretty_generate(data)
