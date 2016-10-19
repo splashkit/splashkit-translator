@@ -10,12 +10,14 @@
 %>
 #include "<%= header_path %>"
 <%
-  else # else if header does not end with .h
+  else
 %>
 <%
-    @data.each do |key, _|
+    # Default to path in data
+    @data.values.each do |header_data|
+      header_path = header_data[:path].split('/').last
 %>
-#include "<%= key %>.h"
+#include "<%= header_path %>"
 <%
     end # end data.each
 %>
