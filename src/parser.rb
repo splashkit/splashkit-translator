@@ -244,12 +244,9 @@ class Parser::HeaderFileParser
     @header_attrs = parse_attributes(xml)
     group = @header_attrs[:group]
     name = xml.xpath('name').text
-    name = nil if name.end_with?('.h')
-    if group.nil? && !name.nil?
-      raise Parser::Error, "Group attribute is missing for header `#{@filename}`"
-    end
-    if name.nil?
-      raise Parser::Error, "No header tag marked on parsed file `#{@filename}`"
+    name = name[0..name.index('.h') - 1] if name.end_with?('.h') # Trim .h
+    if group.nil?
+      raise Parser::Error, "Group attribute is missing for header `#{name}.h`"
     end
     {
       name:         name,
