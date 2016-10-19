@@ -204,17 +204,21 @@ def run_parser
     else
       run_parse_on_src(src)
     end
+  # Write to cache file
   if RunOpts.write_to_cache
     out = RunOpts.write_to_cache
     parsed[SK_CACHE_SOURCE_KEY] = RunOpts.src
     FileUtils.mkdir_p File.dirname out
     File.write out, JSON.pretty_generate(parsed)
-  elsif RunOpts.read_from_cache
+  end
+  # Read cache file means to delete the cache key
+  if RunOpts.read_from_cache
     RunOpts.src = parsed.delete(SK_CACHE_SOURCE_KEY)
     if RunOpts.src.nil?
       raise "#{SK_CACHE_SOURCE_KEY} missing from cache. Aborting."
     end
   end
+  parsed
 rescue Parser::Error
   puts $!.to_s
   exit 1
