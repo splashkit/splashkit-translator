@@ -221,9 +221,10 @@ def run_parser
   # Write to cache file
   if RunOpts.write_to_cache
     out = RunOpts.write_to_cache
-    parsed[SK_CACHE_SOURCE_KEY] = RunOpts.src
+    data = parsed
+    data[SK_CACHE_SOURCE_KEY] = RunOpts.src
     FileUtils.mkdir_p File.dirname out
-    File.write out, JSON.pretty_generate(parsed)
+    File.write out, JSON.pretty_generate(data)
   end
   # Read cache file means to delete the cache key
   if RunOpts.read_from_cache
