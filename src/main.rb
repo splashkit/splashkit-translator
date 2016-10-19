@@ -189,15 +189,29 @@ def run_parser
       end.to_h
       # Source also provided?
       if src
+        cache_data = parsed_from_cache.reject { |k| k == SK_CACHE_SOURCE_KEY }
+                                      .values
         # Re-parse those files which have been modified after the
         # last parsed_time
-        to_parse = parsed_from_cache
-                   .reject { |k| k == SK_CACHE_SOURCE_KEY }
-                   .values
-                   .select { |p| last_modified_hash[p[:path]] > p[:parsed_at] }
-                   .map { |p| "#{RunOpts.src}/#{p[:path]}" }
+        to_parse =
+          if RunOpts.src.end_with? '.h'
+            path = RunOpts.src.split('/').last
+            from_cache = cache_data.select { |p| p[:path].end_with? path }.first
+            updated_since = last_modified_hash[from_cache[:path]] > from_cache[:parsed_at]
+            updated_since ? [RunOpts.src] : []
+          else
+            cache_data.select { |p| last_modified_hash[p[:path]] > p[:parsed_at] }
+                      .map { |p| "#{RunOpts.src}/#{p[:path]}" }
+          end
         unless to_parse.empty?
           parsed_from_cache.merge! run_parse_on_src(to_parse)
+        end
+        # Delete all those in parsed_from_cache that no longer exist in src
+        no_longer_exists =
+          cache_data.map { |p| p[:path] } -
+          src.map { |s| s[s.index(SK_SRC_CORESDK)..-1] }
+        parsed_from_cache.reject! do |k, p|
+          no_longer_exists.include? p[:path] if k != SK_CACHE_SOURCE_KEY
         end
       end
       parsed_from_cache
