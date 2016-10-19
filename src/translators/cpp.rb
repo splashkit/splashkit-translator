@@ -66,14 +66,14 @@ module Translators
                       .pluck(:type)
           end || []
         dependent_types = (field_types + param_types + return_types)
-        @src_data.select do |_, header_data|
+        @src_data.select do |header_name, header_data|
           types_defined = header_data[:typedefs].pluck(:name) +
                           header_data[:structs].pluck(:name) +
                           header_data[:enums].pluck(:name)
           # Accepted if this header defines some of the dependent types
           # and not this header
           !(types_defined & dependent_types).empty? &&
-            header_data[:name] != @data[:name]
+            header_name != @header_name
         end.keys
       end
     end
