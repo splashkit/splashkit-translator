@@ -227,7 +227,7 @@ end
 #
 # Run the translator, or validate only if option set
 #
-def run_translate
+def run_translate(parsed)
   if RunOpts.validate_only
     puts 'SplashKit API documentation valid!'
   else
@@ -249,5 +249,4 @@ end
 
 # Main
 parse_options
-run_parser
-run_translate
+run_translate run_parser
