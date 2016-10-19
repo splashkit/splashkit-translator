@@ -643,7 +643,7 @@ class Parser::HeaderFileParser
   def parse_function_pointer_typedef(xml)
     ppl = parse_ppl(xml)
     return_type = xml.xpath('declaration/declaration_type[1]').text
-    params = ppl_default_to(xml, {}, ppl) # just use PPL for this
+    params = parse_parameters(xml, ppl)
     {
       return: parse_function_return_type(xml, return_type),
       parameters: params
