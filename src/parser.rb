@@ -57,9 +57,7 @@ class Parser
       raise Parser::Error, 'headerdoc2html is not installed!'
     end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
-    # If only parsing one file then don't amend /*.h
-    headers_src = "#{@src}/#{SK_SRC_CORESDK}/*.h" unless @src.end_with? '.h'
-    parsed = Dir[headers_src || @src].map do |hfile|
+    parsed = @src.map do |hfile|
       puts "Parsing #{hfile}..." if @logging
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
       _, stdout, stderr, wait_thr = Open3.popen3 cmd
@@ -79,17 +77,17 @@ class Parser
               "headerdoc2html failed. Command was #{cmd}."
       end
       xml = Nokogiri.XML(hfile_xml)
-      hfparsed = HeaderFileParser.new(File.basename(hfile), xml).parse
+      hfparsed = HeaderFileParser.new(hfile, xml).parse
       hfname = hfparsed[:name]
       hfparsed.delete(:name)
       [hfname, hfparsed]
     end
     if parsed.empty?
-      raise Parser::Error, %{
-Nothing parsed! Check that #{@src} is the correct SplashKit directory and that
-coresdk/src/coresdk contains the correct C++ source. Check that HeaderDoc
-comments exist (refer to README).
-}
+      raise Parser::Error,
+            "Nothing parsed! Check that `#{@src.join('`, `')}` is the correct "\
+            'SplashKit directory and that coresdk/src/coresdk contains the '\
+            'correct C++ source. Check that HeaderDoc comments exist '\
+            '(refer to README).'
     end
     parsed.to_h
   end
@@ -139,8 +137,9 @@ class Parser::HeaderFileParser
   #
   # Initialises a header parser with required data
   #
-  def initialize(filename, input_xml)
-    @filename = filename
+  def initialize(file, input_xml)
+    @path = file[file.index(SK_SRC_CORESDK)..-1] # remove user-part of src path
+    @filename = File.basename(file)
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
@@ -241,7 +240,9 @@ class Parser::HeaderFileParser
       name:         name,
       group:        group,
       brief:        xml.xpath('abstract').text,
-      description:  xml.xpath('desc').text
+      description:  xml.xpath('desc').text,
+      parsed_at:    Time.now.to_i,
+      path:         @path
     }
   end
 
