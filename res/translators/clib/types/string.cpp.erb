@@ -11,8 +11,8 @@
     7. Return the wrapped `Bar::String'
 %>
 extern "C" typedef struct {
-  char *string;
-  unsigned int size;
+    char *string;
+    unsigned int size;
 } __sklib_string;
 <%#
     The SplashKit adapter needs access to the SplashKit clib free function.
@@ -29,11 +29,11 @@ extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_string(__sklib_string s);
     free(s.string);
 }
 __sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s) {
-  __sklib_string __skreturn;
-  __skreturn.size = static_cast<unsigned int>(s.length());
-  __skreturn.string = (char *)malloc(__skreturn.size + 1);
-  strcpy(__skreturn.string, s.c_str());
-  return __skreturn;
+    __sklib_string __skreturn;
+    __skreturn.size = static_cast<unsigned int>(s.length());
+    __skreturn.string = (char *)malloc(__skreturn.size + 1);
+    strcpy(__skreturn.string, s.c_str());
+    return __skreturn;
 }
 std::string <%= func_prefix %>__to_string(const __sklib_string &s) {
     std:string result = std::string(s.string);
