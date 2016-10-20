@@ -57,9 +57,7 @@ class Parser
       raise Parser::Error, 'headerdoc2html is not installed!'
     end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
-    # If only parsing one file then don't amend /*.h
-    headers_src = "#{@src}/#{SK_SRC_CORESDK}/*.h" unless @src.end_with? '.h'
-    parsed = Dir[headers_src || @src].map do |hfile|
+    parsed = @src.map do |hfile|
       puts "Parsing #{hfile}..." if @logging
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
       _, stdout, stderr, wait_thr = Open3.popen3 cmd
@@ -79,17 +77,17 @@ class Parser
               "headerdoc2html failed. Command was #{cmd}."
       end
       xml = Nokogiri.XML(hfile_xml)
-      hfparsed = HeaderFileParser.new(File.basename(hfile), xml).parse
+      hfparsed = HeaderFileParser.new(hfile, xml).parse
       hfname = hfparsed[:name]
       hfparsed.delete(:name)
       [hfname, hfparsed]
     end
     if parsed.empty?
-      raise Parser::Error, %{
-Nothing parsed! Check that #{@src} is the correct SplashKit directory and that
-coresdk/src/coresdk contains the correct C++ source. Check that HeaderDoc
-comments exist (refer to README).
-}
+      raise Parser::Error,
+            "Nothing parsed! Check that `#{@src.join('`, `')}` is the correct "\
+            'SplashKit directory and that coresdk/src/coresdk contains the '\
+            'correct C++ source. Check that HeaderDoc comments exist '\
+            '(refer to README).'
     end
     parsed.to_h
   end
@@ -139,8 +137,9 @@ class Parser::HeaderFileParser
   #
   # Initialises a header parser with required data
   #
-  def initialize(filename, input_xml)
-    @filename = filename
+  def initialize(file, input_xml)
+    @path = file[file.index(SK_SRC_CORESDK)..-1] # remove user-part of src path
+    @filename = File.basename(file)
     @header_attrs = {}
     @input_xml = input_xml
     @unique_names = { unique_global: [], unique_method: [] }
@@ -158,13 +157,28 @@ class Parser::HeaderFileParser
 
   #
   # A function which will default to the ppl provided if they are missing
-  # within the hash provided using the parse_func provided
+  # within the hash provided using the parse_func provided. It will also
+  # add missing data it finds using the parse_func.
   #
   def ppl_default_to(xml, hash, ppl, parse_func = :parse_parameter_info)
     ppl.each do |p_name, p_type|
       args = [xml || Nokogiri::XML(''), p_name, p_type]
-      # Assign has the value it has... or if null, calculate it
-      hash[p_name.to_sym] = (hash[p_name.to_sym] || (parse_func ? send(parse_func, *args) : {}))
+      ppl_data = parse_func ? send(parse_func, *args) : {}
+      p_name = p_name.to_sym
+      hash[p_name] ||= {}
+      # Merge in data that does not exist in hash
+      ppl_data.each do |ppl_key, ppl_value|
+        old_value = hash[p_name][ppl_key]
+        # PPL parsed has an array bigger? Trust that (e.g., array_dimension_sizes)
+        array_mismatch = (old_value.is_a?(Array) && ppl_value.is_a?(Array) &&
+                          old_value.length < ppl_value.length)
+        # PPL parsed is true when original data is false? Trust that
+        truth_mismatch = (old_value === false && ppl_value === true)
+        # PPL parsed has found a key which did not exist previously
+        nil_mismatch = old_value == nil
+        # Update to PPL value if mismatch
+        hash[p_name][ppl_key] = ppl_value if array_mismatch || truth_mismatch || nil_mismatch
+      end
     end
     hash
   end
@@ -230,18 +244,17 @@ class Parser::HeaderFileParser
     @header_attrs = parse_attributes(xml)
     group = @header_attrs[:group]
     name = xml.xpath('name').text
-    name = nil if name.end_with?('.h')
-    if group.nil? && !name.nil?
-      raise Parser::Error, "Group attribute is missing for header `#{@filename}`"
-    end
-    if name.nil?
-      raise Parser::Error, "No header tag marked on parsed file `#{@filename}`"
+    name = name[0..name.index('.h') - 1] if name.end_with?('.h') # Trim .h
+    if group.nil?
+      raise Parser::Error, "Group attribute is missing for header `#{name}.h`"
     end
     {
       name:         name,
       group:        group,
       brief:        xml.xpath('abstract').text,
-      description:  xml.xpath('desc').text
+      description:  xml.xpath('desc').text,
+      parsed_at:    Time.now.to_i,
+      path:         @path
     }
   end
 
@@ -414,7 +427,6 @@ class Parser::HeaderFileParser
     _, const, type, ref, ptr = *(ppl_type_data[:type].match regex)
 
     # Grab template <T> value for parameter
-    # type_parameter, is_vector = *parse_vector(xml, type)
     is_vector = type == 'vector'
     array = parse_array_dimensions(xml, param_name)
 
@@ -628,7 +640,7 @@ class Parser::HeaderFileParser
   def parse_function_pointer_typedef(xml)
     ppl = parse_ppl(xml)
     return_type = xml.xpath('declaration/declaration_type[1]').text
-    params = ppl_default_to(xml, {}, ppl) # just use PPL for this
+    params = parse_parameters(xml, ppl)
     {
       return: parse_function_return_type(xml, return_type),
       parameters: params
