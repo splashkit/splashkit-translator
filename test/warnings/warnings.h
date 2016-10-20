@@ -1,7 +1,9 @@
 /**
- * @header Test
+ * @header warning
  *
  * File header...
+ *
+ * @attribute group test
  */
 
 /**
