@@ -180,7 +180,7 @@ def run_parser
     end if RunOpts.src
   # Read cache contents if exists
   parsed =
-    if File.exist?(RunOpts.read_from_cache)
+    if RunOpts.read_from_cache && File.exist?(RunOpts.read_from_cache)
       parsed_from_cache =
         JSON.parse(File.read(RunOpts.read_from_cache), symbolize_names: true)
       # Source also provided?
