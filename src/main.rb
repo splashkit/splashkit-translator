@@ -204,7 +204,7 @@ def run_parser
                       .map { |p| "#{RunOpts.src}/#{p[:path]}" }
           end
         unless to_parse.empty?
-          parsed_from_cache.merge! run_parse_on_src(to_parse)
+          parsed_from_cache.merge! run_parse_on_src(to_parse).map { |k,v| [k.to_sym, v] }.to_h
         end
         # Delete all those in parsed_from_cache that no longer exist in src
         no_longer_exists =
