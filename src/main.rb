@@ -178,17 +178,17 @@ def run_parser
       [RunOpts.src]
     else
       Dir["#{RunOpts.src}/#{SK_SRC_CORESDK}/*.h"]
-    end
+    end if RunOpts.src
   # Read cache contents if exists
   parsed =
     if RunOpts.read_from_cache
       parsed_from_cache =
         JSON.parse(File.read(RunOpts.read_from_cache), symbolize_names: true)
-      last_modified_hash = src.map do |path|
-        [path[path.index(SK_SRC_CORESDK)..-1], File.mtime(path).to_i]
-      end.to_h
       # Source also provided?
       if src
+        last_modified_hash = src.map do |path|
+          [path[path.index(SK_SRC_CORESDK)..-1], File.mtime(path).to_i]
+        end.to_h
         cache_data = parsed_from_cache.reject { |k| k == SK_CACHE_SOURCE_KEY }
                                       .values
         # Re-parse those files which have been modified after the
