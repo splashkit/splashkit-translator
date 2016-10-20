@@ -132,8 +132,7 @@ def parse_options
   # Check if read cache files exist
   if RunOpts.read_from_cache
     unless File.exist?(RunOpts.read_from_cache)
-      raise OptionParser::InvalidOption,
-            "No such cache file #{RunOpts.read_from_cache}"
+      puts "No such cache file #{RunOpts.read_from_cache} -- ignoring..." if RunOpts.logging
     end
   end
   unless missing.empty?
