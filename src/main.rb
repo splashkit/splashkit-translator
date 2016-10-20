@@ -66,7 +66,6 @@ def parse_options
     help = 'Source header file or SplashKit CoreSDK directory'
     opts.on('-i', '--input SOURCE', help) do |input|
       RunOpts.src = File.expand_path input
-      RunOpts.out = "#{input}/#{SK_TRANSLATED_OUTPUT}"
     end
     # Generate using translator
     help = 'Comma separated list of translators to run on the file(s).'
