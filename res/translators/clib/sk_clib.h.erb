@@ -6,23 +6,13 @@
 #include <string>
 #include <vector>
 <%
-  if header_path.end_with? '.h'
+  # Use path in data
+  @data.values.each do |header_data|
+    header_path = header_data[:path].split('/').last
 %>
 #include "<%= header_path %>"
 <%
-  else
-%>
-<%
-    # Default to path in data
-    @data.values.each do |header_data|
-      header_path = header_data[:path].split('/').last
-%>
-#include "<%= header_path %>"
-<%
-    end # end data.each
-%>
-<%
-  end # end if
+  end # end data.each
 %>
 using std::string;
 using std::vector;

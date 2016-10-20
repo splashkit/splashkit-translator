@@ -15,9 +15,8 @@ module Translators
     #
     # Initializes the translator with the data and source directories provided
     #
-    def initialize(data, src, logging)
+    def initialize(data, logging)
       @data = data
-      @src = src
       @logging = logging
       @direct_types = []
       @enums = @data[:enums] || @data.values.pluck(:enums).flatten

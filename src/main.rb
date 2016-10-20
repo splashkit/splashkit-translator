@@ -188,8 +188,7 @@ def run_parser
         last_modified_hash = src.map do |path|
           [path[path.index(SK_SRC_CORESDK)..-1], File.mtime(path).to_i]
         end.to_h
-        cache_data = parsed_from_cache.reject { |k| k == SK_CACHE_SOURCE_KEY }
-                                      .values
+        cache_data = parsed_from_cache.values
         # Re-parse those files which have been modified after the
         # last parsed_time
         to_parse =
@@ -203,14 +202,17 @@ def run_parser
                       .map { |p| "#{RunOpts.src}/#{p[:path]}" }
           end
         unless to_parse.empty?
-          parsed_from_cache.merge! run_parse_on_src(to_parse).map { |k,v| [k.to_sym, v] }.to_h
+          merge_data = run_parse_on_src(to_parse)
+                        .map { |k,v| [k.to_sym, v] } # symbolize keys
+                        .to_h
+          parsed_from_cache.merge! merge_data
         end
         # Delete all those in parsed_from_cache that no longer exist in src
         no_longer_exists =
           cache_data.map { |p| p[:path] } -
           src.map { |s| s[s.index(SK_SRC_CORESDK)..-1] }
         parsed_from_cache.reject! do |k, p|
-          no_longer_exists.include? p[:path] if k != SK_CACHE_SOURCE_KEY
+          no_longer_exists.include? p[:path]
         end
       end
       parsed_from_cache
@@ -221,16 +223,8 @@ def run_parser
   if RunOpts.write_to_cache
     out = RunOpts.write_to_cache
     data = parsed.clone
-    data[SK_CACHE_SOURCE_KEY] = RunOpts.src
     FileUtils.mkdir_p File.dirname out
     File.write out, JSON.pretty_generate(data)
-  end
-  # Read cache file means to delete the cache key
-  if RunOpts.read_from_cache
-    RunOpts.src = parsed.delete(SK_CACHE_SOURCE_KEY)
-    if RunOpts.src.nil?
-      raise "#{SK_CACHE_SOURCE_KEY} missing from cache. Aborting."
-    end
   end
   parsed
 rescue Parser::Error
@@ -246,7 +240,7 @@ def run_translate(parsed)
     puts 'SplashKit API documentation valid!'
   else
     RunOpts.translators.each do |translator_class|
-      translator = translator_class.new(parsed, RunOpts.src, RunOpts.logging)
+      translator = translator_class.new(parsed, RunOpts.logging)
       out = translator.execute
       next unless RunOpts.out
       out.each do |filename, contents|
