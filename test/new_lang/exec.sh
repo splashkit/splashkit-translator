@@ -1,6 +1,5 @@
 #!/bin/sh
 echo "Generate adapter"
-rm -rf ../out
 ../../translate --generate clib,pascal -i new_lang1.h --output ../out
 
 echo "Make static library"
