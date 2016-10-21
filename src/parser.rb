@@ -138,7 +138,12 @@ class Parser::HeaderFileParser
   # Initialises a header parser with required data
   #
   def initialize(file, input_xml)
-    @path = file[file.index(SK_SRC_CORESDK)..-1] # remove user-part of src path
+    @path =
+      if file.include? SK_SRC_CORESDK
+        file[file.index(SK_SRC_CORESDK)..-1] # remove user-part of src path
+      else
+        file
+      end
     @filename = File.basename(file)
     @header_attrs = {}
     @input_xml = input_xml
