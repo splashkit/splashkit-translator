@@ -154,7 +154,7 @@ module Translators
     # Return true iff function provided is returning function
     #
     def is_func?(function)
-      !is_void(function)
+      !is_proc(function)
     end
 
     #
