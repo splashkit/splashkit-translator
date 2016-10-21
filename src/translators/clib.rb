@@ -29,11 +29,6 @@ module Translators
       }
     end
 
-    def post_execute
-      puts 'Run the cmake script generated above (CMakeLists.txt) '\
-           'to generate the SplashKit dynamic C library.'
-    end
-
     #=== internal ===
 
     #
