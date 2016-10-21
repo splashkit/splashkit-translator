@@ -172,7 +172,7 @@ module Translators
     #
     # Generate a to SK adapter function name for the given type
     #
-    def sk_adapter_fn_for(type_data)
+    def sk_mapper_fn_for(type_data)
       type =
         if type_data[:type] == 'void' && type_data[:is_pointer]
           # If void* then it's a sklib_ptr
@@ -213,7 +213,7 @@ module Translators
     #
     # Generate a to library adapter function name for the given type
     #
-    def lib_adapter_fn_for(type_data)
+    def lib_mapper_fn_for(type_data)
       # Rip lib type first
       type = lib_type_for type_data
       # Remove leading __sklib_ underscores if they exist

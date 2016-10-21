@@ -13,15 +13,15 @@
     function[:parameters].each do |param_name, param_data|
 %>
 <%#
-    1. Convert each parameter using the adapter functions available
+    1. Convert each parameter using the mapper functions available
 %>
 <%
       param_adapted =
         if param_data[:is_pointer]
           param_name
         else
-          adapter_fn = @clib.lib_adapter_fn_for param_data
-          "#{adapter_fn}(#{param_name})"
+          mapper_fn = @clib.lib_mapper_fn_for param_data
+          "#{mapper_fn}(#{param_name})"
         end
       ptr = '*' if param_data[:is_pointer]
       const = 'const ' if param_data[:is_const]
@@ -60,9 +60,9 @@
     end # end select
     non_const_refs.each do | param_name, param_data |
       if type_can_be_directly_copied? param_data
-        adapter_fn = cpp_adapter_fn_for param_data
+        mapper_fn = cpp_mapper_fn_for param_data
 %>
-    <%= param_name %> = <%= adapter_fn %>(__skparam__<%= param_name %>);
+    <%= param_name %> = <%= mapper_fn %>(__skparam__<%= param_name %>);
 <%
       else # cant be directly copied... use update function
         update_fn = cpp_update_fn_for param_data
@@ -82,7 +82,7 @@
     params_to_free.each do | param_name, param_data |
       type_name = @clib.lib_type_for(param_data)
 %>
-    __skadapter__free<%=type_name%>(__skparam__<%=param_name%>);
+    __skmapper__free<%=type_name%>(__skparam__<%=param_name%>);
 <%
     end # end each
 %>
@@ -92,7 +92,7 @@
 <%
     unless is_void?(function)
 %>
-    return <%= cpp_adapter_fn_for function[:return] %>(__skreturn);
+    return <%= cpp_mapper_fn_for function[:return] %>(__skreturn);
 <%
     end # end unless
 %>

@@ -11,7 +11,7 @@
     function[:parameters].each do |param_name, param_data|
 %>
 <%#
-    1. Convert each parameter using the adapter functions available
+    1. Convert each parameter using the mapper functions available
 %>
 <%
       param_adapted =
@@ -19,8 +19,8 @@
           param_name
         else
           deref = '*' if (param_data[:is_reference] && ! param_data[:is_const])
-          adapter_fn = sk_adapter_fn_for param_data
-          "#{adapter_fn}(#{deref}#{param_name})"
+          mapper_fn = sk_mapper_fn_for param_data
+          "#{mapper_fn}(#{deref}#{param_name})"
         end
       ptr = '*' if param_data[:is_pointer]
       const = 'const ' if param_data[:is_const] && !param_data[:is_reference]
@@ -57,9 +57,9 @@
     end # end select
     non_const_refs.each do | param_name, param_data |
       if type_can_be_directly_copied? param_data
-        adapter_fn = lib_adapter_fn_for param_data
+        mapper_fn = lib_mapper_fn_for param_data
 %>
-    *<%= param_name %> = <%= adapter_fn %>(__skparam__<%= param_name %>);
+    *<%= param_name %> = <%= mapper_fn %>(__skparam__<%= param_name %>);
 <%
       else # cannot be directly copied...
         update_fn = sk_update_fn_for param_data
@@ -75,7 +75,7 @@
 <%
     unless is_void?(function)
 %>
-    return <%= lib_adapter_fn_for function[:return] %>(__skreturn);
+    return <%= lib_mapper_fn_for function[:return] %>(__skreturn);
 <%
     end # end unless
 %>

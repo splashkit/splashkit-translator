@@ -1,5 +1,5 @@
 <%#
-    Struct adapters must be made to and from the Lib and SK code.
+    Struct mappers must be made to and from the Lib and SK code.
     Can't use a macro for this and cannot be a static cast so we must
     generate the functions individually.
  %>
@@ -7,12 +7,12 @@
   @structs.each do |struct|
 %>
 <%#
-    Make adapter function for struct -> __sklib_struct
+    Make mapper function for struct -> __sklib_struct
 %>
 __sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<%= struct[:name] %> v) {
     __sklib_<%= struct[:name] %> __skreturn;
 <%#
-    For every field, convert using adapter functions for this field's type
+    For every field, convert using mapper functions for this field's type
 %>
 <%
     struct[:fields].each do |field_name, field_data|
@@ -20,12 +20,12 @@ __sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<
       if field_data[:is_array]
         get_Nd_array_size_as_1d(field_data).times do |i|
 %>
-    __skreturn.<%= field_name %>[<%= i %>] = <%= lib_adapter_fn_for field_data %>(v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %>);
+    __skreturn.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %>);
 <%
         end # end times
-      else # else, copy over using lib type and sk to lib type adapter
+      else # else, copy over using lib type and sk to lib type mapper
 %>
-    __skreturn.<%= field_name %> = <%= lib_adapter_fn_for field_data %>(v.<%= field_name %>);
+    __skreturn.<%= field_name %> = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %>);
 <%
       end # end if
     end # end fields.each
@@ -33,12 +33,12 @@ __sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<
     return __skreturn;
 }
 <%#
-    Make adapter function for __sklib_struct -> struct
+    Make mapper function for __sklib_struct -> struct
 %>
 <%= struct[:name] %> <%= func_prefix %>__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v) {
     <%= struct[:name] %> __skreturn;
 <%#
-    For every field, convert using adapter functions for this field's type
+    For every field, convert using mapper functions for this field's type
 %>
 <%
     struct[:fields].each do |field_name, field_data|
@@ -46,12 +46,12 @@ __sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<
       if field_data[:is_array]
         get_Nd_array_size_as_1d(field_data).times do |i|
 %>
-    __skreturn.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %> = <%= sk_adapter_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+    __skreturn.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
 <%
         end # end times
-      else # else standard copy converted as SK type using SK type adapter)
+      else # else standard copy converted as SK type using SK type mapper)
 %>
-    __skreturn.<%= field_name %> = <%= sk_adapter_fn_for field_data %>(v.<%= field_name %>);
+    __skreturn.<%= field_name %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>);
 <%
       end # end if
     end # end fields.each
