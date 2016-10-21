@@ -14,14 +14,15 @@ typedef struct {
     <%= lib_map_type_for(type) %> *data_from_lib;
     unsigned int size_from_lib;
 } __sklib_vector_<%= type %>;
-<%
-    # Must forward declare C Library free function if not yet declared
-    # before we declare the non-C Library free function
-    if splashkit_library?
+<%#
+    Must forward declare the library free vector function if adapter.
 %>
-extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
 <%
-    end # end unless
+    if splashkit_adapter?
+%>
+extern "C" void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%
+    end
 %>
 <%
   end # end vectors.each

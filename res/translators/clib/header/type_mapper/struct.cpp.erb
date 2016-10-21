@@ -1,0 +1,12 @@
+<%#
+    1. Define mapper function for struct -> __sklib_struct
+    2. Define mapper function for __sklib_struct -> struct
+%>
+<%
+  @structs.each do |struct|
+%>
+__sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<%= struct[:name] %> v);
+<%= struct[:name] %> <%= func_prefix %>__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v);
+<%
+  end # end structs.each
+%>

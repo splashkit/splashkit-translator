@@ -23,8 +23,9 @@ module Translators
     def render_templates
       {
         'sk_clib.h' => read_template('sk_clib.h'),
+        'sk_clib.cpp' => read_template('sk_clib.cpp'),
         'lib_type_mapper.h' => read_template('type_mapper.h'),
-        'sk_clib.cpp' => read_template('sk_clib.cpp')
+        'lib_type_mapper.cpp' => read_template('type_mapper.cpp'),
       }
     end
 
@@ -223,11 +224,18 @@ module Translators
     end
 
     #
-    # C code allocates strings and vectors on the heap. It should therefore
+    # C library allocates strings and vectors on the heap. It should therefore
     # free any allocated heap memory when it is no longer required.
     #
     def splashkit_library?
       true
+    end
+
+    #
+    # If it is not the library then it is an adapter.
+    #
+    def splashkit_adapter?
+      !splashkit_library?
     end
 
     #

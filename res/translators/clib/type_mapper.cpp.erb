@@ -2,30 +2,13 @@
 // SplashKit <%= splashkit_library? ? 'C Library' : 'C++ Adapter' %> type mapping functions
 // DO NOT MODIFY
 //
-#include <stdlib.h>
-#include <string>
-#include <vector>
-<% if splashkit_library? %>
-<%
-  # Use path in data
-  @data.values.each do |header_data|
-    header_path = header_data[:path].split('/').last
-%>
-#include "<%= header_path %>"
-<%
-  end # end data.each
-%>
+#include "<%= splashkit_library? ? "lib" : "adapter" %>_type_mapper.h"
 
-using std::string;
-using std::vector;
-using namespace splashkit_lib;
-<% end %>
-
-<%= read_template 'implementation/functions/type_mappings/string' %>
-<%= read_template 'implementation/functions/type_mappings/bool' %>
-<%= read_template 'implementation/functions/type_mappings/direct' %>
-<%= read_template 'implementation/functions/type_mappings/typealias_pointer' %>
-<%= read_template 'implementation/functions/type_mappings/enum' %>
-<%= read_template 'implementation/functions/type_mappings/struct' %>
-<%= read_template 'implementation/functions/type_mappings/function_pointer' %>
-<%= read_template 'implementation/functions/type_mappings/vector' %>
+<%= read_template 'implementation/type_mapper/string' %>
+<%= read_template 'implementation/type_mapper/bool' %>
+<%= read_template 'implementation/type_mapper/direct' %>
+<%= read_template 'implementation/type_mapper/typealias_pointer' %>
+<%= read_template 'implementation/type_mapper/enum' %>
+<%= read_template 'implementation/type_mapper/struct' %>
+<%= read_template 'implementation/type_mapper/function_pointer' %>
+<%= read_template 'implementation/type_mapper/vector' %>

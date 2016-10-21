@@ -21,7 +21,8 @@ module Translators
       result.merge(
         'splashkit.h'   => read_template('header/splashkit_header.h'),
         'splashkit.cpp' => read_template('implementation/implementation.cpp'),
-        'adapter_type_mapper.h' => @clib.read_template('type_mapper.h')
+        'adapter_type_mapper.h' => @clib.read_template('type_mapper.h'),
+        'adapter_type_mapper.cpp' => @clib.read_template('type_mapper.cpp')
       )
     end
 

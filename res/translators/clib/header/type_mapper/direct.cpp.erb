@@ -1,0 +1,13 @@
+<%#
+    Direct adapters are made for no change between SK and Lib types. Must handle
+    space replacement in adapter function name as unsigned may be provided.
+%>
+<%
+  @direct_types.each do |type|
+    utype = type.tr("\s", "_")
+%>
+__sklib_<%= utype %> <%= func_prefix %>__to_sklib_<%= utype %>(<%= type %> v);
+<%= type %> <%= func_prefix %>__to_<%= utype %>(<%= type %> v);
+<%
+  end # end direct_types.each
+%>

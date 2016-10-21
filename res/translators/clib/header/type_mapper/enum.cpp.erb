@@ -1,0 +1,12 @@
+<%#
+    1. Define mapper function for enum -> __sklib_enum (aka int)
+    2. Define mapper function for __sklib_enum (aka int) -> enum
+ %>
+<%
+  @enums.pluck(:name).each do |enum|
+%>
+int <%= func_prefix %>__to_sklib_<%= enum %>(<%= enum %> v);
+<%= enum %> <%= func_prefix %>__to_<%= enum %>(int v);
+<%
+  end # end enums.each
+%>
