@@ -146,8 +146,15 @@ module Translators
     #
     # Return true iff function provided is void
     #
-    def is_void?(function)
+    def is_proc?(function)
       function[:return][:type] == 'void' && !function[:return][:is_pointer]
+    end
+
+    #
+    # Return true iff function provided is returning function
+    #
+    def is_func?(function)
+      !is_void(function)
     end
 
     #

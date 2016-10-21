@@ -36,7 +36,7 @@
     2. Make the function call (and assign __skreturn if non-void)
 %>
 <%
-    return_val = unless is_void?(function) then
+    return_val = if is_func?(function) then
       type_parameter = "<#{function[:return][:type_parameter]}>" if function[:return][:type_parameter]
       "#{function[:return][:type]}#{type_parameter} __skreturn = "
     end
@@ -73,11 +73,11 @@
     4. Return __skreturn variable if non-void
 %>
 <%
-    unless is_void?(function)
+    if is_func?(function)
 %>
     return <%= lib_mapper_fn_for function[:return] %>(__skreturn);
 <%
-    end # end unless
+    end # end if func
 %>
 }
 <%

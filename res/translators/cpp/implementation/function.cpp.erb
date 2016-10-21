@@ -37,7 +37,7 @@
        if non-void)
 %>
 <%
-    return_val = unless is_void?(function) then
+    return_val = if is_func?(function) then
       "#{@clib.lib_type_for function[:return]} __skreturn = "
     end
     lib_fn_name = @clib.lib_function_name_for(function)
@@ -90,11 +90,11 @@
     5. Return __skreturn variable if non-void
 %>
 <%
-    unless is_void?(function)
+    if is_func?(function)
 %>
     return <%= cpp_mapper_fn_for function[:return] %>(__skreturn);
 <%
-    end # end unless
+    end # end if function
 %>
 }
 <%
