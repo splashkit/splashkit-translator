@@ -4,18 +4,17 @@
 <%
   @functions.each do |function|
 %>
-  <%= lib_signature_for(function) %>; cdecl; external;
+<%= lib_signature_for(function) %>; cdecl; external;
 <%
   end # functions.each
 %>
-
 <%#
   Implement Pascal functions (pas -> clib -> pas)
 %>
 <%
   @functions.each do |function|
 %>
-<%= pascal_signature_for(function) %>
+<%= pascal_signature_for(function) %>;
 <%#
   Start variable declaration block
 %>
@@ -70,7 +69,7 @@ begin
     end.join(', ')
     func_call  = "#{return_val}#{lib_fn_name}(#{param_list})"
 %>
-    <%= func_call %>;
+  <%= func_call %>;
 <%#
     3. Update all non-const references.
         -- if it can be directly copied... do that.
