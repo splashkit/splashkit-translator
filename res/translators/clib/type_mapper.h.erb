@@ -2,6 +2,13 @@
 // SplashKit <%= splashkit_library? ? 'C Library' : 'C++ Adapter' %> type mapping functions
 // DO NOT MODIFY
 //
+<%
+guard_name = splashkit_library? ? "lib" : "adapter"
+%>
+
+#ifndef __splashkit_<%= guard_name %>_type_mapper
+#define __splashkit_<%= guard_name %>_type_mapper
+
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -29,3 +36,5 @@ using namespace splashkit_lib;
 <%= read_template 'implementation/functions/type_mappings/struct' %>
 <%= read_template 'implementation/functions/type_mappings/function_pointer' %>
 <%= read_template 'implementation/functions/type_mappings/vector' %>
+
+#endif /* __splashkit_<%= guard_name %>_type_mapper */
