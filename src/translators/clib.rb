@@ -23,7 +23,9 @@ module Translators
     def render_templates
       {
         'sk_clib.h' => read_template('sk_clib.h'),
-        'sk_clib.cpp' => read_template('sk_clib.cpp')
+        'sk_clib.cpp' => read_template('sk_clib.cpp'),
+        'lib_type_mapper.h' => read_template('type_mapper.h'),
+        'lib_type_mapper.cpp' => read_template('type_mapper.cpp'),
       }
     end
 
@@ -222,11 +224,27 @@ module Translators
     end
 
     #
-    # C code allocates strings and vectors on the heap. It should therefore
+    # C library allocates strings and vectors on the heap. It should therefore
     # free any allocated heap memory when it is no longer required.
     #
-    def is_splashkit_library?
+    def splashkit_library?
       true
+    end
+
+    #
+    # If it is not the library then it is an adapter.
+    #
+    def splashkit_adapter?
+      !splashkit_library?
+    end
+
+    #
+    # Parameter list for function pointers
+    #
+    def function_pointer_param_list(fp)
+      fp[:parameters].map do |param_name, param_data|
+        "#{lib_type_for param_data} #{param_name}"
+      end.join(', ')
     end
 
     #
@@ -252,7 +270,7 @@ module Translators
     # C++ translator should not free strings or vectors -- this is the
     # responsibility of the C lib code that created it.
     #
-    def is_splashkit_library?
+    def splashkit_library?
       false
     end
 

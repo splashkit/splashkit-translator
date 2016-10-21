@@ -1,0 +1,15 @@
+//
+// SplashKit <%= splashkit_library? ? 'C Library' : 'C++ Adapter' %> type mapping functions
+// DO NOT MODIFY
+//
+
+#include "<%= splashkit_library? ? "lib" : "adapter" %>_type_mapper.h"
+
+<%= read_template 'implementation/type_mapper/string' %>
+<%= read_template 'implementation/type_mapper/bool' %>
+<%= read_template 'implementation/type_mapper/direct' %>
+<%= read_template 'implementation/type_mapper/typealias_pointer' %>
+<%= read_template 'implementation/type_mapper/enum' %>
+<%= read_template 'implementation/type_mapper/struct' %>
+<%= read_template 'implementation/type_mapper/function_pointer' %>
+<%= read_template 'implementation/type_mapper/vector' %>

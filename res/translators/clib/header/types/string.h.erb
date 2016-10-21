@@ -1,0 +1,8 @@
+<%#
+    Strings contain an internal `char*` and size `int`.
+%>
+typedef struct {
+    char *string;
+    unsigned int size;
+} __sklib_string;
+void <%= CLib::FUNC_PREFIX %>__free__sklib_string(__sklib_string s);

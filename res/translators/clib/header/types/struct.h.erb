@@ -1,0 +1,20 @@
+<%#
+    Structs must have each field converted to a compatible Lib type (i.e., the
+    field type `foo' becomes `__sklib_foo'). Hence, we can use
+    `lib_struct_field_for` for convenience.
+ %>
+<%
+  @structs.each do |struct|
+%>
+typedef struct {
+<%
+    struct[:fields].each do |field_name, field_data|
+%>
+    <%= lib_struct_field_for(field_name, field_data) %>;
+<%
+    end # end fields.each
+%>
+} __sklib_<%= struct[:name] %>;
+<%
+  end # end structs.each
+%>

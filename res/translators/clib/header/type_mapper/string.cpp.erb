@@ -1,0 +1,7 @@
+<%#
+    Strings must be able to be freed, and converted to/from __sklib
+    to std::string type.
+%>
+void <%= func_prefix %>__free__sklib_string(__sklib_string s);
+__sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s);
+std::string <%= func_prefix %>__to_string(const __sklib_string &s);

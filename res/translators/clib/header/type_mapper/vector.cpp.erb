@@ -1,0 +1,49 @@
+<%
+  @vector_types.each do |type|
+%>
+<%#
+    Must forward declare the library free function if this is the adapter
+    (it is within the implementation to call the library function to free vector).
+%>
+<%
+    if splashkit_adapter?
+%>
+extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%
+    end
+%>
+<%#
+    Free __sklib_vector function frees heap data that the library has allocated.
+    Must mark with extern "C" if being declared by library.
+%>
+<% if splashkit_library? %>extern "C" <% end %>
+void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%#
+    Converts a std::vector into a __sklib__vector by allocating each of its members
+    onto the heap.
+%>
+__sklib_vector_<%= type %> <%= func_prefix %>__to_sklib_vector_<%= type %>(const std::vector<<%= type %>> &v);
+<%#
+    Converts a __sklib__vector to a std::vector by copying each of its members
+    into the std::vector.
+%>
+vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vector_<%= type %> &v);
+<%#
+    These update functions take existing std::vector or sklib_vector values
+    and update them. These are used with pass by ref parameters to update the
+    sklib_vector or std::vector from the other component.
+%>
+<%
+    if splashkit_library?
+%>
+void <%= func_prefix %>__update_from_vector_<%= type %>(const std::vector<<%= type %>> &v, __sklib_vector_<%= type %> *__skreturn);
+<%
+    else # it's an adapter... only adapters will update vectors
+%>
+void <%= func_prefix %>__update_from_vector_<%= type %>(__sklib_vector_<%= type %> &v, std::vector<<%= type %>> &__skreturn);
+<%
+    end # end if is library
+%>
+<%
+  end # end vectors.each
+%>

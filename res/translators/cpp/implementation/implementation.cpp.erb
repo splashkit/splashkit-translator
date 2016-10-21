@@ -1,17 +1,11 @@
+//
+// SplashKit Generated C++ Code
+// DO NOT MODIFY
+//
+
 #include "splashkit.h"
-#include <string>
-#include <vector>
-#include <cstdlib>
-using std::string;
-using std::vector;
-
-<%#
-    Can re-use the templates for C library types (and adapters)
-    and function prototypes seeing as they would be the same
-%>
-<%= @clib.read_template 'types/types' %>
-<%= @clib.read_template 'functions/prototypes' %>
-
+#include "sk_clib.h"
+#include "adapter_type_mapper.h"
 <%#
     Read template for C++ function implementation
 %>

@@ -1,0 +1,13 @@
+<%#
+    Redeclare every function pointer typealias. There are issues with converting
+    function pointer types (return type and parameter types) so we do not
+    explicitly convert them using `lib_type_for`. See da03064.
+%>
+<%
+  @function_pointers.each do |fp|
+    fp_param_decl = function_pointer_param_list(fp)
+%>
+typedef <%= fp[:return][:type] %> (__sklib_<%= fp[:name] %>)(<%= fp_param_decl %>);
+<%
+  end # end function_pointers.each
+%>

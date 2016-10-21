@@ -1,0 +1,13 @@
+<%#
+    Mapping functions to/from `__sklib_ptr' and typealias.
+ %>
+__sklib_ptr <%= func_prefix %>__to_sklib_ptr(__sklib_ptr v);
+<%
+  @typealiases.pluck(:name).each do |typealias|
+    deambigious_typealias = splashkit_library? ? "splashkit_lib::#{typealias}" : typealias
+%>
+__sklib_ptr <%= func_prefix %>__to_sklib_<%= typealias %>(<%= deambigious_typealias %> v);
+<%= typealias %> <%= func_prefix %>__to_<%= typealias %>(__sklib_ptr v);
+<%
+  end # end typealiases.each
+%>

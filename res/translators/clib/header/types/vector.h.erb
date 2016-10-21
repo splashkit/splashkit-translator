@@ -1,0 +1,29 @@
+<%#
+    Dynamic arrays from a std::vector<T> in the SK code must be allocated on
+    the heap and freed after use.
+
+    Values passed to SplashKit will come into `data_from_app`
+    Values returned from SplashKit Lib will through `data_from_lib`
+%>
+<%
+  @vector_types.each do |type|
+%>
+typedef struct {
+    <%= lib_map_type_for(type) %> *data_from_app;
+    unsigned int size_from_app;
+    <%= lib_map_type_for(type) %> *data_from_lib;
+    unsigned int size_from_lib;
+} __sklib_vector_<%= type %>;
+<%#
+    Must forward declare the library free vector function if adapter.
+%>
+<%
+    if splashkit_adapter?
+%>
+extern "C" void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<%
+    end
+%>
+<%
+  end # end vectors.each
+%>

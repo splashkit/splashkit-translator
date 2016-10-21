@@ -1,0 +1,60 @@
+//
+// SplashKit <%= splashkit_library? ? 'C Library' : 'C++ Adapter' %> type mapping functions
+// DO NOT MODIFY
+//
+<%
+guard_name = splashkit_library? ? "lib" : "adapter"
+%>
+
+#ifndef __splashkit_<%= guard_name %>_type_mapper
+#define __splashkit_<%= guard_name %>_type_mapper
+
+<%#
+  Dependent header includes. Must always include "sk_clib.h" to have access
+  to library-defined __sklib_ types which are defined in this header.
+%>
+#include <stdlib.h>
+#include <string>
+#include <cstring>
+#include <vector>
+#include "sk_clib.h"
+<%#
+  Includes for SK types, either from the original SK source (if library) or
+  from the adapter front-end ("splashkit.h").
+%>
+<%
+  # If the adapter, must include "splashkit.h" to have access to the adapter's
+  # front-end exposed types.
+  if splashkit_adapter?
+%>
+#include "splashkit.h"
+<%
+  # If the library, it will need to have access to all of SK's headers
+  # to have access to original SK types.
+  else
+    # Use path in data
+    @data.values.each do |header_data|
+      header_path = header_data[:path].split('/').last
+%>
+#include "<%= header_path %>"
+<%
+    end # end data.each
+%>
+
+using std::string;
+using std::vector;
+using namespace splashkit_lib;
+<%
+  end # if splashkit_library
+%>
+
+<%= read_template 'header/type_mapper/string' %>
+<%= read_template 'header/type_mapper/bool' %>
+<%= read_template 'header/type_mapper/direct' %>
+<%= read_template 'header/type_mapper/typealias_pointer' %>
+<%= read_template 'header/type_mapper/enum' %>
+<%= read_template 'header/type_mapper/struct' %>
+<%= read_template 'header/type_mapper/function_pointer' %>
+<%= read_template 'header/type_mapper/vector' %>
+
+#endif /* __splashkit_<%= guard_name %>_type_mapper */

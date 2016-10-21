@@ -1,8 +1,0 @@
-<%#
-    SK `bool' to C `int' adapter macros.
-%>
-#define <%= func_prefix %>__to_sklib_bool(v)\
-(v == true ? 1 : 0)
-#define <%= func_prefix %>__to_bool(v)\
-(v == 1 ? true : false)
-typedef bool __sklib_bool;

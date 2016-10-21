@@ -1,0 +1,9 @@
+<%#
+    SK type mapping for shared `bool'.
+%>
+int <%= func_prefix %>__to_sklib_bool(bool v) {
+  return (v == true ? 1 : 0);
+}
+bool <%= func_prefix %>__to_bool(int v) {
+  return (v == 1 ? true : false);
+}

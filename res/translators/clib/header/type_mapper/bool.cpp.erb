@@ -1,0 +1,6 @@
+<%#
+  1. Define mapper function for bool -> __sklib_bool (aka int)
+  2. Define mapper function for __sklib_bool (aka int) -> bool
+%>
+int <%= func_prefix %>__to_sklib_bool(bool v);
+bool <%= func_prefix %>__to_bool(int v);
