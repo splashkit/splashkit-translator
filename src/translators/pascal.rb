@@ -5,13 +5,9 @@ module Translators
   # SplashKit C Library code generator
   #
   class Pascal < AbstractTranslator
-    def initialize(data, src, logging)
-      super(data, src, logging)
-      @direct_types = {
-        'int'     => 'Integer',
-        'float'   => 'Single',
-        'double'  => 'Double'
-      }
+    def initialize(data, logging)
+      super(data, logging)
+      @direct_types = []
     end
 
     self.case_converters = {
@@ -26,16 +22,21 @@ module Translators
       }
     end
 
-    def lib_type_for(type)
-      raw_t = raw_type_for(type)
-      lookup_table = @direct_types.merge(
-        'bool'      => 'Integer',
-        'string'    => '__sklib_string',
-        'enum'      => 'Integer',
-        'struct'    => "__sklib_#{type}",
-        'typealias' => '__sklib_ptr'
-      )
-      lookup_table[raw_t]
+    def lib_type_for(type_name)
+      {
+          'int'       => 'LongInt',
+          'short'     => 'ShortInt',
+          'long'      => 'Int64',
+          'float'     => 'Single',
+          'double'    => 'Double',
+          'byte'      => 'Char',
+          'char'      => 'Char',
+          'bool'      => 'LongInt',
+          'enum'      => 'LongInt',
+          'struct'    => "__sklib_#{type_name}",
+          'string'    => '__sklib_string',
+          'typealias' => "__sklib_#{type_name}"
+      }[raw_type_for(type_name)]
     end
 
     def pascal_type_for(type)

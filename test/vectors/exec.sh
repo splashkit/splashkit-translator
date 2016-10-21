@@ -1,7 +1,7 @@
 #!/bin/sh
 echo "Generate adapter"
 rm -rf ../out
-../../translate --generate clib,cpp,pascal -i with_vector.h --output ../out
+../../translate --generate clib,cpp -i with_vector.h --output ../out
 
 echo "Make static library"
 clang++ -DBUILDING_SK_LIB -std=c++14 -c with_vector.cpp ../out/clib/sk_clib.cpp -I../clib -I../..

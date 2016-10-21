@@ -1,3 +1,8 @@
+/**
+ * @header with_vector
+ * @attribute group test
+ */
+
 #include <vector>
 #include <string>
 using namespace std;
