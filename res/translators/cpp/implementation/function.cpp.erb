@@ -82,7 +82,7 @@
     params_to_free.each do | param_name, param_data |
       type_name = @clib.lib_type_for(param_data)
 %>
-    __skmapper__free<%=type_name%>(__skparam__<%=param_name%>);
+    __skadapter__free<%=type_name%>(__skparam__<%=param_name%>);
 <%
     end # end each
 %>
