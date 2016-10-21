@@ -2,6 +2,7 @@ unit SplashKit;
 
 interface
 type
+  int = LongInt;
   <%= read_template('interface/types').indent(2) %>
 
 <%= read_template 'interface/functions' %>

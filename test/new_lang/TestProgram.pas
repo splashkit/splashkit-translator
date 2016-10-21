@@ -1,12 +1,12 @@
 program TestProgram;
-// using SplashKit;
+uses SplashKit;
 
-procedure __sklib__say_yay(); cdecl; external;
-
-procedure SayYay();
-begin
-  __sklib__say_yay();
-end;
+// procedure __sklib__say_yay(); cdecl; external;
+//
+// procedure SayYay();
+// begin
+//   __sklib__say_yay();
+// end;
 
 procedure Main();
 begin

@@ -16,4 +16,4 @@ echo "Compile program"
 # clang++ -g -std=c++14 with_vector_test.cpp -L. -lSplashKit -I../out/cpp -Wl,-rpath,@loader_path
 # mv with_vector.h.old with_vector.h
 
-ppcx64 -S2 TestProgram.pas -k-L. -k-lSplashKit
+ppcx64 -Fu../out/pascal -S2 TestProgram.pas -k-L. -k-lSplashKit
