@@ -1,0 +1,10 @@
+<%#
+  Implement Pascal functions (pas -> clib -> pas)
+%>
+<%
+  @functions.each do |function|
+%>
+<%= pascal_signature_for(function) %>;
+<%
+  end # end functions.each
+%>

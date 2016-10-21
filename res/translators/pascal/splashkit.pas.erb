@@ -1,0 +1,19 @@
+unit SplashKit;
+
+interface
+
+type
+  <%= read_template('interface/types').indent(2) %>
+
+<%= read_template 'interface/function' %>
+
+implementation
+uses strings;
+
+type
+  <%= read_template('implementation/types').indent(2) %>
+
+<%= read_template 'implementation/mappers' %>
+<%= read_template 'implementation/functions' %>
+
+end.

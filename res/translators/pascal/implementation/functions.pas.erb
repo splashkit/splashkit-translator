@@ -1,49 +1,93 @@
 <%#
   Forward declare SKLib functions
 %>
-<% @functions.each do |function| %>
-<% if is_void?(function) %>procedure <% else %>function <% end %>
-<%= CLib.lib_function_name_for(function) %>(<%=
-  function[:parameters].map do |param_name, param_data|
-    param_name.variable_case + ": " + lib_type_for(param_data[:type])
-  end.join('; ')
-%>)<% unless is_void?(function) %>: <%= lib_type_for(function[:return_type]) %><% end %>; cdecl; external;
-<% end %>
+<%
+  @functions.each do |function|
+%>
+  lib_signature_for(function)
+<%
+  end # functions.each
+%>
 
 <%#
   Implement Pascal functions (pas -> clib -> pas)
 %>
-<% @functions.each do |function| %>
-<%# Function signature %>
-<% if is_void?(function) %>procedure <% else %>function <% end %>
-<%= function[:name].function_case %>(<%=
-  function[:parameters].map do |param_name, param_data|
-    param_name.variable_case + ": " + pascal_type_for(param_data[:type])
-  end.join('; ')
-%>)<% unless is_void?(function) %>: <%= pascal_type_for(function[:return_type]) %><% end %>;
-<% if (!function[:parameters].empty? || !is_void?(function)) %>
-<%# Variable declaration block %>
+<%
+  @functions.each do |function|
+%>
+<%= pascal_signature_for(function) %>
+<%#
+  Start variable declaration block
+%>
+<%
+    if (!function[:parameters].empty? || is_func?(function))
+%>
 var
-<% end %>
-<% function[:parameters].each do |param_name, param_data| %>
-  __skparam__<%= param_name %>: <%= lib_type_for(param_data[:type]) %>;
-<% end %>
-<% unless is_void?(function) %>
-  __skreturn: <%= lib_type_for(function[:return_type]) %>;
-<% end %>
+<%
+    end # end if empty parameters or if function
+%>
+<%
+  # Declare each parameter prefixed with __skparam
+  function[:parameters].each do |param_name, param_data|
+%>
+  __skparam__<%= param_name %>: <%= pascal_type_for(param_data[:type]) %>;
+<%
+  end # end parameters.each
+%>
+<%
+  # If returning a value, prefix a variable using __skreturn
+  if is_func?(function)
+%>
+  __skreturn: <%= pascal_type_for(function[:return_type]) %>;
+<%
+  end # end if func
+%>
+<%#
+  End variable declaration block
+%>
 begin
-<%# Convert params to clib type %>
-<% function[:parameters].each do |param_name, param_data| %>
+<%#
+    1. Convert each parameter using the mapper functions available
+%>
+<%
+  function[:parameters].each do |param_name, param_data|
+%>
   __skparam__<%= param_name %> := __skadapter__to_sklib_<%= param_data[:type] %>(<%= param_name %>);
-<% end %>
-<%# Call clib function %>
-  <% unless is_void?(function) %>__skreturn := <% end %>
-<%= CLib.lib_function_name_for(function) %>(<%=
-function[:parameters].map { |param_name, _| "__skparam__#{param_name}" }.join(', ')
-%>);
-<%# Assign result to pas type %>
-<% unless is_void?(function) %>
-  result := __skadapter__to_<%= function[:return_type] %>(__skreturn);
-<% end %>
+<%
+  end
+%>
+<%#
+    2. Make the function call (and assign __skreturn if non-void)
+%>
+<%
+    return_val = if is_func?(function) then
+      "__skreturn := "
+    end
+    lib_fn_name = CLib.lib_function_name_for(function)
+    param_list = function[:parameters].map do |param_name, param_data|
+      address_of_oper = '@' if param_data[:is_reference] && !param_data[:is_const]
+      "#{address_of_oper}__skparam__#{param_name}"
+    end.join(', ')
+    func_call  = "#{return_val}#{lib_fn_name}(#{param_list})"
+%>
+    <%= func_call %>;
+<%#
+    3. Update all non-const references.
+        -- if it can be directly copied... do that.
+        -- otherwise use the types update function
+%>
+// TODO: Update references
+<%#
+    4. Assign result to __skreturn variable if non-void
+%>
+<%
+    if is_func?(function)
+%>
+    result := <%= pascal_mapper_fn_for function[:return] %>(__skreturn);
+<%
+    end # end if function
+%>
 end;
-<% end %>
+<%
+  end # functions.each
+%>

@@ -6,6 +6,7 @@
 %>
 <%= struct[:name].type_case %> = record
 <%
+    # Convert each field type into Pascal type
     struct[:fields].each do |field_name, field_data|
 %>
   <%= field_name.variable_case %>: <%= pascal_type_for(field_data[:type]) %>;

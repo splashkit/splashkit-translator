@@ -1,0 +1,11 @@
+<%#
+  Mappers from `Boolean` <-> `LongInt`
+%>
+function __skadapter__to_sklib_bool(v: Boolean): LongInt;
+begin
+  if v = true then result := 1 else result := 0;
+end;
+function __skadapter__to_bool(v: LongInt): Boolean;
+begin
+  result := v = 1;
+end;
