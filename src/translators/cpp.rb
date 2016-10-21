@@ -15,11 +15,11 @@ module Translators
       result = @data.map do |header_key, header_data|
         header_file_name = "#{header_key}.h"
         header_contents  = Header.new(header_data, header_key.to_s, @data, @logging)
-                                 .read_template('header/module_header.h')
+                                 .read_template('interface/module_header.h')
         [header_file_name, header_contents]
       end.to_h
       result.merge(
-        'splashkit.h'   => read_template('header/splashkit_header.h'),
+        'splashkit.h'   => read_template('interface/splashkit_header.h'),
         'splashkit.cpp' => read_template('implementation/implementation.cpp'),
         'adapter_type_mapper.h' => @clib.read_template('type_mapper.h'),
         'adapter_type_mapper.cpp' => @clib.read_template('type_mapper.cpp')

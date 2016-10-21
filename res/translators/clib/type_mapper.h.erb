@@ -48,13 +48,6 @@ using namespace splashkit_lib;
   end # if splashkit_library
 %>
 
-<%= read_template 'header/mappers/string' %>
-<%= read_template 'header/mappers/bool' %>
-<%= read_template 'header/mappers/direct' %>
-<%= read_template 'header/mappers/typealias_pointer' %>
-<%= read_template 'header/mappers/enum' %>
-<%= read_template 'header/mappers/struct' %>
-<%= read_template 'header/mappers/function_pointer' %>
-<%= read_template 'header/mappers/vector' %>
+<%= read_template 'interface/mappers' %>
 
 #endif /* __splashkit_<%= guard_name %>_type_mapper */
