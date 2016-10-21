@@ -59,7 +59,7 @@ module Translators
         end
       param_list = pascal_parameter_list_for(function)
       func_suffix =
-        if is_proc(function)
+        if is_proc?(function)
           ": #{pascal_type_for(function[:return_type])}"
         end
       "#{declaration} #{name}(#{param_list})#{func_suffix};"
