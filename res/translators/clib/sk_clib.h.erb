@@ -3,21 +3,13 @@
 // DO NOT MODIFY
 //
 
-#include <stdlib.h>
-#include <string>
-#include <vector>
-<%
-  # Use path in data
-  @data.values.each do |header_data|
-    header_path = header_data[:path].split('/').last
-%>
-#include "<%= header_path %>"
-<%
-  end # end data.each
-%>
-using std::string;
-using std::vector;
-using namespace splashkit_lib;
+#ifdef CPP
+extern "C" {
+#endif
 
-<%= read_template('types/types') %>
-<%= read_template('functions/prototypes') %>
+<%= read_template('header/types/types') %>
+<%= read_template('header/functions/prototypes') %>
+
+#ifdef CPP
+}
+#endif

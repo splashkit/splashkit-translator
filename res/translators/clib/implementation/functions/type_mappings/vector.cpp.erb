@@ -15,17 +15,7 @@
 %>
 <%
   @vector_types.each do |type|
-%>
-typedef struct {
-    <%# Values passed to SplashKit will come in here... %>
-    <%= lib_map_type_for(type) %> *data_from_app;
-    unsigned int size_from_app;
-    <%# Values returns will come through here... %>
-    <%= lib_map_type_for(type) %> *data_from_lib;
-    unsigned int size_from_lib;
-} __sklib_vector_<%= type %>;
-<%
-    if is_splashkit_library?
+    if splashkit_library?
       update_field_suffix = "_from_lib"
       read_field_suffix = "_from_app"
     else
@@ -36,19 +26,19 @@ typedef struct {
 <%
     # Must forward declare C Library free function if not yet declared
     # before we declare the non-C Library free function
-    unless is_splashkit_library? # if it is the splashkit c library...
+    unless splashkit_library? # if it is the splashkit c library...
 %>
 extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
 <%
     end # end unless
 %>
-<%= "extern \"C\" " if is_splashkit_library? %>void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
+<%= "extern \"C\" " if splashkit_library? %>void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v) {
 <%
     # If it is a string... and its in the adapter... it needs to free then
     # embedded string resources.
     # String resources in the library will be freed when the vector is converted
     # and each of the strings are read back.
-    if type == 'string' && ! is_splashkit_library?
+    if type == 'string' && !splashkit_library?
 %>
     <%# Freeing vector<string> requires us to free the strings within the vector %>
     for (unsigned int i = 0; i < v.size<%= update_field_suffix %>; i++) {
@@ -79,7 +69,7 @@ vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vect
     }
 <%
     # Only the adapters need to call free on return.
-    unless is_splashkit_library?
+    unless splashkit_library?
       # We are an adapter... therefore on returning a vector, we need to ask
       # the SplashKit Library to free the space it allocated for this dynamic
       # array. Then we return our copy of this.
@@ -98,7 +88,7 @@ vector<<%= type %>> <%= func_prefix %>__to_vector_<%= type %>(const __sklib_vect
     from the other component.
 %>
 <%
-    if is_splashkit_library?
+    if splashkit_library?
       # Only the library will update a __sklib__vector
 %>
 void <%= func_prefix %>__update_from_vector_<%= type %>(const std::vector<<%= type %>> &v, __sklib_vector_<%= type %> *__skreturn) {

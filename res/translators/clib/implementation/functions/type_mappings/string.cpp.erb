@@ -10,22 +10,7 @@
     6. Free the returned `__sklib_string' from the heap
     7. Return the wrapped `Bar::String'
 %>
-extern "C" typedef struct {
-    char *string;
-    unsigned int size;
-} __sklib_string;
-<%#
-    The SplashKit adapter needs access to the SplashKit clib free function.
-%>
-<%
-    # Must forward declare C Library free function as external "C" in adapters
-    unless is_splashkit_library?
-%>
-extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_string(__sklib_string s);
-<%
-    end # end unless
-%>
-<%= "extern \"C\" " if is_splashkit_library? %>void <%= func_prefix %>__free__sklib_string(__sklib_string s) {
+void <%= func_prefix %>__free__sklib_string(__sklib_string s) {
     free(s.string);
 }
 __sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s) {
@@ -40,7 +25,7 @@ std::string <%= func_prefix %>__to_string(const __sklib_string &s) {
 <%
     # The library does not free string that it is converting. This will be
     # handled by the adapters that are calling into the SplashKit c library
-    unless is_splashkit_library?
+    unless splashkit_library?
       # It is the adapter... so we are returning a string created by the
       # splashkit library on a return...
       # So we must ask the SplashKit library to free this...

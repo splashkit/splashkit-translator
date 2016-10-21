@@ -1,0 +1,10 @@
+<%#
+    Enums are converted down to shared `int`'s.
+ %>
+<%
+  @enums.pluck(:name).each do |enum|
+%>
+typedef int __sklib_<%= enum %>;
+<%
+  end # end enums.each
+%>

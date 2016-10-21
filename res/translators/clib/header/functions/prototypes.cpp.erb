@@ -4,7 +4,7 @@
 <%
   @functions.each do |function|
 %>
-extern "C" <%= lib_signature_for(function) %>;
+<%= lib_signature_for(function) %>;
 <%
   end # end functions.each
 %>
