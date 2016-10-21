@@ -2,6 +2,7 @@
 // SplashKit <%= splashkit_library? ? 'C Library' : 'C++ Adapter' %> type mapping functions
 // DO NOT MODIFY
 //
+
 #include "<%= splashkit_library? ? "lib" : "adapter" %>_type_mapper.h"
 
 <%= read_template 'implementation/type_mapper/string' %>
