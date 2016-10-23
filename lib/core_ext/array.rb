@@ -12,7 +12,7 @@ module CoreExtensions
     #
     def indent(by = 4)
       spaces = ' ' * by
-      join("\n#{spaces}")
+      join("\n#{spaces}").strip
     end
   end
 end

@@ -26,20 +26,20 @@ var
     end # end if empty parameters or if function
 %>
 <%
-  # Declare each parameter prefixed with __skparam
-  function[:parameters].each do |param_name, param_data|
+    # Declare each parameter prefixed with __skparam
+    function[:parameters].each do |param_name, param_data|
 %>
-  __skparam__<%= param_name %>: <%= pascal_type_for(param_data[:type]) %>;
+  __skparam__<%= param_name %>: <%= lib_type_for(param_data) %>;
 <%
-  end # end parameters.each
+    end # end parameters.each
 %>
 <%
-  # If returning a value, prefix a variable using __skreturn
-  if is_func?(function)
+    # If returning a value, prefix a variable using __skreturn
+    if is_func?(function)
 %>
-  __skreturn: <%= pascal_type_for(function[:return_type]) %>;
+  __skreturn: <%= pascal_type_for(function[:return]) %>;
 <%
-  end # end if func
+    end # end if func
 %>
 <%#
   End variable declaration block
@@ -49,11 +49,11 @@ begin
     1. Convert each parameter using the mapper functions available
 %>
 <%
-  function[:parameters].each do |param_name, param_data|
+    function[:parameters].each do |param_name, param_data|
 %>
-  __skparam__<%= param_name %> := __skadapter__to_sklib_<%= param_data[:type] %>(<%= param_name %>);
+  __skparam__<%= param_name %> := <%= lib_mapper_fn_for param_data %>(<%= param_name %>);
 <%
-  end
+    end
 %>
 <%#
     2. Make the function call (and assign __skreturn if non-void)
@@ -62,7 +62,7 @@ begin
     return_val = if is_func?(function) then
       "__skreturn := "
     end
-    lib_fn_name = CLib.lib_function_name_for(function)
+    lib_fn_name = @clib.lib_function_name_for(function)
     param_list = function[:parameters].map do |param_name, param_data|
       address_of_oper = '@' if param_data[:is_reference] && !param_data[:is_const]
       "#{address_of_oper}__skparam__#{param_name}"

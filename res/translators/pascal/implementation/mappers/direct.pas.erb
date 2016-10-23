@@ -1,8 +1,11 @@
 <%#
-  Direct type mappers have no change between the C- and Pascal-types
+  Direct type mappers have no change between the C- and Pascal-types and
+  can therefore directly translate one to the other by just returning the
+  value
 %>
 <%
-  @direct_types.each do |c_type, pas_type|
+  direct_types.each do |c_type, pas_type|
+    c_type = c_type.tr("\s", "_")
 %>
 function __skadapter__to_sklib_<%= c_type %>(v: <%= pas_type %>): <%= pas_type %>;
 begin

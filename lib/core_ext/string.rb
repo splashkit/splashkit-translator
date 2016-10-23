@@ -47,7 +47,7 @@ module CoreExtensions
     # Split a string and indent it by the number of spaces specified
     #
     def indent(by = 4)
-      split("\n").indent(by)
+      strip.split("\n").indent(by)
     end
 
     #

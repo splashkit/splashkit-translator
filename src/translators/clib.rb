@@ -37,8 +37,9 @@ module Translators
     #
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
-    def self.lib_function_name_for(function)
-      function[:parameters].reduce("#{FUNC_PREFIX}__#{function[:name]}") do |memo, param|
+    def lib_function_name_for(function)
+      name = "#{FUNC_PREFIX}__#{function[:name].tr("\s", '_')}"
+      function[:parameters].reduce(name) do |memo, param|
         param_data = param.last
         ptr = '_ptr' if param_data[:is_pointer]
         ref = '_ref' if param_data[:is_reference]
@@ -48,13 +49,6 @@ module Translators
         type += "_#{param_data[:type_parameter]}" if param_data[:is_vector]
         "#{memo}__#{type}#{ref}#{ptr}#{arr}"
       end
-    end
-
-    #
-    # Alias to static method for usage on instance
-    #
-    def lib_function_name_for(function)
-      CLib.lib_function_name_for(function)
     end
 
     #
@@ -109,13 +103,13 @@ module Translators
     def lib_type_for(type_data)
       type = type_data[:type]
       # Handle unsigned [type] as direct
-      return type if type =~ /^unsigned\s+\w+/
+      return type if unsigned_type?(type_data)
       # Handle void * as __sklib_ptr
-      return '__sklib_ptr' if type == 'void' && type_data[:is_pointer]
+      return '__sklib_ptr' if void_pointer?(type_data)
       # Handle function pointers
-      return "__sklib_#{type}" if @function_pointers.pluck(:name).include? type
+      return "__sklib_#{type}" if function_pointer?(type_data)
       # Handle vectors
-      return "__sklib_vector_#{type_data[:type_parameter]}" if type_data[:is_vector]
+      return "__sklib_vector_#{type_data[:type_parameter]}" if vector_type?(type_data)
       # Map directly otherwise...
       result = lib_map_type_for(type)
       raise "The type `#{type}` cannot yet be translated into a compatible "\
@@ -169,10 +163,10 @@ module Translators
     #
     def sk_mapper_fn_for(type_data)
       type =
-        if type_data[:type] == 'void' && type_data[:is_pointer]
+        if void_pointer?(type_data)
           # If void* then it's a sklib_ptr
           'sklib_ptr'
-        elsif type_data[:type] =~ /^unsigned\s+\w+/
+        elsif unsigned_type?(type_data)
           # Remove spaces for unsigned
           type_data[:type].tr("\s", '_')
         elsif type_data[:type] == 'byte'
@@ -185,7 +179,6 @@ module Translators
           # Use standard type
           type_data[:type]
         end
-
       "#{func_prefix}__to_#{type}"
     end
 
@@ -201,7 +194,6 @@ module Translators
           # Use standard type
           raise Parser::Error, "Attempt to use invalid update function...."
         end
-
       "#{func_prefix}__update_#{type}"
     end
 

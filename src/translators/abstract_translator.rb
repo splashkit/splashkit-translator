@@ -226,6 +226,41 @@ module Translators
     end
 
     #
+    # Type is unsigned
+    #
+    def unsigned_type?(type_data)
+      !(type_data[:type] =~ /^unsigned\s+\w+/).nil?
+    end
+
+    #
+    # Type is a char pointer
+    #
+    def char_pointer?(type_data)
+      type_data[:type] == 'char' && type_data[:is_pointer]
+    end
+
+    #
+    # Type is a void pointer
+    #
+    def void_pointer?(type_data)
+      type_data[:type] == 'void' && type_data[:is_pointer]
+    end
+
+    #
+    # Type is a function pointer
+    #
+    def function_pointer?(type_data)
+      @function_pointers.pluck(:name).include? type_data[:type]
+    end
+
+    #
+    # Type is a vector
+    #
+    def vector_type?(type_data)
+      type_data[:is_vector]
+    end
+
+    #
     # On an update of a ref parameter:
     #
     # Check if the type can be copied across the boundary directly. This will
