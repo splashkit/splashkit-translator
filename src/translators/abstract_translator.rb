@@ -42,6 +42,43 @@ module Translators
         )
         .map { |param| param[:type_parameter] }         # Map to their type
         .uniq                                           # unique type params
+      # Define case converters
+      define_case_converters()
+    end
+
+    #
+    # Dynamically adds the case conversion functions using the right types
+    #
+    def define_case_converters
+      const_key = "#{name.upcase}_IDENTIFIER_CASES".to_sym
+      converters =
+        if self.class.const_defined?(const_key)
+          self.class.const_get(const_key)
+        else
+          # Default to snake case
+          converters = {
+            types:      :snake_case,
+            functions:  :snake_case,
+            variables:  :snake_case
+          }
+        end
+      string_case_module = Module.new do
+        def send_case_conversion_method(casee)
+          send("to_#{casee}".to_sym)
+        end
+        define_method(:type_case) do
+          to_s.send_case_conversion_method converters[:types]
+        end
+        define_method(:function_case) do
+          to_s.send_case_conversion_method converters[:functions]
+        end
+        define_method(:variable_case) do
+          to_s.send_case_conversion_method converters[:variables]
+        end
+      end
+      string_case_module.freeze
+      String.prepend string_case_module
+      Symbol.prepend string_case_module
     end
 
     #
@@ -82,32 +119,6 @@ module Translators
     end
 
     #
-    # Dynamically adds the case conversion functions using the right types
-    # assigned by self.case_converters
-    #
-    def self.case_converters=(converters)
-      string_case_module = Module.new do
-        def send_case_conversion_method(casee)
-          send("to_#{casee}".to_sym)
-        end
-        define_method(:type_case) do
-          to_s.send_case_conversion_method converters[:types]
-        end
-        define_method(:function_case) do
-          to_s.send_case_conversion_method converters[:functions]
-        end
-        define_method(:variable_case) do
-          to_s.send_case_conversion_method converters[:variables]
-        end
-      end
-      string_case_module.freeze
-      String.prepend string_case_module
-      Symbol.prepend string_case_module
-    end
-
-    private_class_method :"case_converters="
-
-    #
     # Returns the structs ordered by dependency between other structs
     #
     def ordered_structs
@@ -133,15 +144,6 @@ module Translators
     end
 
     protected
-
-    #
-    # Default case types are snake_case, unless it is overridden in a subclass
-    #
-    self.case_converters = {
-      types:      :snake_case,
-      functions:  :snake_case,
-      variables:  :snake_case
-    }
 
     #
     # Return true iff function provided is void

@@ -14,7 +14,7 @@
 <%
   @functions.each do |function|
 %>
-<%= pascal_signature_for(function) %>;
+<%= sk_signature_for(function) %>;
 <%#
   Start variable declaration block
 %>
@@ -37,7 +37,7 @@ var
     # If returning a value, prefix a variable using __skreturn
     if is_func?(function)
 %>
-  __skreturn: <%= pascal_type_for(function[:return]) %>;
+  __skreturn: <%= sk_type_for(function[:return]) %>;
 <%
     end # end if func
 %>
@@ -59,15 +59,10 @@ begin
     2. Make the function call (and assign __skreturn if non-void)
 %>
 <%
-    return_val = if is_func?(function) then
-      "__skreturn := "
-    end
-    lib_fn_name = @clib.lib_function_name_for(function)
-    param_list = function[:parameters].map do |param_name, param_data|
-      address_of_oper = '@' if param_data[:is_reference] && !param_data[:is_const]
-      "#{address_of_oper}__skparam__#{param_name}"
-    end.join(', ')
-    func_call  = "#{return_val}#{lib_fn_name}(#{param_list})"
+    return_val  = "__skreturn := " if is_func?(function)
+    lib_fn_name = lib_function_name_for(function)
+    param_list  = lib_argument_list_for(function)
+    func_call   = "#{return_val}#{lib_fn_name}(#{param_list})"
 %>
   <%= func_call %>;
 <%#
@@ -82,7 +77,7 @@ begin
 <%
     if is_func?(function)
 %>
-    result := <%= pascal_mapper_fn_for function[:return] %>(__skreturn);
+    result := <%= sk_mapper_fn_for function[:return] %>(__skreturn);
 <%
     end # end if function
 %>

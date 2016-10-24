@@ -37,7 +37,7 @@ module Translators
     #
     #    my_function(int p1, float p2) => __sklib_my_function__int__float
     #
-    def lib_function_name_for(function)
+    def self.lib_function_name_for(function)
       name = "#{FUNC_PREFIX}__#{function[:name].tr("\s", '_')}"
       function[:parameters].reduce(name) do |memo, param|
         param_data = param.last
@@ -49,6 +49,10 @@ module Translators
         type += "_#{param_data[:type_parameter]}" if param_data[:is_vector]
         "#{memo}__#{type}#{ref}#{ptr}#{arr}"
       end
+    end
+
+    def lib_function_name_for(function)
+      CLib.lib_function_name_for(function)
     end
 
     #
