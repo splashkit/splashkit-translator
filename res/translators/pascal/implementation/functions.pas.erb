@@ -1,6 +1,9 @@
 <%#
   Forward declare SKLib functions
 %>
+//
+// Generate library functions
+//
 <%
   @functions.each do |function|
 %>
@@ -37,7 +40,7 @@ var
     # If returning a value, prefix a variable using __skreturn
     if is_func?(function)
 %>
-  __skreturn: <%= sk_type_for(function[:return]) %>;
+  __skreturn: <%= sk_type_for(function[:return], is_lib: true) %>;
 <%
     end # end if func
 %>

@@ -121,6 +121,9 @@ module Translators::TranslatorHelper
     raise '`sk_signature_syntax` is not yet implemented!'
   end
 
+  #
+  # Generates a Front-End function name from an SK function
+  #
   def lib_function_name_for(function)
     Translators::CLib.lib_function_name_for(function)
   end
@@ -130,29 +133,11 @@ module Translators::TranslatorHelper
   end
 
   #
-  # Generate a Pascal type signature from a SK function
-  #
-  def sk_signature_for(function, opts = {})
-    function_name_func = "#{opts[:is_lib] ? 'sk' : 'lib'}_function_name_for".to_sym
-    function_name = send(function_name_func, function)
-    parameter_list_func = "#{opts[:is_lib] ? 'sk' : 'lib'}_parameter_list_for".to_sym
-    parameter_list = send(parameter_list_func, function)
-    signature_syntax(function, function_name, parameter_list)
-  end
-
-  #
-  # Generate a lib type signature from a SK function
-  #
-  def lib_signature_for(function)
-    sk_signature_for(function, is_lib: true)
-  end
-
-  #
-  # Generates a Front-End parameter list from a SK function
+  # Generates a Front-End parameter list from an SK function
   #
   def sk_parameter_list_for(function, opts = {})
     parameters = function[:parameters]
-    type_conversion_fn = "#{opts[:is_lib] ? 'sk' : 'lib'}_type_for".to_sym
+    type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
     parameter_list_syntax(parameters, type_conversion_fn)
   end
 
@@ -163,6 +148,49 @@ module Translators::TranslatorHelper
     sk_parameter_list_for(function, is_lib: true)
   end
 
+  #
+  # Generates a Front-End return type from an SK function
+  #
+  def sk_return_type_for(function, opts = {})
+    return nil unless is_func?(function)
+
+    return_type = function[:return]
+    type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
+    send(type_conversion_fn, return_type)
+  end
+
+  #
+  # Generates a Library return type from a SK function
+  #
+  def lib_return_type_for(function)
+    sk_return_type_for(function, is_lib: true)
+  end
+
+
+  #
+  # Generate a Pascal type signature from a SK function
+  #
+  def sk_signature_for(function, opts = {})
+    # Determine function to call for function name, parameter list, and return type
+    function_name_func  = "#{opts[:is_lib] ? 'lib' : 'sk'}_function_name_for".to_sym
+    parameter_list_func = "#{opts[:is_lib] ? 'lib' : 'sk'}_parameter_list_for".to_sym
+    return_type_func    = "#{opts[:is_lib] ? 'lib' : 'sk'}_return_type_for".to_sym
+
+    # Now call the functions to map the data types
+    function_name = send(function_name_func, function)
+    parameter_list = send(parameter_list_func, function)
+    return_type = send(return_type_func, function)
+
+    # Generate the signature from the mapped types
+    signature_syntax(function, function_name, parameter_list, return_type)
+  end
+
+  #
+  # Generate a lib type signature from a SK function
+  #
+  def lib_signature_for(function)
+    sk_signature_for(function, is_lib: true)
+  end
 
   #
   # Generates a field's struct information

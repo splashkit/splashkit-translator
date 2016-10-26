@@ -61,9 +61,9 @@ module Translators
     #
     # Generate a Pascal type signature from a SK function
     #
-    def signature_syntax(function, function_name, parameter_list)
+    def signature_syntax(function, function_name, parameter_list, return_type)
       declaration = is_proc?(function) ? 'procedure' : 'function'
-      func_suffix = ": #{sk_type_for(function[:return])}" if is_func?(function)
+      func_suffix = ": #{return_type}" if is_func?(function)
       "#{declaration} #{function_name}(#{parameter_list})#{func_suffix}"
     end
 
