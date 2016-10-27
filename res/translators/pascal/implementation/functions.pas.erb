@@ -73,7 +73,15 @@ begin
         -- if it can be directly copied... do that.
         -- otherwise use the types update function
 %>
-// TODO: Update references
+<%
+    function[:parameters].each do |param_name, param_data|
+      if param_data[:is_reference]
+%>
+  <%= param_name %> := <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
+<%
+      end
+    end
+%>
 <%#
     4. Assign result to __skreturn variable if non-void
 %>

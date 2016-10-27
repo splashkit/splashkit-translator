@@ -85,8 +85,9 @@ module Translators
 
     def lib_argument_list_for(function)
       function[:parameters].map do |param_name, param_data|
-        address_of_oper = '@' if param_data[:is_reference] && !param_data[:is_const]
-        "#{address_of_oper}__skparam__#{param_name}"
+        # address_of_oper = '@' if param_data[:is_reference] && !param_data[:is_const]
+        # "#{address_of_oper}__skparam__#{param_name}"
+        "__skparam__#{param_name}"
       end.join(', ')
     end
 

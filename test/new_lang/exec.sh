@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LANG_TEST=3
+LANG_TEST=4
 echo "Generate adapter"
 ../../translate --generate clib,pascal -i "new_lang${LANG_TEST}.h" --output ../out
 
