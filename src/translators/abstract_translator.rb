@@ -275,6 +275,56 @@ module Translators
     end
 
     #
+    # Array is one dimensional
+    #
+    def array_is_1d?(array_data)
+      array_data[:array_dimension_sizes].size == 1
+    end
+
+    #
+    # Array is two dimensional
+    #
+    def array_is_2d?(array_data)
+      array_data[:array_dimension_sizes].size == 2
+    end
+
+    #
+    # Returns the size of a N-dimensional array represented as a single
+    # dimensional array. E.g., if we have foo[3][3] -> foo[9] (i.e., 3 * 3)
+    #
+    def array_size_as_one_dimensional(array_data)
+      array_data[:array_dimension_sizes].inject(:*)
+    end
+
+    #
+    # Returns the index either as a one dimensional index (array with one
+    # element) or two dimensional index (array with two elements) depending on
+    # the data provided
+    #
+    def array_index_from_one_dimensional_index(array_data, idx)
+      if array_is_2d?(array_data)
+        r = array_data[:array_dimension_sizes][0]
+        c = array_data[:array_dimension_sizes][1] || r
+        [(idx / r).to_i, idx % c]
+      else
+        idx
+      end
+    end
+
+    #
+    # Converts library 1D index for an array into its 1D/2D equivalent
+    # depending on the array_data
+    #
+    def array_mapper_index_for(array_data, lib_idx)
+      new_idx = array_index_from_one_dimensional_index(array_data, lib_idx)
+      if array_is_2d?(array_data)
+        array_at_index_syntax(new_idx.first, new_idx.last)
+      else
+        array_at_index_syntax(new_idx)
+      end
+    end
+
+    #
     # On an update of a ref parameter:
     #
     # Check if the type can be copied across the boundary directly. This will

@@ -122,24 +122,13 @@ module Translators
     end
 
     #
-    # Returns the size of a N-dimensional array represented as a single
-    # dimensional array. E.g., if we have foo[3][3] -> foo[9] (i.e., 3 * 3)
+    # Array syntax for either a one or two dimensional array
     #
-    def get_Nd_array_size_as_1d(field_data)
-      field_data[:array_dimension_sizes].inject(:*)
-    end
-
-    #
-    # Returns the index for
-    #
-    def get_Nd_array_index_as_1d(field_data, idx)
-      is_2d = field_data[:array_dimension_sizes].size == 2
-      if is_2d
-        r = field_data[:array_dimension_sizes][0]
-        c = field_data[:array_dimension_sizes][1] || field_data[:array_dimension_sizes][0]
-        '[' + [(idx / r).to_i, idx % c].join('][') + ']'
+    def array_at_index_syntax(idx1, idx2 = nil)
+      unless idx2.nil?
+        '[' + [idx1, idx2].join('][') + ']'
       else
-        "[#{idx}]"
+        "[#{idx1}]"
       end
     end
 
@@ -152,7 +141,7 @@ module Translators
       ptr_star = '*' if is_pointer
       is_array   = field_data[:is_array]
       # convert n multidimensional array to 1 dimensional array
-      size_of_arr = get_Nd_array_size_as_1d(field_data)
+      size_of_arr = array_size_as_one_dimensional(field_data)
       array_decl = "[#{size_of_arr}]" if is_array
       # actually a __sklib_ptr == void *?
       if is_pointer && type == 'void'

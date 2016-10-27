@@ -18,9 +18,9 @@ __sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<
     struct[:fields].each do |field_name, field_data|
       # If an array copy over each value in the array (1D array << {1,2}D array)
       if field_data[:is_array]
-        get_Nd_array_size_as_1d(field_data).times do |i|
+        array_size_as_one_dimensional(field_data).times do |i|
 %>
-    __skreturn.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %>);
+    __skreturn.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= array_mapper_index_for(field_data, i) %>);
 <%
         end # end times
       else # else, copy over using lib type and sk to lib type mapper
@@ -44,9 +44,9 @@ __sklib_<%= struct[:name] %> <%= func_prefix %>__to_sklib_<%= struct[:name] %>(<
     struct[:fields].each do |field_name, field_data|
       # If an array copy over each value in the array ({1,2}D array << 1D array)
       if field_data[:is_array]
-        get_Nd_array_size_as_1d(field_data).times do |i|
+        array_size_as_one_dimensional(field_data).times do |i|
 %>
-    __skreturn.<%= field_name %><%= get_Nd_array_index_as_1d(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+    __skreturn.<%= field_name %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
 <%
         end # end times
       else # else standard copy converted as SK type using SK type mapper)

@@ -105,17 +105,21 @@ module Translators
     end
 
     #
-    # Syntax for 1D array
+    # Syntax for declaring array
     #
-    def one_dimensional_array_syntax(array_size, array_type)
-      "Array [0..#{array_size}] of #{array_type}"
+    def array_declaration_syntax(array_type, dim1_size, dim2_size = nil)
+      if dim2_size.nil?
+        "Array [0..#{dim1_size}] of #{array_type}"
+      else
+        "Array [0..#{dim1_size}, 0..#{dim2_size}] of #{array_type}"
+      end
     end
 
     #
-    # Syntax for 2D array
+    # Syntax for accessing array
     #
-    def two_dimensional_array_syntax(dim1_size, dim2_size, array_type)
-      "Array [0..#{dim1_size}, 0..#{dim2_size}] of #{array_type}"
+    def array_at_index_syntax(idx1, idx2)
+      "[#{idx1},#{idx2}]"
     end
   end
 end

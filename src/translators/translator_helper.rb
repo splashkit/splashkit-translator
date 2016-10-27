@@ -107,8 +107,9 @@ module Translators::TranslatorHelper
     # Map as array of mapped type if applicable
     if type_data[:is_array]
       dims = type_data[:array_dimension_sizes]
-      result = one_dimensional_array_syntax(dims.first, result) if dims.length == 1
-      result = two_dimensional_array_syntax(dims.first, dims.last, result) if dims.length == 2
+      dim1_size = dims.first
+      dim2_size = dims.last if array_is_2d?(type_data)
+      result = array_declaration_syntax(result, dim1_size, dim2_size)
     end
     raise "The type `#{type}` cannot yet be translated into a compatible "\
           "#{name} type" if result.nil?
@@ -189,7 +190,7 @@ module Translators::TranslatorHelper
   #
   def sk_vector_type_for(vector_type, opts = {})
     type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
-    send(type_conversion_fn, { type: vector_type } )
+    send(type_conversion_fn, type: vector_type)
   end
 
   #
@@ -291,6 +292,24 @@ module Translators::TranslatorHelper
     raise '`struct_field_syntax` not implemented. Use this function to define '\
           'the syntax for declaraing a field given the name, data and '\
           'and type.'
+  end
+
+  #
+  # Array accessor syntax
+  #
+  def array_at_index_syntax(idx1, idx2 = nil)
+    raise '`array_at_index_syntax` not yet implemented! Use this function for '\
+          'defining an array accessor with two parameters, the first index '\
+          'and the second index (nil if 1D array).'
+  end
+
+  #
+  # Array declaration syntax (either 1 or 2D)
+  #
+  def array_declaration_syntax(array_type, dim1_size, dim2_size = nil)
+    raise '`array_declaration_syntax` not yet implemented! Use this function '\
+          'defining an array definition of a specific array type with two '\
+          'dimensions (the second dimension is nil if 1D array).'
   end
 
   #
