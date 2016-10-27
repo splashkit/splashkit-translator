@@ -47,12 +47,7 @@ end
 def parse_options
   opt_parser = OptionParser.new do |opts|
     # Translators we can use
-    avaliable_translators =
-      Translators.constants
-                 .select { |c| Class === Translators.const_get(c) }
-                 .select { |c| ![:AbstractTranslator, :ReusableCAdapter].include? c }
-                 .map { |t| [t.upcase, Translators.const_get(t)] }
-                 .to_h
+    avaliable_translators = Translators.all
     # Setup
     help =
       "Usage: translate --input /path/to/splashkit[/#{SK_SRC_CORESDK}/file.h]"\

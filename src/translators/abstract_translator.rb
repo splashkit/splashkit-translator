@@ -1,5 +1,17 @@
 module Translators
   #
+  # Gets all translators
+  #
+  def all
+    Translators.constants
+               .select { |c| Class === Translators.const_get(c) }
+               .select { |c| ![:AbstractTranslator, :ReusableCAdapter].include? c }
+               .map { |t| [t.upcase, Translators.const_get(t)] }
+               .to_h
+  end
+  module_function :all
+
+  #
   # Common helper methods for translators
   #
   class AbstractTranslator
