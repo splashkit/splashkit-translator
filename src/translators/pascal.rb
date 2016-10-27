@@ -47,7 +47,7 @@ module Translators
       'enum'      => 'LongInt'
     }
 
-    def type_exceptions(type_data)
+    def type_exceptions(type_data, type_conversion_fn, opts = {})
       # Handle char* as PChar
       return 'PChar' if char_pointer?(type_data)
       # Handle void * as Pointer
@@ -55,7 +55,12 @@ module Translators
       # Handle function pointers
       return 'TODO' if function_pointer?(type_data)
       # Handle vectors as Array of <T>
-      return "Array of #{type_data[:type_parameter]}" if vector_type?(type_data)
+      if vector_type?(type_data)
+        return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
+        return "ArrayOf#{send(type_conversion_fn, type_data[:type_parameter])}"
+      end
+      # No exception for this type
+      return nil
     end
 
     #

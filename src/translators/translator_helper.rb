@@ -92,11 +92,14 @@ module Translators::TranslatorHelper
   # Converts a C++ type to its LanguageX type for use in SK front end
   #
   def sk_type_for(type_data, opts = {})
-    exception = type_exceptions(type_data)
+    if type_data.is_a? String
+      type_data = { type: type_data }
+    end
+    func = opts[:is_lib] ? :lib_map_type_for : :sk_map_type_for
+    exception = type_exceptions(type_data, func, opts)
     return exception if exception
     # Map directly otherwise...
     type = type_data[:type]
-    func = opts[:is_lib] ? :lib_map_type_for : :sk_map_type_for
     result = send(func, type)
     raise "The type `#{type}` cannot yet be translated into a compatible "\
           "#{name} type" if result.nil?
@@ -166,6 +169,22 @@ module Translators::TranslatorHelper
     sk_return_type_for(function, is_lib: true)
   end
 
+  #
+  # Generates a Front-End parameter list from an SK function
+  #
+  def sk_vector_type_for(vector_type, opts = {})
+    type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
+    send(type_conversion_fn, { type: vector_type } )
+  end
+
+  #
+  # Generates a Library parameter list from a SK function
+  #
+  def lib_vector_type_for(function)
+    sk_vector_type_for(function, is_lib: true)
+  end
+
+
 
   #
   # Generate a Pascal type signature from a SK function
@@ -203,29 +222,31 @@ module Translators::TranslatorHelper
   #
   # Prepares type name for mapping type_data
   #
-  def mapper_fn_prepare_type_name(type_data)
+  def mapper_fn_prepare_func_suffix(type_data)
     # Rip lib type first
     type = type_data[:type]
     # Remove leading __sklib_ underscores if they exist
     type = type[2..-1] if type =~ /^\_{2}/
     # Replace spaces with underscores for unsigned
     type.tr("\s", '_')
+
+    type = "#{type}_#{type_data[:type_parameter]}" if type_data[:is_vector]
   end
 
   #
   # Mapper function to convert type_data into LanguageX Front-End type
   #
   def sk_mapper_fn_for(type_data)
-    type = mapper_fn_prepare_type_name type_data
-    "__skadapter__to_#{type}"
+    func_suffix = mapper_fn_prepare_func_suffix type_data
+    "__skadapter__to_#{func_suffix}"
   end
 
   #
   # Mapper function to convert type_data into C Library type
   #
   def lib_mapper_fn_for(type_data)
-    type = mapper_fn_prepare_type_name type_data
-    "__skadapter__to_sklib_#{type}"
+    func_suffix = mapper_fn_prepare_func_suffix type_data
+    "__skadapter__to_sklib_#{func_suffix}"
   end
 
   #

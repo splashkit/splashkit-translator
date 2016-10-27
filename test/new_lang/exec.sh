@@ -1,8 +1,8 @@
 #!/bin/sh
 
-LANG_TEST=4
+LANG_TEST=6
 echo "Generate adapter"
-../../translate --generate clib,pascal -i "new_lang${LANG_TEST}.h" --output ../out
+../../translate --generate clib,pascal -i "new_lang${LANG_TEST}.h" --output ../out -l
 
 echo "Make static library"
 # clang++ -DBUILDING_SK_LIB -std=c++14 -c new_lang1.cpp ../out/clib/sk_clib.cpp ../out/clib/lib_type_mapper.cpp -I../clib -I../.. -I.

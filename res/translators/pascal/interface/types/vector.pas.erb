@@ -1,7 +1,7 @@
 <%
   @vector_types.each do |type|
 %>
-// TODO - <%= type[:name] %> not yet implemented!
+  type ArrayOf<%= sk_type_for(type) %> = Array of <%= sk_type_for(type) %>;
 <%
   end # end vectors.each
 %>

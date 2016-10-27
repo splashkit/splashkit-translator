@@ -75,7 +75,7 @@ begin
 %>
 <%
     function[:parameters].each do |param_name, param_data|
-      if param_data[:is_reference]
+      if param_data[:is_reference] && ! param_data[:is_const]
 %>
   <%= param_name %> := <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
 <%
