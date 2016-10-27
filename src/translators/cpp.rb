@@ -107,7 +107,7 @@ module Translators
     #
     # Generates a field's struct information
     #
-    def sk_parameter_list_for(field_name, field_data)
+    def sk_struct_field_for(field_name, field_data)
       type = sk_type_for field_data
       ptr = '*' if field_data[:is_pointer]
       ref = '&' if field_data[:is_reference]
