@@ -1,0 +1,6 @@
+libSplashKit.dylib
+libSplashKit.dylib.dSYM
+TestProgram
+TestProgram.o
+splashkit.o
+splashkit.ppu

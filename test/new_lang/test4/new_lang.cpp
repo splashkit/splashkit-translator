@@ -1,4 +1,4 @@
-#include "new_lang4.h"
+#include "new_lang.h"
 
 #include <iostream>
 using namespace std;
@@ -10,7 +10,7 @@ namespace splashkit_lib
      x += 10;
      return 10;
    }
-   
+
    void update_int(int &x)
    {
      x = x * 2;

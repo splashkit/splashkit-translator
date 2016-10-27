@@ -1,4 +1,4 @@
-#include "new_lang1.h"
+#include "new_lang.h"
 
 #include <iostream>
 using namespace std;
