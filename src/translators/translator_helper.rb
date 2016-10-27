@@ -65,9 +65,9 @@ module Translators::TranslatorHelper
   #
   def sk_map_type_for(type_name)
     default_map = {
-      'enum'      => type_name,
-      'struct'    => type_name,
-      'typealias' => type_name
+      'enum'      => type_name.type_case,
+      'struct'    => type_name.type_case,
+      'typealias' => type_name.type_case
     }
     map = default_map.merge(language_types_hash).merge(direct_types_hash)
     type_name = raw_type_for(type_name)
@@ -231,6 +231,7 @@ module Translators::TranslatorHelper
     type.tr("\s", '_')
 
     type = "#{type}_#{type_data[:type_parameter]}" if type_data[:is_vector]
+    type
   end
 
   #

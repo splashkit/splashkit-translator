@@ -4,7 +4,7 @@
 <%
   @structs.each do |struct|
 %>
-<%= struct[:name].type_case %> = record
+type <%= struct[:name].type_case %> = record
 <%
     # Convert each field type into Pascal type
     struct[:fields].each do |field_name, field_data|

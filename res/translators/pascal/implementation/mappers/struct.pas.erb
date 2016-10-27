@@ -4,7 +4,7 @@
 <%
   @structs.each do |struct|
 %>
-function __skadapter__to_sklib_<%= struct[:name] %>(v: <%= struct[:name] %>): <%= struct[:name].type_case %>;
+function __skadapter__to_sklib_<%= struct[:name] %>(v: <%= struct[:name].type_case %>): __sklib_<%= struct[:name] %>;
 begin
 <%
     struct[:fields].each do |field_name, field_data|
