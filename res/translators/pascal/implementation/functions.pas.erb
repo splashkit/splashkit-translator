@@ -1,9 +1,6 @@
 <%#
   Forward declare SKLib functions
 %>
-//
-// Generate library functions
-//
 <%
   @functions.each do |function|
 %>
@@ -75,12 +72,12 @@ begin
 %>
 <%
     function[:parameters].each do |param_name, param_data|
-      if param_data[:is_reference] && ! param_data[:is_const]
+      if param_data[:is_reference] && !param_data[:is_const]
 %>
   <%= param_name %> := <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
 <%
-      end
-    end
+      end # end if is non const ref
+    end # end parameters.each
 %>
 <%#
     4. Assign result to __skreturn variable if non-void
@@ -88,7 +85,7 @@ begin
 <%
     if is_func?(function)
 %>
-    result := <%= sk_mapper_fn_for function[:return] %>(__skreturn);
+  result := <%= sk_mapper_fn_for function[:return] %>(__skreturn);
 <%
     end # end if function
 %>

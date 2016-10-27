@@ -5,8 +5,6 @@
   @function_pointers.each do |fp|
     sk_fp_type = fp[:name].type_case
     lib_fp_type = "__sklib_#{fp[:name]}"
-    return_type = sk_type_for fp[:return] if is_func?(fp)
-    fp_param_decl = sk_parameter_list_for fp
 %>
 type <%= lib_fp_type %> = <%= sk_fp_type %>;
 function __skadapter__to_sklib_<%= fp[:name] %>(v: <%= sk_fp_type %>): <%= lib_fp_type %>;

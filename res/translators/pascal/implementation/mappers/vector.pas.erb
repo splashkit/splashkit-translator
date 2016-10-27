@@ -3,97 +3,95 @@
     sk_type = sk_type_for(type)
     lib_type = lib_type_for(type)
 %>
-
 <%#
     Create the record to map between languages.
 %>
-  type __sklib_vector_<%= type %> = record
-        data_from_app: ArrayOf<%= sk_type %>;
-        size_from_app: Cardinal;
-        data_from_lib: ^<%= lib_type %>;
-        size_from_lib: Cardinal;
-      end;
-
+type __sklib_vector_<%= type %> = record
+  data_from_app: ArrayOf<%= sk_type %>;
+  size_from_app: Cardinal;
+  data_from_lib: ^<%= lib_type %>;
+  size_from_lib: Cardinal;
+end;
 <%#
-    Create a function to free our part of the mapped data
+    Create a function to free our part of the mapped data. This is the
+    function to free the library part of the vector mapping.
 %>
-  // The function to free the library part of the vector mapping
-  procedure __sklib__free__sklib_vector_<%= type %>(v: __sklib_vector_<%= type %>); cdecl; external;
-
-  // Free our part
-  procedure __skadapter__free__sklib_vector_<%= type %>(var v: __sklib_vector_<%= type %>);
-  <%
-      # Freeing a std::vector<string> requires us to recursively free the
-      # allocated __sklib_strings inside the std::vector.
-      # String resources in the library will be freed when the vector is converted
-      # and each of the strings are read back.
-      if type == 'string'
-  %>
-  var
-    i: Integer;
+procedure __sklib__free__sklib_vector_<%= type %>(v: __sklib_vector_<%= type %>); cdecl; external;
+<%#
+   Free our part
+%>
+procedure __skadapter__free__sklib_vector_<%= type %>(var v: __sklib_vector_<%= type %>);
+<%
+    # Freeing a std::vector<string> requires us to recursively free the
+    # allocated __sklib_strings inside the std::vector.
+    # String resources in the library will be freed when the vector is converted
+    # and each of the strings are read back.
+    if type == 'string'
+%>
+var
+  i: Integer;
+begin
+  for i := 0 to v.size_from_app - 1 do
   begin
-      for i := 0 to v.size_from_app - 1 do
-      begin
-          __skadapter__free__sklib_string(v.data_from_app[i]);
-      end;
-  <% else %>
-  begin
-  <%
-      end # end if type is string
-  %>
-      SetLength(v.data_from_app, 0);
+      __skadapter__free__sklib_string(v.data_from_app[i]);
   end;
-
-  <%#
-      Converts a array of type into a __sklib__vector by allocating each of its
-      members onto the heap.
-  %>
-  function __skadapter__to_sklib_vector_<%= type %>(const v: ArrayOf<%= sk_type %>): __sklib_vector_<%= type %>;
+<%
+    else # else not a string
+%>
+begin
+<%
+    end # end if type is string
+%>
+  SetLength(v.data_from_app, 0);
+end;
+<%#
+    Converts a array of type into a __sklib__vector by allocating each of its
+    members onto the heap.
+%>
+function __skadapter__to_sklib_vector_<%= type %>(const v: ArrayOf<%= sk_type %>): __sklib_vector_<%= type %>;
+begin
+  result.size_from_lib := 0;
+  result.data_from_lib := nil;
+  result.size_from_app := Length(v);
+  result.data_from_app := v;
+end;
+<%#
+    Converts a __sklib__vector to a dynamic array of type by copying each of
+    its members into the dynamic array
+%>
+function __skadapter__to_vector_<%= type %>(const v: __sklib_vector_<%= type %>): ArrayOf<%= sk_type %>;
+var
+  i: Integer;
+begin
+  SetLength(result, v.size_from_lib);
+  for i := 0 to v.size_from_lib - 1 do
   begin
-      result.size_from_lib := 0;
-      result.data_from_lib := nil;
-      result.size_from_app := Length(v);
-      result.data_from_app := v;
+    result[i] := __skadapter__to_<%= type %>(v.data_from_lib[i]);
   end;
-
-  <%#
-      Converts a __sklib__vector to a dynamic array of type by copying each of
-      its members into the dynamic array
-  %>
-  function __skadapter__to_vector_<%= type %>(const v: __sklib_vector_<%= type %>): ArrayOf<%= sk_type %>;
-  var
-      i: Integer;
+<%
+    # We need to ask the SplashKit library to free the
+    # space it allocated for this dynamic on returning a vector. Then we
+    # return our copy of this.
+%>
+  __sklib__free__sklib_vector_<%= type %>(v);
+end;
+<%#
+    These update functions take existing std::vector or sklib_vector values
+    and update them. These are used with pass by ref parameters to update the
+    sklib_vector or std::vector from the other component.
+%>
+procedure __skadapter__update_from_vector_<%= type %>(var v: __sklib_vector_<%= type %>; var __skreturn: ArrayOf<%= sk_type %>);
+var
+  i: Integer;
+begin
+  SetLength(__skreturn, v.size_from_lib);
+  for i := 0 to v.size_from_lib - 1 do
   begin
-      SetLength(result, v.size_from_lib);
-      for i := 0 to v.size_from_lib - 1 do
-      begin
-          result[i] := __skadapter__to_<%= type %>(v.data_from_lib[i]);
-      end;
-  <%
-      # We need to ask the SplashKit library to free the
-      # space it allocated for this dynamic on returning a vector. Then we
-      # return our copy of this.
-  %>
-      __sklib__free__sklib_vector_<%= type %>(v);
+      __skreturn[i] := __skadapter__to_<%= type %>(v.data_from_lib[i]);
   end;
-
-  <%#
-      These update functions take existing std::vector or sklib_vector values
-      and update them. These are used with pass by ref parameters to update the
-      sklib_vector or std::vector from the other component.
-  %>
-  procedure __skadapter__update_from_vector_<%= type %>(var v: __sklib_vector_<%= type %>; var __skreturn: ArrayOf<%= sk_type %>);
-  var
-      i: Integer;
-  begin
-      SetLength(__skreturn, v.size_from_lib);
-      for i := 0 to v.size_from_lib - 1 do
-      begin
-          __skreturn[i] := __skadapter__to_<%= type %>(v.data_from_lib[i]);
-      end;
-      <%# Now it is copied... we need to get the library to free this! %>
-      __sklib__free__sklib_vector_<%= type %>(v);
-  end;
+  <%# Now it is copied... we need to get the library to free this! %>
+  __sklib__free__sklib_vector_<%= type %>(v);
+end;
 <%
   end # end vectors.each
 %>

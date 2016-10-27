@@ -13,12 +13,12 @@ type <%= enum[:name].type_case %> = (
       last = ',' unless is_last
       constant_decl = "#{constant_key}#{numb}#{last}"
 %>
-    <%= constant_decl %>
+  <%= constant_decl %>
 
 <%
     end # end enums.each
 %>
-  );
+);
 <%
   end # end enums.each
 %>
