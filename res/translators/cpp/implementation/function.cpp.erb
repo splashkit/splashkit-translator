@@ -8,7 +8,7 @@
 <%
   @functions.each do |function|
 %>
-<%= cpp_signature_for(function) %> {
+<%= sk_signature_for(function) %> {
 <%
     function[:parameters].each do |param_name, param_data|
 %>
@@ -60,12 +60,12 @@
     end # end select
     non_const_refs.each do | param_name, param_data |
       if type_can_be_directly_copied? param_data
-        mapper_fn = cpp_mapper_fn_for param_data
+        mapper_fn = sk_mapper_fn_for param_data
 %>
     <%= param_name %> = <%= mapper_fn %>(__skparam__<%= param_name %>);
 <%
       else # cant be directly copied... use update function
-        update_fn = cpp_update_fn_for param_data
+        update_fn = sk_update_fn_for param_data
 %>
     <%= update_fn %>(__skparam__<%= param_name %>, <%= param_name %>);
 <%
@@ -92,7 +92,7 @@
 <%
     if is_func?(function)
 %>
-    return <%= cpp_mapper_fn_for function[:return] %>(__skreturn);
+    return <%= sk_mapper_fn_for function[:return] %>(__skreturn);
 <%
     end # end if function
 %>
