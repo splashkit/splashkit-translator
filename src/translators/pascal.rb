@@ -53,7 +53,7 @@ module Translators
       # Handle void * as Pointer
       return 'Pointer' if void_pointer?(type_data)
       # Handle function pointers
-      return 'TODO' if function_pointer?(type_data)
+      return type_data[:type].type_case if function_pointer?(type_data)
       # Handle vectors as Array of <T>
       if vector_type?(type_data)
         return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
@@ -83,7 +83,7 @@ module Translators
         if param_data[:is_reference]
           var = param_data[:is_const] ? 'const ' : 'var '
         end
-        type = "^#{type}" if param_data[:is_pointer]
+        type = "^#{type}" if param_data[:is_pointer] && !function_pointer?(param_data)
         "#{var}#{param_name.variable_case}: #{type}"
       end.join('; ')
     end
