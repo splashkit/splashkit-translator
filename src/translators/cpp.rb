@@ -82,21 +82,21 @@ module Translators
     #
     # Generate a C++ type signature from a SK function
     #
-    def cpp_signature_for(function)
+    def sk_signature_for(function)
       name            = function[:name]
-      return_type     = cpp_type_for function[:return]
-      parameter_list  = cpp_parameter_list_for function
+      return_type     = sk_type_for function[:return]
+      parameter_list  = sk_parameter_list_for function
       "#{return_type} #{name}(#{parameter_list})"
     end
 
     #
     # Convert a list of parameters to a C++ parameter list
     #
-    def cpp_parameter_list_for(function)
+    def sk_parameter_list_for(function)
       function[:parameters].reduce('') do |memo, param|
         param_name = param.first
         param_data = param.last
-        type = cpp_type_for param_data
+        type = sk_type_for param_data
         ptr = '*' if param_data[:is_pointer]
         ref = '&' if param_data[:is_reference]
         const = 'const ' if param_data[:is_const]
@@ -107,8 +107,8 @@ module Translators
     #
     # Generates a field's struct information
     #
-    def cpp_struct_field_for(field_name, field_data)
-      type = cpp_type_for field_data
+    def sk_parameter_list_for(field_name, field_data)
+      type = sk_type_for field_data
       ptr = '*' if field_data[:is_pointer]
       ref = '&' if field_data[:is_reference]
       if field_data[:is_array]
@@ -126,7 +126,7 @@ module Translators
     #
     # Converts SK type to C++ type
     #
-    def cpp_type_for(type_data)
+    def sk_type_for(type_data)
       # Only hardcode mapping we need
       return 'unsigned char' if type_data[:type] == 'byte'
       type_parameter = "<#{type_data[:type_parameter]}>" if type_data[:type_parameter]
@@ -136,7 +136,7 @@ module Translators
     #
     # C Lib type to C++ type adapter
     #
-    def cpp_mapper_fn_for(function)
+    def sk_mapper_fn_for(function)
       # Just use clib SK adapter -- it's the same thing
       @clib.sk_mapper_fn_for(function)
     end
@@ -144,7 +144,7 @@ module Translators
     #
     # C Lib type to C++ type adapter
     #
-    def cpp_update_fn_for(function)
+    def sk_update_fn_for(function)
       # Just use clib SK adapter -- it's the same thing
       @clib.sk_update_fn_for(function)
     end

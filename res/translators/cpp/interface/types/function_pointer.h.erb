@@ -5,10 +5,10 @@
   @function_pointers.each do |fp|
 %>
 <%
-    return_type = cpp_type_for fp[:return]
+    return_type = sk_type_for fp[:return]
     fp_param_decl = fp[:parameters].map do |param_name, param_data|
       ptr = '*' if param_data[:is_pointer]
-      type = cpp_type_for param_data
+      type = sk_type_for param_data
       "#{type} #{ptr}#{param_name}"
     end.join(', ')
 %>

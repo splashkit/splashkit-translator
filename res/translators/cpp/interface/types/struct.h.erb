@@ -14,7 +14,7 @@ typedef struct {
 <%
     struct[:fields].each do |field_name, field_data|
 %>
-    <%= cpp_struct_field_for(field_name, field_data) %>;
+    <%= sk_parameter_list_for(field_name, field_data) %>;
 <%
     end # end fields.each
 %>
