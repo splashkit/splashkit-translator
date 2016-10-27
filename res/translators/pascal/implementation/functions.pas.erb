@@ -53,7 +53,6 @@ begin
 %>
 <%
     function[:parameters].each do |param_name, param_data|
-      puts "#{param_data} => #{lib_mapper_fn_for param_data}"
 %>
   __skparam__<%= param_name %> := <%= lib_mapper_fn_for param_data %>(<%= param_name %>);
 <%
