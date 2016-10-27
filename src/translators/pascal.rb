@@ -54,6 +54,8 @@ module Translators
       return 'Pointer' if void_pointer?(type_data)
       # Handle function pointers
       return type_data[:type].type_case if function_pointer?(type_data)
+      # Handle generic pointer
+      return "^#{type}" if type_data[:is_pointer]
       # Handle vectors as Array of <T>
       if vector_type?(type_data)
         return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
@@ -88,12 +90,11 @@ module Translators
       end.join('; ')
     end
 
-    def lib_argument_list_for(function)
-      function[:parameters].map do |param_name, param_data|
-        # address_of_oper = '@' if param_data[:is_reference] && !param_data[:is_const]
-        # "#{address_of_oper}__skparam__#{param_name}"
-        "__skparam__#{param_name}"
-      end.join(', ')
+    #
+    # Joins the argument list using a comma
+    #
+    def argument_list_syntax(arguments)
+      arguments.join(', ')
     end
 
     #

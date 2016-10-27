@@ -266,6 +266,15 @@ module Translators::TranslatorHelper
   end
 
   #
+  # Syntax when defining a list of arguments.
+  #
+  def argument_list_syntax(_arguments)
+    raise '`argument_list_syntax` not implemented! Use this function to '\
+          'define how to separate a list of arguments (e.g., comma separated '\
+          'values). This function recieves a list of argument names only.'
+  end
+
+  #
   # Argument list when making C library calls
   #
   def lib_argument_list_for(function)

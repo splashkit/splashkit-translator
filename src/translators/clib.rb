@@ -196,7 +196,7 @@ module Translators
           "from_#{type_data[:type]}_#{type_data[:type_parameter]}"
         else
           # Use standard type
-          raise Parser::Error, "Attempt to use invalid update function...."
+          raise Parser::Error, 'Attempt to use invalid update function....'
         end
       "#{func_prefix}__update_#{type}"
     end
