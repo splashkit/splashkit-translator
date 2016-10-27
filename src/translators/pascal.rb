@@ -97,22 +97,24 @@ module Translators
     end
 
     #
-    # Generates a field's struct information
+    # Defines a Pascal struct field
     #
-    def sk_struct_field_for(field_name, field_data)
-      type = pascal_type_for field_data
-      type = "^#{type}" if field_data[:is_pointer]
-      if field_data[:is_array]
-        array_dims = field_data[:array_dimension_sizes]
-        array_decl =
-          if array_dims.length == 1
-            "[0..#{array_dims.first}]"
-          else
-            "[0..#{array_dims.first}, 0..#{array_dims.last}]"
-          end
-        array_decl = "Array #{array_decl} of #{type}"
-      end
-      "#{field_name}: #{type}"
+    def struct_field_syntax(field_name, field_type, _field_data)
+      "#{field_name}: #{field_type}"
+    end
+
+    #
+    # Syntax for 1D array
+    #
+    def one_dimensional_array_syntax(array_size, array_type)
+      "Array [0..#{array_size}] of #{array_type}"
+    end
+
+    #
+    # Syntax for 2D array
+    #
+    def two_dimensional_array_syntax(dim1_size, dim2_size, array_type)
+      "Array [0..#{dim1_size}, 0..#{dim2_size}] of #{array_type}"
     end
   end
 end

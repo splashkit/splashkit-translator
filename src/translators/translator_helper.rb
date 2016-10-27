@@ -92,15 +92,24 @@ module Translators::TranslatorHelper
   # Converts a C++ type to its LanguageX type for use in SK front end
   #
   def sk_type_for(type_data, opts = {})
+    # Wrap if raw string provided
     if type_data.is_a? String
       type_data = { type: type_data }
     end
+    # Type mapping function to use
     func = opts[:is_lib] ? :lib_map_type_for : :sk_map_type_for
+    # Return possible exceptions user has defined
     exception = type_exceptions(type_data, func, opts)
     return exception if exception
-    # Map directly otherwise...
     type = type_data[:type]
+    # Map directly otherwise...
     result = send(func, type)
+    # Map as array of mapped type if applicable
+    if type_data[:is_array]
+      dims = type_data[:array_dimension_sizes]
+      result = one_dimensional_array_syntax(dims.first, result) if dims.length == 1
+      result = two_dimensional_array_syntax(dims.first, dims.last, result) if dims.length == 2
+    end
     raise "The type `#{type}` cannot yet be translated into a compatible "\
           "#{name} type" if result.nil?
     result
@@ -120,7 +129,10 @@ module Translators::TranslatorHelper
     raise 'Not yet implemented!'
   end
 
-  def sk_signature_syntax
+  #
+  # Syntax to define a function signature
+  #
+  def sk_signature_syntax(_function)
     raise '`sk_signature_syntax` is not yet implemented!'
   end
 
@@ -131,6 +143,9 @@ module Translators::TranslatorHelper
     Translators::CLib.lib_function_name_for(function)
   end
 
+  #
+  # Function name generated
+  #
   def sk_function_name_for(function)
     function[:name].function_case
   end
@@ -229,7 +244,7 @@ module Translators::TranslatorHelper
     type = type[2..-1] if type =~ /^\_{2}/
     # Replace spaces with underscores for unsigned
     type.tr("\s", '_')
-
+    # Append type parameter if vector
     type = "#{type}_#{type_data[:type_parameter]}" if type_data[:is_vector]
     type
   end
@@ -253,9 +268,28 @@ module Translators::TranslatorHelper
   #
   # Argument list when making C library calls
   #
-  def lib_argument_list_for(_function)
-    raise '`lib_argument_list_for` is not yet implemented! This function '\
-          'should return the argument list of the function call prepended '\
-          'with __skparam__[name] and any dereferencing'
+  def lib_argument_list_for(function)
+    args = function[:parameters].map do |param_name, _|
+      "__skparam__#{param_name}"
+    end
+    argument_list_syntax(args)
+  end
+
+  #
+  # Defines the syntax for defining a struct field
+  #
+  def struct_field_syntax(_field_name, _field_type, _field_data)
+    raise '`struct_field_syntax` not implemented. Use this function to define '\
+          'the syntax for declaraing a field given the name, data and '\
+          'and type.'
+  end
+
+  #
+  # Front end struct field definition
+  #
+  def sk_struct_field_for(field_name, field_data)
+    field_name = field_name.variable_case
+    field_type = sk_type_for(field_data)
+    struct_field_syntax(field_name, field_type, field_data)
   end
 end
