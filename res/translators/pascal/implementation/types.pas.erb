@@ -1,7 +1,7 @@
 <%#
   SplashKit __sklib_string wrapper
 %>
-__sklib_string = record
+type __sklib_string = record
   str: PChar;
   size: Integer;
 end;
@@ -9,14 +9,14 @@ end;
   `__sklib_ptr' is a wrapper for typealiases to pointer types using type
   casts.
 %>
-__sklib_ptr = Pointer;
+type __sklib_ptr = Pointer;
 <%#
   Naming for SK lib functions that return structs as alias to Pascal type
 %>
 <%
   @structs.each do |struct|
 %>
-__sklib_<%= struct[:name] %> = <%= struct[:name].type_case %>;
+type __sklib_<%= struct[:name] %> = <%= struct[:name].type_case %>;
 <%
   end # end structs.each
 %>

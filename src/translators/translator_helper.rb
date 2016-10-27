@@ -81,7 +81,7 @@ module Translators::TranslatorHelper
     default_map = {
       'struct'    => "__sklib_#{type_name}",
       'string'    => '__sklib_string',
-      'typealias' => "__sklib_#{type_name}"
+      'typealias' => '__sklib_ptr'
     }
     map = default_map.merge(library_types_hash).merge(direct_types_hash)
     type_name = raw_type_for(type_name)
