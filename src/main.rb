@@ -233,6 +233,7 @@ def run_translate(parsed)
   if RunOpts.validate_only
     puts 'SplashKit API documentation valid!'
   else
+    puts RunOpts.translators
     RunOpts.translators.each do |translator_class|
       translator = translator_class.new(parsed, RunOpts.logging)
       out = translator.execute

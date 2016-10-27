@@ -5,7 +5,7 @@ module Translators
   # SplashKit C Library code generator
   #
   class CLib < AbstractTranslator
-    def initialize(data, logging)
+    def initialize(data, logging = false)
       super(data, logging)
       @direct_types = %w(
         int

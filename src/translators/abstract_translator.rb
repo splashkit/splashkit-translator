@@ -9,7 +9,11 @@ module Translators
                .map { |t| [t.upcase, Translators.const_get(t)] }
                .to_h
   end
+  def adapters
+    all.select { |c| ![:CLIB, :DOCS].include? c }.values
+  end
   module_function :all
+  module_function :adapters
 
   #
   # Common helper methods for translators
@@ -27,7 +31,7 @@ module Translators
     #
     # Initializes the translator with the data and source directories provided
     #
-    def initialize(data, logging)
+    def initialize(data, logging = false)
       @data = data
       @logging = logging
       @direct_types = []
