@@ -3,12 +3,12 @@ uses SplashKit;
 
 procedure Main();
 var
-  arr: array of Integer;
+  arr: array of Boolean;
 begin
-  SetLength(arr, 2);
-  arr[0] := 1;
-  arr[0] := -100;
-
+  arr := GetBools();
+  PrintAll(arr);
+  WriteLn('Adding false');
+  AddBool(arr, false);
   PrintAll(arr);
 end;
 
