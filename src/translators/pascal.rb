@@ -118,8 +118,12 @@ module Translators
     #
     # Syntax for accessing array
     #
-    def array_at_index_syntax(idx1, idx2)
-      "[#{idx1},#{idx2}]"
+    def array_at_index_syntax(idx1, idx2 = nil)
+      if idx2.nil?
+        "[#{idx1}]"
+      else
+        "[#{idx1},#{idx2}]"
+      end
     end
   end
 end

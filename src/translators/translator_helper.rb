@@ -107,8 +107,9 @@ module Translators::TranslatorHelper
     # Map as array of mapped type if applicable
     if type_data[:is_array]
       dims = type_data[:array_dimension_sizes]
-      dim1_size = dims.first
-      dim2_size = dims.last if array_is_2d?(type_data)
+      # Only 1D arrays in library if lib is true
+      dim1_size = opts[:is_lib] ? array_size_as_one_dimensional(type_data) : dims.first
+      dim2_size = dims.last if array_is_2d?(type_data) && !opts[:is_lib]
       result = array_declaration_syntax(result, dim1_size, dim2_size)
     end
     raise "The type `#{type}` cannot yet be translated into a compatible "\
@@ -318,6 +319,15 @@ module Translators::TranslatorHelper
   def sk_struct_field_for(field_name, field_data)
     field_name = field_name.variable_case
     field_type = sk_type_for(field_data)
+    struct_field_syntax(field_name, field_type, field_data)
+  end
+
+  #
+  # Front end lib struct field, ensures arrays are converted to 1D
+  #
+  def lib_struct_field_for(field_name, field_data)
+    field_name = field_name.variable_case
+    field_type = lib_type_for(field_data)
     struct_field_syntax(field_name, field_type, field_data)
   end
 end

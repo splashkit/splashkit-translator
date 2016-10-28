@@ -5,12 +5,12 @@ using namespace std;
 
 namespace splashkit_lib
 {
-  void update_1d(array_1d v)
+  void update_1d(array_1d &v)
   {
-    v.value[1] -= 10;
+    v.values[1] = 0;
   }
-  void update_2d(array_2d v)
+  void update_2d(array_2d &v)
   {
-    v.value[1][2] -= 30;
+    v.values[1][2] = 0;
   }
 }

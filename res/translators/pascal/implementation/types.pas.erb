@@ -11,12 +11,22 @@ end;
 %>
 type __sklib_ptr = Pointer;
 <%#
-  Naming for SK lib functions that return structs as alias to Pascal type
+  Structs must have each field converted to a compatible Lib type (i.e., the
+  field type `foo' becomes `__sklib_foo'). Hence, we can use
+  `lib_struct_field_for` for convenience.
 %>
 <%
   @structs.each do |struct|
 %>
-type __sklib_<%= struct[:name] %> = <%= struct[:name].type_case %>;
+type __sklib_<%= struct[:name] %> = record
+<%
+    struct[:fields].each do |field_name, field_data|
+%>
+  <%= lib_struct_field_for(field_name, field_data) %>;
+<%
+    end # end fields.each
+%>
+end;
 <%
   end # end structs.each
 %>

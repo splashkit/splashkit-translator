@@ -303,9 +303,8 @@ module Translators
     #
     def array_index_from_one_dimensional_index(array_data, idx)
       if array_is_2d?(array_data)
-        r = array_data[:array_dimension_sizes][0]
-        c = array_data[:array_dimension_sizes][1] || r
-        [(idx / r).to_i, idx % c]
+        c = array_data[:array_dimension_sizes][1] # 3
+        [(idx / c).to_i, idx % c]
       else
         idx
       end
