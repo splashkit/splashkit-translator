@@ -7,7 +7,7 @@
     Create the record to map between languages.
 %>
 type __sklib_vector_<%= type %> = record
-  data_from_app: ArrayOf<%= sk_type %>;
+  data_from_app: Array of <%= lib_type %>;
   size_from_app: Cardinal;
   data_from_lib: ^<%= lib_type %>;
   size_from_lib: Cardinal;
@@ -49,11 +49,17 @@ end;
     members onto the heap.
 %>
 function __skadapter__to_sklib_vector_<%= type %>(const v: ArrayOf<%= sk_type %>): __sklib_vector_<%= type %>;
+var
+    i: Integer;
 begin
   result.size_from_lib := 0;
   result.data_from_lib := nil;
   result.size_from_app := Length(v);
-  result.data_from_app := v;
+  SetLength(result.data_from_app, Length(v));
+  for i := 0 to High(v) do
+  begin
+    result.data_from_app[i] := __skadapter__to_sklib_<%= type %>(v[i]);
+  end;
 end;
 <%#
     Converts a __sklib__vector to a dynamic array of type by copying each of
