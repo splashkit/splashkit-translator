@@ -12,6 +12,7 @@ namespace splashkit_lib
     struct vector_2d
     {
       float x, y;
+      int multi_name;
     };
 
     /**

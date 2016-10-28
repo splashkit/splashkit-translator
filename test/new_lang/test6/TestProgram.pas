@@ -7,6 +7,7 @@ var
 begin
   v := GetVector();
   PrintVector(v);
+  WriteLn('Matches: ', v.x, ',', v.y, ' and ', v.MultiName);
 end;
 
 begin
