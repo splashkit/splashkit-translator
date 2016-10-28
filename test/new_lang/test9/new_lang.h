@@ -6,14 +6,6 @@
 namespace splashkit_lib
 {
   /**
-   * [int  description]
-   * @field value description
-   */
-  struct a_struct {
-    int value;
-  };
-
-  /**
    * Description
    */
   typedef struct a_struct *struct_ptr;
@@ -23,4 +15,16 @@ namespace splashkit_lib
    * @param v [description]
    */
   void update_struct(struct_ptr v);
+
+  /**
+   * [print_struct description]
+   * @param v [description]
+   */
+  void print_struct(struct_ptr v);
+
+  /**
+   * [get_struct description]
+   * @return [description]
+   */
+  struct_ptr get_struct();
 }

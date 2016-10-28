@@ -3,15 +3,13 @@ uses SplashKit;
 
 procedure Main();
 var
-  s: AStruct;
   sPtr: StructPtr;
 begin
-  s.value := 10;
-  sPtr := @s;
-  WriteLn('The value of struct value is: ', s.value);
+  sPtr := GetStruct();
+  PrintStruct(sPtr);
   WriteLn('Calling update func!');
   UpdateStruct(sPtr);
-  WriteLn('The value of struct value is: ', s.value);
+  PrintStruct(sPtr);
 end;
 
 begin
