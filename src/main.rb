@@ -85,15 +85,20 @@ def parse_options
     opts.on('-v', '--validate', help) do
       RunOpts.validate_only = true
     end
-    # Parse and cache parsed contents to file
-    help = 'Write parsed contents to a cache file'
-    opts.on('-w', '--writecache FILE', help) do |file|
-      RunOpts.write_to_cache = File.expand_path file
-    end
     # Read parsed contents from cache
     help = 'Read parsed contents from a cache file'
     opts.on('-r', '--readcache FILE', help) do |file|
       RunOpts.read_from_cache = File.expand_path file
+    end
+    # Parse and cache parsed contents to file
+    help = 'Write parsed contents to a cache file'
+    opts.on('-w', '--writecache FILE', help) do |file|
+      RunOpts.write_to_cache =
+        if file.nil? && !RunOpts.read_from_cache.nil?
+          RunOpts.read_from_cache
+        else
+          File.expand_path file
+        end
     end
     opts.separator ''
     # Show warnings at the end of parsing
