@@ -51,7 +51,7 @@ begin
 <%
     function[:parameters].each do |param_name, param_data|
 %>
-  __skparam__<%= param_name %> := <%= lib_mapper_fn_for param_data %>(<%= param_name %>);
+  __skparam__<%= param_name %> := <%= lib_mapper_fn_for param_data %>(<%= param_name.variable_case %>);
 <%
     end
 %>
