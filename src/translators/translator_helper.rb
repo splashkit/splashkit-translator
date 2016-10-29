@@ -245,7 +245,7 @@ module Translators::TranslatorHelper
     # Remove leading __sklib_ underscores if they exist
     type = type[2..-1] if type =~ /^\_{2}/
     # Replace spaces with underscores for unsigned
-    type.tr("\s", '_')
+    type = type.tr("\s", '_')
     # Append type parameter if vector
     type = "#{type}_#{type_data[:type_parameter]}" if type_data[:is_vector]
     type
