@@ -85,7 +85,6 @@ module Translators
         if param_data[:is_reference]
           var = param_data[:is_const] ? 'const ' : 'var '
         end
-        type = "^#{type}" if param_data[:is_pointer] && !function_pointer?(param_data)
         "#{var}#{param_name.variable_case}: #{type}"
       end.join('; ')
     end
