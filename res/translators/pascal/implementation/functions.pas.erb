@@ -74,7 +74,7 @@ begin
     function[:parameters].each do |param_name, param_data|
       if param_data[:is_reference] && !param_data[:is_const]
 %>
-  <%= param_name %> := <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
+  <%= param_name.variable_case %> := <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
 <%
       end # end if is non const ref
     end # end parameters.each
