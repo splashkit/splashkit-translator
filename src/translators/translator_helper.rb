@@ -246,8 +246,10 @@ module Translators::TranslatorHelper
     type = type[2..-1] if type =~ /^\_{2}/
     # Replace spaces with underscores for unsigned
     type = type.tr("\s", '_')
+    # Handle void pointer as generic __sklib_ptr
+    type = 'ptr' if void_pointer?(type_data)
     # Append type parameter if vector
-    type = "#{type}_#{type_data[:type_parameter]}" if type_data[:is_vector]
+    type = "#{type}_#{type_data[:type_parameter]}" if vector_type?(type_data)
     type
   end
 
