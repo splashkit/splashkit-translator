@@ -239,7 +239,7 @@ module Translators::TranslatorHelper
   #
   # Prepares type name for mapping type_data
   #
-  def mapper_fn_prepare_func_suffix(type_data)
+  def mapper_fn_suffix(type_data)
     # Rip lib type first
     type = type_data[:type]
     # Remove leading __sklib_ underscores if they exist
@@ -255,7 +255,7 @@ module Translators::TranslatorHelper
   # Mapper function to convert type_data into LanguageX Front-End type
   #
   def sk_mapper_fn_for(type_data)
-    func_suffix = mapper_fn_prepare_func_suffix type_data
+    func_suffix = mapper_fn_suffix type_data
     "__skadapter__to_#{func_suffix}"
   end
 
@@ -263,7 +263,7 @@ module Translators::TranslatorHelper
   # Mapper function to convert type_data into C Library type
   #
   def lib_mapper_fn_for(type_data)
-    func_suffix = mapper_fn_prepare_func_suffix type_data
+    func_suffix = mapper_fn_suffix type_data
     "__skadapter__to_sklib_#{func_suffix}"
   end
 
