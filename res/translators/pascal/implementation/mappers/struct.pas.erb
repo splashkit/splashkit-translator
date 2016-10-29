@@ -14,6 +14,8 @@ begin
 %>
 <%
     struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
       # If an array copy over each value in the array (1D array << {1,2}D array)
       if field_data[:is_array]
         array_size_as_one_dimensional(field_data).times do |i|
@@ -39,6 +41,8 @@ begin
 %>
 <%
     struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
       # If an array copy over each value in the array ({1,2}D array << 1D array)
       if field_data[:is_array]
         array_size_as_one_dimensional(field_data).times do |i|
