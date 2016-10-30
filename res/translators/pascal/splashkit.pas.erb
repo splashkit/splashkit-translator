@@ -6,10 +6,12 @@ interface
 <%= read_template 'interface/functions' %>
 
 implementation
-uses strings;
+uses strings, math;
 
 <%= read_template 'implementation/types' %>
 <%= read_template 'implementation/mappers' %>
 <%= read_template 'implementation/functions' %>
 
+begin
+  SetExceptionMask([exInvalidOp, exDenormalized, exZeroDivide, exOverflow, exUnderflow, exPrecision]);
 end.
