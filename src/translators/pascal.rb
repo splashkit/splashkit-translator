@@ -8,7 +8,7 @@ module Translators
   class Pascal < AbstractTranslator
     include TranslatorHelper
 
-    def initialize(data, logging)
+    def initialize(data, logging = false)
       super(data, logging)
     end
 
