@@ -7,7 +7,6 @@ module Translators
   class Docs < AbstractTranslator
     def initialize(data, logging = false)
       super(data, logging)
-      @adapters = Translators.adapters.map { |t| t.new(@data) }
     end
 
     def render_templates
@@ -38,29 +37,28 @@ module Translators
               end
               memo
             end
-          group_data = map_signatures(group_data)
+          map_signatures(group_data)
           [group_key, group_data]
         end.sort.to_h
     end
 
     def run_for_each_adapter
-      @adapters.map do |adapter|
-        output = yield adapter
-        [adapter.name, output]
-      end.to_h
-    end
-
-    def function_signatures(function_data)
-      function_data.delete :signature
-      function_data[:signatures] = run_for_each_adapter do |adpt|
-        adpt.sk_signature_for(function_data)
+      # Must translate in order of adapters (case conversion must be
+      # in order as String is prepended)
+      Translators.adapters.each do |adpt|
+        adpt = adpt.new(@data)
+        yield adpt
       end
-      function_data
     end
 
     def map_signatures(data)
-      data[:functions].map!(&method(:function_signatures))
-      data
+      run_for_each_adapter do |adpt|
+        data[:functions].each do |function_data|
+          function_data[:signatures] = {} if function_data[:signatures].nil?
+          signature = adpt.sk_signature_for(function_data)
+          function_data[:signatures][adpt.name] = signature
+        end
+      end
     end
 
     def post_execute

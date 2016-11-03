@@ -173,7 +173,6 @@ module Translators::TranslatorHelper
   #
   def sk_return_type_for(function, opts = {})
     return nil unless is_func?(function)
-
     return_type = function[:return]
     type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
     send(type_conversion_fn, return_type)
@@ -200,8 +199,6 @@ module Translators::TranslatorHelper
   def lib_vector_type_for(function)
     sk_vector_type_for(function, is_lib: true)
   end
-
-
 
   #
   # Generate a Pascal type signature from a SK function
