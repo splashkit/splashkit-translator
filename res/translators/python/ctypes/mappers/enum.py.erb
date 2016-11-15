@@ -1,0 +1,17 @@
+<%#
+  Pascal mapper from `enum` <-> `LongInt`
+ %>
+<%
+  @enums.each do |enum|
+%>
+function __skadapter__to_<%= enum[:name] %>(v: LongInt): <%= enum[:name].type_case %>;
+begin
+  result := <%= enum[:name].type_case %>(v);
+end;
+function __skadapter__to_sklib_<%= enum[:name] %>(v: <%= enum[:name].type_case %>): LongInt;
+begin
+  result := Integer(v);
+end;
+<%
+  end # enums.each
+%>

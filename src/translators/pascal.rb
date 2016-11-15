@@ -68,7 +68,7 @@ module Translators
     #
     # Generate a Pascal type signature from a SK function
     #
-    def signature_syntax(function, function_name, parameter_list, return_type)
+    def signature_syntax(function, function_name, parameter_list, return_type, opts = {})
       declaration = is_proc?(function) ? 'procedure' : 'function'
       func_suffix = ": #{return_type}" if is_func?(function)
       "#{declaration} #{function_name}(#{parameter_list})#{func_suffix}"
@@ -79,7 +79,7 @@ module Translators
     # Use the type conversion function to get which type to use
     # as this function is used to for both Library and Front-End code
     #
-    def parameter_list_syntax(parameters, type_conversion_fn)
+    def parameter_list_syntax(parameters, type_conversion_fn, opts = {})
       parameters.map do |param_name, param_data|
         type = send(type_conversion_fn, param_data)
         if param_data[:is_reference]

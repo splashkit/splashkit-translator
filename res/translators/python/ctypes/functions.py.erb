@@ -1,0 +1,12 @@
+<%#
+  Forward declare SKLib functions
+%>
+<%
+  @functions.each do |function|
+%>
+sklib.<%= lib_function_name_for(function) %>.argtypes = [ <%= lib_parameter_list_for(function) %> ]
+sklib.<%= lib_function_name_for(function) %>.restype = <%= lib_return_type_for(function) || "None" %>
+
+<%
+  end # functions.each
+%>

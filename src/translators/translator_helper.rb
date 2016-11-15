@@ -158,7 +158,7 @@ module Translators::TranslatorHelper
   def sk_parameter_list_for(function, opts = {})
     parameters = function[:parameters]
     type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
-    parameter_list_syntax(parameters, type_conversion_fn)
+    parameter_list_syntax(parameters, type_conversion_fn, opts)
   end
 
   #
@@ -218,7 +218,7 @@ module Translators::TranslatorHelper
     return_type = send(return_type_func, function)
 
     # Generate the signature from the mapped types
-    signature_syntax(function, function_name, parameter_list, return_type)
+    signature_syntax(function, function_name, parameter_list, return_type, opts)
   end
 
   #

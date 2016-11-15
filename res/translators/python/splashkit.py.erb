@@ -1,0 +1,10 @@
+from ctypes import *
+
+cdll.LoadLibrary("libSplashKit.dylib")
+sklib = CDLL("libsplashkit.dylib")
+
+<%= read_template 'ctypes/functions' %>
+
+<%= read_template 'ctypes/mappers' %>
+
+<%= read_template 'implementation/functions' %>
