@@ -32,7 +32,7 @@ module Translators
       'float'           => 'c_float',
       'double'          => 'c_double',
       'byte'            => 'c_byte',
-      'unsigned int'    => 'c_ulong',
+      'unsigned int'    => 'c_uint',
       'unsigned short'  => 'c_ushort',
       'unsigned long'   => 'c_ulonglong'
     }
@@ -43,7 +43,7 @@ module Translators
       'unsigned char'   => 'ubyte',
     }
     SK_TYPES_TO_LIB_TYPES = {
-      'bool'      => 'c_int',
+      'bool'      => 'c_bool',
       'char'      => 'c_char',
       'enum'      => 'c_int',
       'unsigned char'   => 'c_ubyte',
@@ -99,7 +99,11 @@ module Translators
         # end
         # "#{var}#{param_name.variable_case}: #{type}"
         if opts[:is_lib]
-          "#{type}"
+          if param_data[:is_reference]
+            "POINTER(#{type})"
+          else
+            "#{type}"
+          end
         else
         end
       end.join(', ')
@@ -110,6 +114,17 @@ module Translators
     #
     def argument_list_syntax(arguments)
       arguments.join(', ')
+    end
+
+    def lib_argument_list_for(function)
+      args = function[:parameters].map do |param_name, param_data|
+        result = "__skparam__#{param_name}"
+        if param_data[:is_reference]
+          result = "byref(#{result})"
+        end
+        result
+      end
+      argument_list_syntax(args)
     end
 
     #

@@ -8,6 +8,8 @@
     c_type = c_type.tr("\s", "_")
 %>
 def __skadapter__to_sklib_<%= c_type %>(v):
+    if isinstance(v, <%= py_ctype %>):
+        return v
     return <%= py_ctype %>(v);
 
 def __skadapter__to_<%= c_type %>(v):

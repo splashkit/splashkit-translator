@@ -27,6 +27,7 @@ function[:parameters].map do |param_name, param_data| param_name end.join(', ')
     func_call   = "#{return_val}#{lib_fn_name}(#{param_list})"
 %>
   <%= func_call %>
+
 <%#
     3. Update all non-const references.
         -- if it can be directly copied... do that.
@@ -47,7 +48,6 @@ function[:parameters].map do |param_name, param_data| param_name end.join(', ')
 <%
     if is_func?(function)
 %>
-
   return <%= sk_mapper_fn_for function[:return] %>(__skreturn)
 <%
     end # end if function
