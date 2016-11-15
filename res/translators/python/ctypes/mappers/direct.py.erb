@@ -11,7 +11,7 @@ def __skadapter__to_sklib_<%= c_type %>(v):
     return <%= py_ctype %>(v);
 
 def __skadapter__to_<%= c_type %>(v):
-    return v.value
+    return v
 
 <%
   end

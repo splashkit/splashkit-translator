@@ -4,12 +4,12 @@ def __skadapter__to_sklib_char(v):
     return c_char(v);
 
 def __skadapter__to_char(v):
-    return v.value
+    return bytes.decode(v)
 
 def __skadapter__to_sklib_unsigned_char(v):
     if isinstance(v, str):
-        return c_ubyte(str.encode(v)[0])
-    return c_ubyte(v);
+        return c_ubyte(ord(v[0]))
+    return c_ubyte(ord(v));
 
 def __skadapter__to_unsigned_char(v):
-    return v.value
+    return chr(v)

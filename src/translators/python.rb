@@ -82,6 +82,10 @@ module Translators
       end
     end
 
+    def sk_function_name_for(function)
+      "#{function[:name].function_case}#{function[:attributes][:suffix].nil? ? '':'_'}#{function[:attributes][:suffix]}"
+    end
+
     #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use

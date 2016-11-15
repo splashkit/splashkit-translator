@@ -13,6 +13,7 @@
 
     /**
      *
+     * @attribute suffix with_initial_value
      * @param x [description]
      * @returns x
      */
