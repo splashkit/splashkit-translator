@@ -59,10 +59,10 @@ module Translators
       # # Handle generic pointer
       # return "^#{type}" if type_data[:is_pointer]
       # # Handle vectors as Array of <T>
-      # if vector_type?(type_data)
-      #   return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
-      #   return "ArrayOf#{send(type_conversion_fn, type_data[:type_parameter])}"
-      # end
+      if vector_type?(type_data)
+        return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
+        return "ArrayOf#{send(type_conversion_fn, type_data[:type_parameter])}"
+      end
       # No exception for this type
       return nil
     end
@@ -99,7 +99,7 @@ module Translators
         # end
         # "#{var}#{param_name.variable_case}: #{type}"
         if opts[:is_lib]
-          if param_data[:is_reference]
+          if param_data[:is_reference] && !param_data[:is_const]
             "POINTER(#{type})"
           else
             "#{type}"
@@ -119,7 +119,7 @@ module Translators
     def lib_argument_list_for(function)
       args = function[:parameters].map do |param_name, param_data|
         result = "__skparam__#{param_name}"
-        if param_data[:is_reference]
+        if param_data[:is_reference] && !param_data[:is_const]
           result = "byref(#{result})"
         end
         result

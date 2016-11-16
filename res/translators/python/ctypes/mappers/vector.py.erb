@@ -6,21 +6,31 @@
 <%#
     Create the record to map between languages.
 %>
-type __sklib_vector_<%= type %> = record
-  data_from_app: Array of <%= lib_type %>;
-  size_from_app: Cardinal;
-  data_from_lib: ^<%= lib_type %>;
-  size_from_lib: Cardinal;
-end;
+class __sklib_vector_<%= type %>(Structure):
+    _fields_ = [
+      ("data_from_app", POINTER(<%= lib_type %>)),
+      ("size_from_app", c_uint),
+      ("data_from_lib", POINTER(<%= lib_type %>)),
+      ("size_from_lib", c_uint),
+    ]
+
+    def __init__(self, num):
+        elems = (<%= lib_type %> * num)()
+        self.data_from_app = cast(elems, POINTER(<%= lib_type %>))
+        self.size_from_app = num
+        self.data_from_lib = None
+        self.size_from_lib = 0
+
 <%#
     Create a function to free our part of the mapped data. This is the
     function to free the library part of the vector mapping.
 %>
-procedure __sklib__free__sklib_vector_<%= type %>(v: __sklib_vector_<%= type %>); cdecl; external;
+sklib.__sklib__free__sklib_vector_<%= type %>.argtypes = [ __sklib_vector_<%= type %> ]
+sklib.__sklib__free__sklib_vector_<%= type %>.restype = None
 <%#
    Free our part
 %>
-procedure __skadapter__free__sklib_vector_<%= type %>(var v: __sklib_vector_<%= type %>);
+def __skadapter__free__sklib_vector_<%= type %>(v):
 <%
     # Freeing a std::vector<string> requires us to recursively free the
     # allocated __sklib_strings inside the std::vector.
@@ -28,76 +38,50 @@ procedure __skadapter__free__sklib_vector_<%= type %>(var v: __sklib_vector_<%= 
     # and each of the strings are read back.
     if type == 'string'
 %>
-var
-  i: Integer;
-begin
-  for i := 0 to v.size_from_app - 1 do
-  begin
-      __skadapter__free__sklib_string(v.data_from_app[i]);
-  end;
-<%
-    else # else not a string
-%>
-begin
+    for i in range(0, v.size_from_app):
+        __skadapter__free__sklib_string(v.data_from_app[i])
 <%
     end # end if type is string
 %>
-  SetLength(v.data_from_app, 0);
-end;
+    v.data_from_app = None
+
 <%#
     Converts a array of type into a __sklib__vector by allocating each of its
     members onto the heap.
 %>
-function __skadapter__to_sklib_vector_<%= type %>(const v: ArrayOf<%= sk_type %>): __sklib_vector_<%= type %>;
-var
-    i: Integer;
-begin
-  result.size_from_lib := 0;
-  result.data_from_lib := nil;
-  result.size_from_app := Length(v);
-  SetLength(result.data_from_app, Length(v));
-  for i := 0 to High(v) do
-  begin
-    result.data_from_app[i] := __skadapter__to_sklib_<%= type %>(v[i]);
-  end;
-end;
+def __skadapter__to_sklib_vector_<%= type %>(v):
+    result = __sklib_vector_<%= type %>(len(v))
+    for i in range(0, len(v)):
+        result.data_from_app[i] = __skadapter__to_sklib_<%= type %>(v[i])
+    return result
+
 <%#
     Converts a __sklib__vector to a dynamic array of type by copying each of
     its members into the dynamic array
 %>
-function __skadapter__to_vector_<%= type %>(const v: __sklib_vector_<%= type %>): ArrayOf<%= sk_type %>;
-var
-  i: Integer;
-begin
-  SetLength(result, v.size_from_lib);
-  for i := 0 to v.size_from_lib - 1 do
-  begin
-    result[i] := __skadapter__to_<%= type %>(v.data_from_lib[i]);
-  end;
+def __skadapter__to_vector_<%= type %>(v):
+    result = []
+    for i in range(0, v.size_from_lib):
+        result.append ( __skadapter__to_<%= type %>(v.data_from_lib[i]) )
 <%
     # We need to ask the SplashKit library to free the
     # space it allocated for this dynamic on returning a vector. Then we
     # return our copy of this.
 %>
-  __sklib__free__sklib_vector_<%= type %>(v);
-end;
+    sklib.__sklib__free__sklib_vector_<%= type %>(v)
+    return result
 <%#
     These update functions take existing std::vector or sklib_vector values
     and update them. These are used with pass by ref parameters to update the
     sklib_vector or std::vector from the other component.
 %>
-procedure __skadapter__update_from_vector_<%= type %>(var v: __sklib_vector_<%= type %>; var __skreturn: ArrayOf<%= sk_type %>);
-var
-  i: Integer;
-begin
-  SetLength(__skreturn, v.size_from_lib);
-  for i := 0 to v.size_from_lib - 1 do
-  begin
-      __skreturn[i] := __skadapter__to_<%= type %>(v.data_from_lib[i]);
-  end;
-  <%# Now it is copied... we need to get the library to free this! %>
-  __sklib__free__sklib_vector_<%= type %>(v);
-end;
+def __skadapter__update_from_vector_<%= type %>(v, __skreturn):
+    del __skreturn[:]
+    for i in range(0, v.size_from_lib):
+        __skreturn.append( __skadapter__to_<%= type %>(v.data_from_lib[i]) )
+
+<%# Now it is copied... we need to get the library to free this! %>
+    sklib.__sklib__free__sklib_vector_<%= type %>(v)
 <%
   end # end vectors.each
 %>
