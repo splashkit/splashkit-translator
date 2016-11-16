@@ -7,6 +7,21 @@ echo "Generate adapter"
 echo "Make dynamic library"
 clang++ -shared -g -DBUILDING_SK_LIB -std=c++14 -I "test${LANG_TEST}" "test${LANG_TEST}/new_lang.cpp" ../out/clib/sk_clib.cpp ../out/clib/lib_type_mapper.cpp -I../clib -I../.. -I. -o libSplashKit.dylib -install_name @rpath/libSplashKit.dylib
 
+function run_cpp
+{
+  echo "Compile C++ program"
+  clang++ -g -std=c++14 ../out/cpp/splashkit.cpp test${LANG_TEST}/test_program.cpp -L. -lSplashKit -I../out/clib -I../out/cpp -Wl,-rpath,@loader_path
+}
+
+echo "Do you wish to run the C++ version?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) run_cpp; break;;
+        No ) break;;
+    esac
+done
+
+
 function run_pascal
 {
   echo "Compile Pascal program"
