@@ -7,11 +7,14 @@
 <%#
     Make mapper function for struct -> __sklib_struct
 %>
-function __skadapter__to_sklib_<%= struct[:name] %>(v: <%= struct[:name].type_case %>): __sklib_<%= struct[:name] %>;
-begin
+def __skadapter__to_sklib_<%= struct[:name] %>(v):
 <%#
     For every field, convert using mapper functions for this field's type
 %>
+    if isinstance(v, __sklib_<%= struct[:name] %>):
+        return v
+
+    result = <%= struct[:name].type_case %>()
 <%
     struct[:fields].each do |field_name, field_data|
       # Ensure field name is in correct case for language
@@ -20,25 +23,27 @@ begin
       if field_data[:is_array]
         array_size_as_one_dimensional(field_data).times do |i|
 %>
-  result.<%= field_name %>[<%= i %>] := <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= array_mapper_index_for(field_data, i) %>);
+    result.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= array_mapper_index_for(field_data, i) %>)
 <%
         end # end times
       else # else, copy over using lib type and sk to lib type mapper
 %>
-  result.<%= field_name %> := <%= lib_mapper_fn_for field_data %>(v.<%= field_name %>);
+    result.<%= field_name %> = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %>)
 <%
       end # end if
     end # end fields.each
 %>
-end;
+    return result
 <%#
     Make mapper function for __sklib_struct -> struct
 %>
-function __skadapter__to_<%= struct[:name] %>(v: __sklib_<%= struct[:name] %>): <%= struct[:name].type_case %>;
-begin
+def __skadapter__to_<%= struct[:name] %>(v):
+    if isinstance(v, <%= struct[:name].type_case %>):
+        return v
 <%#
     For every field, convert using mapper functions for this field's type
 %>
+    result = <%= struct[:name].type_case %>()
 <%
     struct[:fields].each do |field_name, field_data|
       # Ensure field name is in correct case for language
@@ -47,17 +52,17 @@ begin
       if field_data[:is_array]
         array_size_as_one_dimensional(field_data).times do |i|
 %>
-  result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> := <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> := <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
 <%
         end # end times
       else # else standard copy converted as SK type using SK type mapper
 %>
-  result.<%= field_name %> := <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>);
+    result.<%= field_name %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>)
 <%
       end # end if
     end # fields.each
 %>
-end;
+    return result
 <%
   end # structs.each
 %>

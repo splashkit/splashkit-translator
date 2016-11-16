@@ -1,0 +1,22 @@
+<%#
+    Function pointer translations
+%>
+<%
+  @function_pointers.each do |fp|
+    return_type = sk_type_for fp[:return] if is_func?(fp)
+    fp_param_decl = sk_parameter_list_for fp
+%>
+<%
+    if is_func?(fp)
+%>
+type <%= fp[:name].type_case %> = function (<%= fp_param_decl %>): <%= return_type %>; cdecl;
+<%
+    else
+%>
+type <%= fp[:name].type_case %> = procedure (<%= fp_param_decl %>); cdecl;
+<%
+    end # end if func
+%>
+<%
+  end # end function_pointers.each
+%>

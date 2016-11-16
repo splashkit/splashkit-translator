@@ -1,0 +1,23 @@
+<%#
+  Record declaration from structs
+%>
+<%
+  @structs.each do |struct|
+%>
+class <%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>(Structure):
+    _fields_ = [
+<%
+    # Convert each field type into Pascal type
+    struct[:fields].each do |field_name, field_data|
+%>
+        ("<%= field_name.variable_case %>", <%= lib_type_for(field_data) %>),
+<%
+    end # end fields.each
+%>
+    ]
+
+class <%= struct[:name].type_case %>(<%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>):
+    pass
+<%
+  end # end structs.each
+%>
