@@ -10,7 +10,8 @@ clang++ -shared -g -DBUILDING_SK_LIB -std=c++14 -I "test${LANG_TEST}" "test${LAN
 function run_cpp
 {
   echo "Compile C++ program"
-  clang++ -g -std=c++14 ../out/cpp/splashkit.cpp test${LANG_TEST}/test_program.cpp -L. -lSplashKit -I../out/clib -I../out/cpp -Wl,-rpath,@loader_path
+  clang++ -g -std=c++14 ../out/cpp/*.cpp test${LANG_TEST}/test_program.cpp -L. -lSplashKit -I../out/clib -I../out/cpp -Wl,-rpath,@loader_path -o cpp_test${LANG_TEST}
+  ./cpp_test${LANG_TEST}
 }
 
 echo "Do you wish to run the C++ version?"
