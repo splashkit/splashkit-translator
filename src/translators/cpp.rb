@@ -5,7 +5,7 @@ module Translators
   # C++ Front-End Translator
   #
   class CPP < AbstractTranslator
-    def initialize(data, logging)
+    def initialize(data, logging = false)
       super(data, logging)
       @clib = ReusableCAdapter.new(@data, @logging)
     end
@@ -23,6 +23,16 @@ module Translators
         'adapter_type_mapper.h' => @clib.read_template('type_mapper.h'),
         'adapter_type_mapper.cpp' => @clib.read_template('type_mapper.cpp')
       )
+    end
+
+    #
+    # Generate a C++ type signature from a SK function
+    #
+    def sk_signature_for(function)
+      name            = function[:name]
+      return_type     = sk_type_for function[:return]
+      parameter_list  = sk_parameter_list_for function
+      "#{return_type} #{name}(#{parameter_list})"
     end
 
     #=== internal ===
@@ -77,16 +87,6 @@ module Translators
             header_name != @header_name
         end.keys
       end
-    end
-
-    #
-    # Generate a C++ type signature from a SK function
-    #
-    def sk_signature_for(function)
-      name            = function[:name]
-      return_type     = sk_type_for function[:return]
-      parameter_list  = sk_parameter_list_for function
-      "#{return_type} #{name}(#{parameter_list})"
     end
 
     #
