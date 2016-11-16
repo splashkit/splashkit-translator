@@ -17,6 +17,7 @@ typedef struct {
 <%#
     Must forward declare the library free vector function if adapter.
 %>
+void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
 <%
     if splashkit_adapter?
 %>
