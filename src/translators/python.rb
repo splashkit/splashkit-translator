@@ -55,8 +55,8 @@ module Translators
       # return 'PChar' if char_pointer?(type_data)
       # # Handle void * as Pointer
       # return 'Pointer' if void_pointer?(type_data)
-      # # Handle function pointers
-      # return type_data[:type].type_case if function_pointer?(type_data)
+      # Handle function pointers
+      return type_data[:type].type_case if function_pointer?(type_data)
       # # Handle generic pointer
       # return "^#{type}" if type_data[:is_pointer]
       # # Handle vectors as Array of <T>

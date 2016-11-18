@@ -6,11 +6,11 @@
     sk_fp_type = fp[:name].type_case
     lib_fp_type = "__sklib_#{fp[:name]}"
 %>
-type <%= lib_fp_type %> = <%= sk_fp_type %>;
-function __skadapter__to_sklib_<%= fp[:name] %>(v: <%= sk_fp_type %>): <%= lib_fp_type %>;
-begin
-  result := v;
-end;
+def __skadapter__to_sklib_<%= fp[:name] %>(v):
+    if isinstance(v, <%= fp[:name].type_case %>):
+        return v
+    return <%= fp[:name].type_case %>(v)
+
 <%
   end # end function_pointers.each
 %>
