@@ -48,6 +48,7 @@ module Translators
       'char'      => 'c_char',
       'enum'      => 'c_int',
       'unsigned char'   => 'c_ubyte',
+      'typealias' => 'c_void_p',
     }
 
     def type_exceptions(type_data, type_conversion_fn, opts = {})

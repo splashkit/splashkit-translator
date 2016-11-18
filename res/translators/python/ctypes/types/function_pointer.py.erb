@@ -3,7 +3,6 @@
 %>
 <%
   @function_pointers.each do |fp|
-    puts fp
     return_type = lib_type_for(fp[:return]) if is_func?(fp)
     fp_param_decl = lib_parameter_list_for fp
 %>
