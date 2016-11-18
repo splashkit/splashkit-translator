@@ -23,8 +23,9 @@ end
 PYTHON_IDENTIFIER_CASES = {
   types:      :pascal_case,
   functions:  :snake_case,
-  variables:  :snake_case
+  variables:  :snake_case,
+  constants:  :snake_case
 }
 ```
 1. In your templates we recommend two folders: one for the templates related to the sk library (clib) and the other for the user/programmer facing code from your template. For example, in Python we used `ctypes` which maps the clib functions from splashkit, and `implementation` for the templates to create the python code used by the user/programmer.
-1. 
+1.

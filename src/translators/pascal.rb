@@ -23,7 +23,8 @@ module Translators
     PASCAL_IDENTIFIER_CASES = {
       types:      :pascal_case,
       functions:  :pascal_case,
-      variables:  :camel_case
+      variables:  :camel_case,
+      constants:  :upper_case
     }
     DIRECT_TYPES = {
       'int'             => 'Integer',

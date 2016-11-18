@@ -23,7 +23,8 @@ module Translators
     PYTHON_IDENTIFIER_CASES = {
       types:      :pascal_case,
       functions:  :snake_case,
-      variables:  :snake_case
+      variables:  :snake_case,
+      constants:  :snake_case
     }
     DIRECT_TYPES = {
       'int'             => 'c_int',

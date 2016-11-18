@@ -1,4 +1,5 @@
 from ctypes import *
+from enum import Enum
 
 cdll.LoadLibrary("libSplashKit.dylib")
 sklib = CDLL("libsplashkit.dylib")

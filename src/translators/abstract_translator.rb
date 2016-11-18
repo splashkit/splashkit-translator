@@ -75,7 +75,8 @@ module Translators
           converters = {
             types:      :snake_case,
             functions:  :snake_case,
-            variables:  :snake_case
+            variables:  :snake_case,
+            constants:   :upper_case
           }
         end
       string_case_module = Module.new do
@@ -90,6 +91,9 @@ module Translators
         end
         define_method(:variable_case) do
           to_s.send_case_conversion_method converters[:variables]
+        end
+        define_method(:constant_case) do
+          to_s.send_case_conversion_method converters[:constants]
         end
       end
       string_case_module.freeze

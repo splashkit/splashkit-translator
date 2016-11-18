@@ -73,11 +73,19 @@ module CoreExtensions
     end
 
     #
-    # Converts from snake_case to snake_case (no change)
+    # Converts from snake_case to snake_case (all lower)
     #
     def to_snake_case
-      self
+      self.downcase
     end
+
+    #
+    # Converts to UPPER_CASE (snake but uppercase)
+    #
+    def to_upper_case
+      self.upcase
+    end
+
 
     #
     # Converts from snake_case to kebab-case
