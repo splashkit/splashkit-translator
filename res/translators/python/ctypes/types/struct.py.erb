@@ -1,14 +1,38 @@
 <%#
   Record declaration from structs
 %>
+
+class _FieldIndexer:
+    def __init__(self, obj, field, dim1, dim2):
+        self.obj = obj
+        self.field = field
+        self.dim1 = dim1
+        self.dim2 = dim2
+
+    def __getitem__(self, index):
+        if ( isinstance(index, tuple)  ):
+            return getattr(self.obj, self.field)[index[0] * self.dim2 + index[1]]
+        else:
+            return getattr(self.obj, self.field)[index]
+
+    def __setitem__(self, index, value):
+        if ( isinstance(index, tuple)  ):
+            getattr(self.obj, self.field)[index[0] * self.dim2 + index[1]] = value
+        else:
+            getattr(self.obj, self.field)[index] = value
+
+
 <%
   @structs.each do |struct|
 %>
 class <%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>(Structure):
     _fields_ = [
 <%
-    # Convert each field type into Pascal type
+    # Convert each field type into Python type
     struct[:fields].each do |field_name, field_data|
+      if field_data[:is_array]
+        field_name = "_#{field_name}"
+      end
 %>
         ("<%= field_name.variable_case %>", <%= lib_type_for(field_data) %>),
 <%
@@ -17,7 +41,22 @@ class <%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>(Structure):
     ]
 
 class <%= struct[:name].type_case %>(<%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>):
-    pass
+    def __init__(self):
 <%
+    struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
+      # If an array copy over each value in the array (1D array << {1,2}D array)
+      if field_data[:is_array]
+        dim1 = field_data[:array_dimension_sizes][0]
+        dim2 = field_data[:array_dimension_sizes][1] || 0
+%>
+      self.<%= field_name %> = _FieldIndexer(self, "_<%= field_name %>", <%=dim1%>, <%=dim2%>)
+<%
+      end # end if
+%>
+      super().__init__()
+<%
+    end # end fields.each
   end # end structs.each
 %>

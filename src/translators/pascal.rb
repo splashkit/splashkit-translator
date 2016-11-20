@@ -109,9 +109,9 @@ module Translators
     #
     def array_declaration_syntax(array_type, dim1_size, dim2_size = nil)
       if dim2_size.nil?
-        "Array [0..#{dim1_size}] of #{array_type}"
+        "Array [0..#{dim1_size - 1}] of #{array_type}"
       else
-        "Array [0..#{dim1_size}, 0..#{dim2_size}] of #{array_type}"
+        "Array [0..#{dim1_size - 1}, 0..#{dim2_size - 1}] of #{array_type}"
       end
     end
 

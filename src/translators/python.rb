@@ -141,9 +141,9 @@ module Translators
     #
     def array_declaration_syntax(array_type, dim1_size, dim2_size = nil)
       if dim2_size.nil?
-        "Array [0..#{dim1_size}] of #{array_type}"
+        "#{array_type} * #{dim1_size}"
       else
-        "Array [0..#{dim1_size}, 0..#{dim2_size}] of #{array_type}"
+        "(#{array_type} * #{dim2_size}) * #{dim1_size}"
       end
     end
 
@@ -154,7 +154,7 @@ module Translators
       if idx2.nil?
         "[#{idx1}]"
       else
-        "[#{idx1},#{idx2}]"
+        "[#{idx1}][#{idx2}]"
       end
     end
   end

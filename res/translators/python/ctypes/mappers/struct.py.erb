@@ -21,6 +21,7 @@ def __skadapter__to_sklib_<%= struct[:name] %>(v):
       field_name = field_name.variable_case
       # If an array copy over each value in the array (1D array << {1,2}D array)
       if field_data[:is_array]
+        field_name = "#{field_name}"
         array_size_as_one_dimensional(field_data).times do |i|
 %>
     result.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= array_mapper_index_for(field_data, i) %>)
@@ -52,7 +53,7 @@ def __skadapter__to_<%= struct[:name] %>(v):
       if field_data[:is_array]
         array_size_as_one_dimensional(field_data).times do |i|
 %>
-    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> := <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
 <%
         end # end times
       else # else standard copy converted as SK type using SK type mapper
