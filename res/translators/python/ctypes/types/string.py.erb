@@ -1,0 +1,10 @@
+class __sklib_string(Structure):
+    _fields_ = [
+      ( "str",  c_char_p),
+      ( "size", c_int )
+    ]
+
+    def __init__(self, s):
+        self.size = len(s)
+        bytes = str.encode(s)
+        self.str = c_char_p(bytes)

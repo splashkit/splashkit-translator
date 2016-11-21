@@ -1,19 +1,16 @@
 <%#
   String mappers
 %>
-function __skadapter__to_sklib_string(s: String): __sklib_string;
-begin
-  result.size := Length(s);
-  result.str := StrAlloc(Length(s) + 1);
-  StrPCopy(result.str, s);
-end;
-procedure __sklib__free__sklib_string(s: __sklib_string); cdecl; external;
-procedure __skadapter__free__sklib_string(s: __sklib_string);
-begin
-  StrDispose(s.str);
-end;
-function __skadapter__to_string(s: __sklib_string): String;
-begin
-  result := StrPas(s.str);
-  __sklib__free__sklib_string(s);
-end;
+def __skadapter__to_sklib_string(s):
+    return __sklib_string(s)
+
+sklib.__sklib__free__sklib_string.argtypes = [ __sklib_string ]
+sklib.__sklib__free__sklib_string.restype = None
+
+def __skadapter__free__sklib_string(s):
+    pass
+
+def __skadapter__to_string(s):
+    result = bytes.decode(s.str)
+    sklib.__sklib__free__sklib_string(s)
+    return result
