@@ -2,6 +2,7 @@
   Enum declaration
 %>
 <%
+  next_numb = 0
   @enums.each do |enum|
 %>
 class <%= enum[:name].type_case %>(Enum):
@@ -9,7 +10,15 @@ class <%= enum[:name].type_case %>(Enum):
     enum[:constants].each do |constant_key, constant_data|
       is_last = constant_key == enum[:constants].keys.last
       has_numb = constant_data[:number].is_a? Integer
-      numb = " = #{constant_data[:number]}" if has_numb
+
+      if has_numb
+        numb = " = #{constant_data[:number]}"
+        next_numb = constant_data[:number] + 1
+      else
+        numb = " = #{next_numb}"
+        next_numb += 1
+      end
+
       constant_decl = "#{constant_key.to_s.to_snake_case}#{numb}"
 %>
     <%= constant_decl %>
