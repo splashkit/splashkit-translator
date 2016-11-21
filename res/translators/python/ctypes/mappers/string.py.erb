@@ -2,9 +2,9 @@
   String mappers
 %>
 def __skadapter__to_sklib_string(s):
-    return __sklib_string(s)
+    return _sklib_string(s)
 
-sklib.__sklib__free__sklib_string.argtypes = [ __sklib_string ]
+sklib.__sklib__free__sklib_string.argtypes = [ _sklib_string ]
 sklib.__sklib__free__sklib_string.restype = None
 
 def __skadapter__free__sklib_string(s):

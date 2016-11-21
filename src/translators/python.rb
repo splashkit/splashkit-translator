@@ -44,6 +44,7 @@ module Translators
       'unsigned char'   => 'ubyte',
     }
     SK_TYPES_TO_LIB_TYPES = {
+      'string'    => '_sklib_string',
       'bool'      => 'c_bool',
       'char'      => 'c_char',
       'enum'      => 'c_int',
