@@ -55,8 +55,8 @@ module Translators
     def type_exceptions(type_data, type_conversion_fn, opts = {})
       # # Handle char* as PChar
       # return 'PChar' if char_pointer?(type_data)
-      # # Handle void * as Pointer
-      # return 'Pointer' if void_pointer?(type_data)
+      # Handle void * as Pointer
+      return 'c_void_p' if void_pointer?(type_data)
       # Handle function pointers
       return type_data[:type].type_case if function_pointer?(type_data)
       # # Handle generic pointer
