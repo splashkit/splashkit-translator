@@ -52,6 +52,11 @@ module Translators
       'typealias' => 'c_void_p',
     }
 
+    # Override to switch to single _ to avoid issues with Python
+    def sklib_prefix
+      "_sklib"
+    end
+
     def type_exceptions(type_data, type_conversion_fn, opts = {})
       # # Handle char* as PChar
       # return 'PChar' if char_pointer?(type_data)
@@ -63,7 +68,7 @@ module Translators
       # return "^#{type}" if type_data[:is_pointer]
       # # Handle vectors as Array of <T>
       if vector_type?(type_data)
-        return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
+        return "_sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
         return "ArrayOf#{send(type_conversion_fn, type_data[:type_parameter])}"
       end
       # No exception for this type
@@ -71,7 +76,7 @@ module Translators
     end
 
     #
-    # Generate a Pascal type signature from a SK function
+    # Generate a Python type signature from a SK function
     #
     def signature_syntax(function, function_name, parameter_list, return_type, opts = {})
       if opts[:is_lib]
@@ -128,13 +133,6 @@ module Translators
         result
       end
       argument_list_syntax(args)
-    end
-
-    #
-    # Defines a Pascal struct field
-    #
-    def struct_field_syntax(field_name, field_type, _field_data)
-      "#{field_name}: #{field_type}"
     end
 
     #

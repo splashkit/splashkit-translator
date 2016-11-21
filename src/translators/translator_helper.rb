@@ -75,13 +75,21 @@ module Translators::TranslatorHelper
   end
 
   #
+  # This is the prefix added to many lib types. Override in translator to
+  # change as needed.
+  #
+  def sklib_prefix
+    "__sklib"
+  end
+
+  #
   # Type name to use for when calling C library code
   #
   def lib_map_type_for(type_name)
     default_map = {
-      'struct'    => "__sklib_#{type_name}",
-      'string'    => '__sklib_string',
-      'typealias' => '__sklib_ptr'
+      'struct'    => "#{sklib_prefix}_#{type_name}",
+      'string'    => '#{sklib_prefix}_string',
+      'typealias' => '#{sklib_prefix}_ptr'
     }
     map = default_map.merge(library_types_hash).merge(direct_types_hash)
     type_name = raw_type_for(type_name)

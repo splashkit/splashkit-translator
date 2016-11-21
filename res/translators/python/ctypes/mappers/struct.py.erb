@@ -11,7 +11,7 @@ def __skadapter__to_sklib_<%= struct[:name] %>(v):
 <%#
     For every field, convert using mapper functions for this field's type
 %>
-    if isinstance(v, __sklib_<%= struct[:name] %>):
+    if isinstance(v, <%= "#{sklib_prefix()}_#{struct[:name]}" %>):
         return v
 
     result = <%= struct[:name].type_case %>()

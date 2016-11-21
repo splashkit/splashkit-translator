@@ -25,7 +25,7 @@ class _FieldIndexer:
 <%
   @structs.each do |struct|
 %>
-class <%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>(Structure):
+class <%= sklib_prefix() %>_<%= struct[:name].variable_case %>(Structure):
     _fields_ = [
 <%
     # Convert each field type into Python type
@@ -40,7 +40,7 @@ class <%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>(Structure):
 %>
     ]
 
-class <%= struct[:name].type_case %>(<%= CLib::FUNC_PREFIX %>_<%= struct[:name].variable_case %>):
+class <%= struct[:name].type_case %>(<%= sklib_prefix() %>_<%= struct[:name].variable_case %>):
     def __init__(self):
 <%
     struct[:fields].each do |field_name, field_data|
