@@ -6,7 +6,7 @@
 <%#
     Create the record to map between languages.
 %>
-class __sklib_vector_<%= type %>(Structure):
+class <%= sklib_prefix() %>_vector_<%= type %>(Structure):
     _fields_ = [
       ("data_from_app", POINTER(<%= lib_type %>)),
       ("size_from_app", c_uint),
@@ -25,7 +25,7 @@ class __sklib_vector_<%= type %>(Structure):
     Create a function to free our part of the mapped data. This is the
     function to free the library part of the vector mapping.
 %>
-sklib.__sklib__free__sklib_vector_<%= type %>.argtypes = [ __sklib_vector_<%= type %> ]
+sklib.__sklib__free__sklib_vector_<%= type %>.argtypes = [ <%= sklib_prefix() %>_vector_<%= type %> ]
 sklib.__sklib__free__sklib_vector_<%= type %>.restype = None
 <%#
    Free our part
@@ -50,13 +50,13 @@ def __skadapter__free__sklib_vector_<%= type %>(v):
     members onto the heap.
 %>
 def __skadapter__to_sklib_vector_<%= type %>(v):
-    result = __sklib_vector_<%= type %>(len(v))
+    result = _sklib_vector_<%= type %>(len(v))
     for i in range(0, len(v)):
         result.data_from_app[i] = __skadapter__to_sklib_<%= type %>(v[i])
     return result
 
 <%#
-    Converts a __sklib__vector to a dynamic array of type by copying each of
+    Converts a _sklib__vector to a dynamic array of type by copying each of
     its members into the dynamic array
 %>
 def __skadapter__to_vector_<%= type %>(v):
