@@ -88,8 +88,8 @@ module Translators::TranslatorHelper
   def lib_map_type_for(type_name)
     default_map = {
       'struct'    => "#{sklib_prefix}_#{type_name}",
-      'string'    => '#{sklib_prefix}_string',
-      'typealias' => '#{sklib_prefix}_ptr'
+      'string'    => "#{sklib_prefix}_string",
+      'typealias' => "#{sklib_prefix}_ptr"
     }
     map = default_map.merge(library_types_hash).merge(direct_types_hash)
     type_name = raw_type_for(type_name)

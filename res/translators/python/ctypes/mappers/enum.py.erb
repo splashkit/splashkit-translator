@@ -5,10 +5,12 @@
   @enums.each do |enum|
 %>
 def __skadapter__to_<%= enum[:name] %>(v):
-  return <%= enum[:name].type_case %>(v)
+    if isinstance(v, <%= enum[:name].type_case %>):
+        return v
+    return <%= enum[:name].type_case %>(v)
 
 def __skadapter__to_sklib_<%= enum[:name] %>(v):
-  return c_int(v.value)
+    return c_int(v.value)
 
 <%
   end # enums.each

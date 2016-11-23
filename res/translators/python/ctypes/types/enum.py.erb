@@ -2,8 +2,8 @@
   Enum declaration
 %>
 <%
-  next_numb = 0
   @enums.each do |enum|
+    next_numb = 0
 %>
 class <%= enum[:name].type_case %>(Enum):
 <%
