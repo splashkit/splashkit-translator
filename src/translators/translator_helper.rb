@@ -142,8 +142,8 @@ module Translators::TranslatorHelper
   #
   # Syntax to define a function signature
   #
-  def sk_signature_syntax(_function)
-    raise '`sk_signature_syntax` is not yet implemented!'
+  def signature_syntax(_function)
+    raise '`signature_syntax` is not yet implemented!'
   end
 
   #
