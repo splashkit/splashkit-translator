@@ -18,7 +18,7 @@
   @functions.each do |function|
 %>
     <%= sk_signature_for(function) %>
-    
+
 {
 <%#
   Start variable declaration block
@@ -48,7 +48,7 @@
 <%
     function[:parameters].each do |param_name, param_data|
 %>
-      __skparam__<%= param_name %> := <%= lib_mapper_fn_for param_data %>(<%= param_name.variable_case %>);
+      __skparam__<%= param_name %> = <%= lib_mapper_fn_for param_data %>(<%= param_name.variable_case %>);
 <%
     end
 %>

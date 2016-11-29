@@ -85,9 +85,9 @@ module Translators
       parameters.map do |param_name, param_data|
         type = send(type_conversion_fn, param_data)
         if param_data[:is_reference]
-          var = param_data[:is_const] ? 'const ' : 'var '
+          var = param_data[:is_const] ? 'const ' : 'ref '
         end
-        "#{var}#{param_name.variable_case}: #{type}"
+        "#{var}#{type} #{param_name.variable_case}"
       end.join('; ')
     end
 
