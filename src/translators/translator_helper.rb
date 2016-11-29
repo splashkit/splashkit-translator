@@ -277,19 +277,24 @@ module Translators::TranslatorHelper
   #
   # Syntax when defining a list of arguments.
   #
-  def argument_list_syntax(_arguments)
-    raise '`argument_list_syntax` not implemented! Use this function to '\
-          'define how to separate a list of arguments (e.g., comma separated '\
-          'values). This function recieves a list of argument names only.'
+  def argument_list_syntax(arguments)
+    puts arguments
+    arguments.map { |arg_data| arg_data[:name] }.join(', ')
   end
 
   #
   # Argument list when making C library calls
   #
   def lib_argument_list_for(function)
-    args = function[:parameters].map do |param_name, _|
-      "__skparam__#{param_name}"
+    args = function[:parameters].map do |param_name, param_data|
+      {
+        name: "__skparam__#{param_name}",
+        param_data: param_data
+      }
     end
+
+    puts args
+
     argument_list_syntax(args)
   end
 

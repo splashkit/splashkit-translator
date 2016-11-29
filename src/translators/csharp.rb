@@ -34,7 +34,7 @@ module Translators
       'double'          => 'double',
       'byte'            => 'byte',
       'char'            => 'char',
-      'unsigned char'   => 'char',
+      'unsigned char'   => 'byte',
       'unsigned int'    => 'uint',
       'unsigned short'  => 'ushort'
     }
@@ -94,7 +94,17 @@ module Translators
     # Joins the argument list using a comma
     #
     def argument_list_syntax(arguments)
-      arguments.join(', ')
+      puts arguments
+
+      args = arguments.map do | arg_data |
+        if arg_data[:param_data][:is_reference]
+          "ref #{arg_data[:name]}"
+        else
+          arg_data[:name]
+        end
+      end
+
+      args.join(', ')
     end
 
     #

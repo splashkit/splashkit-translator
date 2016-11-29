@@ -90,13 +90,6 @@ module Translators
     end
 
     #
-    # Joins the argument list using a comma
-    #
-    def argument_list_syntax(arguments)
-      arguments.join(', ')
-    end
-
-    #
     # Defines a Pascal struct field
     #
     def struct_field_syntax(field_name, field_type, _field_data)

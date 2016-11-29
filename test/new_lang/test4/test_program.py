@@ -11,7 +11,8 @@ uch = c_ubyte(ord('B'))
 b = c_bool(True)
 ui = c_uint(50)
 
-print(i, " get ", get_and_update_int(i), " updated int ", i)
+print(i)
+print(" get ", get_and_update_int(i), " updated int ", i)
 
 print(i, end=" ")
 update_int(i)

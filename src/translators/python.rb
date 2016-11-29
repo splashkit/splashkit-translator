@@ -116,22 +116,16 @@ module Translators
       end.join(', ')
     end
 
-    #
-    # Joins the argument list using a comma
-    #
     def argument_list_syntax(arguments)
-      arguments.join(', ')
-    end
-
-    def lib_argument_list_for(function)
-      args = function[:parameters].map do |param_name, param_data|
-        result = "__skparam__#{param_name}"
-        if param_data[:is_reference] && !param_data[:is_const]
-          result = "byref(#{result})"
+      args = arguments.map do |arg_data| arg_data[:name]
+        if arg_data[:param_data][:is_reference] && !arg_data[:param_data][:is_const]
+          "byref(#{arg_data[:name]})"
+        else
+          arg_data[:name]
         end
-        result
       end
-      argument_list_syntax(args)
+
+      args.join(', ')
     end
 
     #
