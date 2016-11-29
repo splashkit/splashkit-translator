@@ -1,13 +1,14 @@
 <%#
   Mappers from `Boolean` <-> `LongInt`
 %>
-internal static int __skadapter__to_sklib_bool(bool v)
-{
-  if (v) return -1;
-  else return 0;
-}
 
-internal static bool __skadapter__to_bool(int v)
-{
-  return v != 0;
-}
+    internal static int __skadapter__to_sklib_bool(bool v)
+    {
+      if (v) return -1;
+      else return 0;
+    }
+
+    internal static bool __skadapter__to_bool(int v)
+    {
+      return v != 0;
+    }

@@ -10,7 +10,7 @@ module Translators
       @direct_types = %w(
         int
         short
-        long
+        int64_t
         float
         double
         char
@@ -88,7 +88,7 @@ module Translators
           'void'      => 'void',
           'int'       => 'int',
           'short'     => 'short',
-          'long'      => 'long',
+          'int64_t'   => 'int64_t',
           'float'     => 'float',
           'double'    => 'double',
           'byte'      => 'unsigned char',

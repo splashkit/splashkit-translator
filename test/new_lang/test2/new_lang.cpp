@@ -36,9 +36,9 @@ namespace splashkit_lib
       cout << "YAY! short " << x << endl;
   }
 
-  void say_yay_long(long x)
+  void say_yay_long(int64_t x)
   {
-      cout << "YAY! long " << x << endl;
+      cout << "YAY! int64_t " << x << endl;
   }
 
   void say_yay_uint(unsigned int x)

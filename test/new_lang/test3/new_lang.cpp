@@ -40,9 +40,10 @@ namespace splashkit_lib
      return x * 2;
    }
 
-   long get_long(long x)
+   int64_t get_long(int64_t x)
    {
-     return x * 2;
+      cout << "int64_t: " << x << " size: " << sizeof(x) << endl;
+      return x * 2;
    }
 
    unsigned int get_uint(unsigned int x)

@@ -7,15 +7,16 @@
   direct_types.each do |c_type, cs_type|
     c_type = c_type.tr("\s", "_")
 %>
-internal static <%= cs_type %> __skadapter__to_sklib_<%= c_type %>(<%= cs_type %> v)
-{
-  return v;
-}
 
-internal static <%= cs_type %> __skadapter__to_<%= c_type %>(<%= cs_type %> v)
-{
-  return v;
-}
+    internal static <%= cs_type %> __skadapter__to_sklib_<%= c_type %>(<%= cs_type %> v)
+    {
+      return v;
+    }
+
+    internal static <%= cs_type %> __skadapter__to_<%= c_type %>(<%= cs_type %> v)
+    {
+      return v;
+    }
 <%
   end
 %>

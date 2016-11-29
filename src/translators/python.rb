@@ -29,13 +29,12 @@ module Translators
     DIRECT_TYPES = {
       'int'             => 'c_int',
       'short'           => 'c_short',
-      'long'            => 'c_longlong',
+      'int64_t'         => 'c_int64',
       'float'           => 'c_float',
       'double'          => 'c_double',
       'byte'            => 'c_byte',
       'unsigned int'    => 'c_uint',
-      'unsigned short'  => 'c_ushort',
-      'unsigned long'   => 'c_ulonglong'
+      'unsigned short'  => 'c_ushort'
     }
     SK_TYPES_TO_PYTHON_TYPES = {
       'bool'      => 'bool',

@@ -29,15 +29,14 @@ module Translators
     DIRECT_TYPES = {
       'int'             => 'int',
       'short'           => 'short',
-      'long'            => 'long',
+      'int64_t'         => 'long',
       'float'           => 'float',
       'double'          => 'double',
       'byte'            => 'byte',
       'char'            => 'char',
       'unsigned char'   => 'char',
       'unsigned int'    => 'uint',
-      'unsigned short'  => 'ushort',
-      'unsigned long'   => 'ulong'
+      'unsigned short'  => 'ushort'
     }
     SK_TYPES_TO_CSHARP_TYPES = {
       'bool'      => 'bool',

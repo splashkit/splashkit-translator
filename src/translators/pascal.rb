@@ -29,15 +29,14 @@ module Translators
     DIRECT_TYPES = {
       'int'             => 'Integer',
       'short'           => 'ShortInt',
-      'long'            => 'Int64',
+      'int64_t'         => 'Int64',
       'float'           => 'Single',
       'double'          => 'Double',
       'byte'            => 'Char',
       'char'            => 'Char',
       'unsigned char'   => 'Char',
       'unsigned int'    => 'Cardinal',
-      'unsigned short'  => 'Word',
-      'unsigned long'   => 'Longword'
+      'unsigned short'  => 'Word'
     }
     SK_TYPES_TO_PASCAL_TYPES = {
       'bool'      => 'Boolean',
