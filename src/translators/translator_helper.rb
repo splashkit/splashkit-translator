@@ -278,7 +278,6 @@ module Translators::TranslatorHelper
   # Syntax when defining a list of arguments.
   #
   def argument_list_syntax(arguments)
-    puts arguments
     arguments.map { |arg_data| arg_data[:name] }.join(', ')
   end
 
