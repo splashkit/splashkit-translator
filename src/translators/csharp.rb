@@ -59,7 +59,7 @@ module Translators
       # Handle vectors as Array of <T>
       if vector_type?(type_data)
         return "__sklib_vector_#{type_data[:type_parameter]}" if opts[:is_lib]
-        return "ArrayOf#{send(type_conversion_fn, type_data[:type_parameter])}"
+        return "List<#{send(type_conversion_fn, type_data[:type_parameter])}>"
       end
       # No exception for this type
       return nil
@@ -94,8 +94,6 @@ module Translators
     # Joins the argument list using a comma
     #
     def argument_list_syntax(arguments)
-      puts arguments
-
       args = arguments.map do | arg_data |
         if arg_data[:param_data][:is_reference]
           "ref #{arg_data[:name]}"
