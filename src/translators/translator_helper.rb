@@ -292,8 +292,6 @@ module Translators::TranslatorHelper
       }
     end
 
-    puts args
-
     argument_list_syntax(args)
   end
 

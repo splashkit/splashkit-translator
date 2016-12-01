@@ -72,7 +72,7 @@ module Translators
     def signature_syntax(function, function_name, parameter_list, return_type, opts = {})
       external = "extern " if opts[:is_lib]
       return_type = return_type || "void"
-      "public static #{external}#{return_type} #{function_name}(#{parameter_list})"
+      "internal static #{external}#{return_type} #{function_name}(#{parameter_list})"
     end
 
     #
@@ -84,10 +84,10 @@ module Translators
       parameters.map do |param_name, param_data|
         type = send(type_conversion_fn, param_data)
         if param_data[:is_reference]
-          var = param_data[:is_const] ? 'const ' : 'ref '
+          var = param_data[:is_const] ? '' : 'ref '
         end
         "#{var}#{type} #{param_name.variable_case}"
-      end.join('; ')
+      end.join(', ')
     end
 
     #
@@ -95,7 +95,7 @@ module Translators
     #
     def argument_list_syntax(arguments)
       args = arguments.map do | arg_data |
-        if arg_data[:param_data][:is_reference]
+        if arg_data[:param_data][:is_reference] && ! arg_data[:param_data][:is_const]
           "ref #{arg_data[:name]}"
         else
           arg_data[:name]

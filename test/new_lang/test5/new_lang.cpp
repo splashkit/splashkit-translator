@@ -23,6 +23,7 @@ namespace splashkit_lib
 
    vector<bool> get_bools()
    {
+      cout << "Getting Array..." << endl;
       vector<bool> result;
       result.push_back(true);
       return result;
