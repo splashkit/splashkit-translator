@@ -69,7 +69,7 @@ module CoreExtensions
     # Converts from snake_case to Humanised Case
     #
     def to_human_case
-      split('_').map(&:capitalize).join(' ')
+      gsub(/_([0-9])([a-zA-Z])/) { |match| "_#{$1}_#{$2}" }.split('_').map(&:capitalize).join(' ')
     end
 
     #
