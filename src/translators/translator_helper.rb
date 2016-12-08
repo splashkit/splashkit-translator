@@ -177,6 +177,13 @@ module Translators::TranslatorHelper
   end
 
   #
+  # Generates a Method parameter list from a SK function
+  #
+  def method_parameter_list_for(function)
+    sk_parameter_list_for(function, { is_method: true, self: function[:attributes][:self] })
+  end
+
+  #
   # Generates a Front-End return type from an SK function
   #
   def sk_return_type_for(function, opts = {})
@@ -290,6 +297,24 @@ module Translators::TranslatorHelper
         name: "__skparam__#{param_name}",
         param_data: param_data
       }
+    end
+
+    argument_list_syntax(args)
+  end
+
+  def method_argument_list_for(function)
+    args = function[:parameters].map do |param_name, param_data|
+      if param_name.to_s == function[:attributes][:self]
+        {
+          name: "this",
+          param_data: param_data
+        }
+      else
+        {
+          name: param_name,
+          param_data: param_data
+        }
+      end
     end
 
     argument_list_syntax(args)

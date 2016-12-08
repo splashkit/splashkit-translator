@@ -1,0 +1,54 @@
+<%#
+  Declare typealias struct pointer declaration
+%>
+
+<%
+  @typealiases.pluck(:name).each do |typealias|
+    class_name = typealias.to_pascal_case
+%>
+
+public class <%= class_name %> : PointerWrapper
+{
+  internal <%= class_name %>(IntPtr ptr) : base(ptr) {}
+
+  internal static <%= class_name %> FetchOrCreate(IntPtr ptr)
+  {
+    if (ptr == IntPtr.Zero) return null;
+
+    if (_ptrRegister.ContainsKey(ptr)) return _ptrRegister[ptr] as <%= class_name %>;
+    return new <%= class_name %>(ptr);
+  }
+
+<%
+    methods = @functions.select { |f| f[:attributes].include?(:class) && f[:attributes][:class] == typealias }
+
+    methods.each do |method_data|
+      method_name = method_data[:name].to_pascal_case
+      puts method_data
+      params = method_parameter_list_for(method_data)
+      args = method_argument_list_for(method_data)
+
+      if method_data[:attributes].include?(:method)
+%>
+    public <%= method_data[:return][:type].variable_case %> <%= method_data[:attributes][:method].function_case %>(<%= params %>)
+    {
+<%      if is_func? method_data %>
+        return SplashKit.<%= method_data[:name].function_case %>(<%= args %>);
+<%      else %>
+        SplashKit.<%= method_data[:name].function_case %>(<%= args %>);
+<%      end %>
+    }
+<%    elsif method_data[:attributes].include? :destructor %>
+    protected internal override void DoFree()
+    {
+        System.Console.WriteLine("TODO: Free!");
+        SplashKit.<%= method_data[:name].function_case %>(this);
+    }
+<%
+      end
+    end # methods
+%>
+}
+<%
+  end # typealiases.each
+%>

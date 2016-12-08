@@ -5,13 +5,25 @@ using namespace std;
 
 namespace splashkit_lib
 {
-    struct a_struct {
+    struct a_struct
+    {
+      bool deleted;
       int value;
     };
 
     void update_struct(struct_ptr v)
     {
-       v->value = 0;
+       v->value -= 30;
+    }
+
+    void update_struct(struct_ptr v, int value)
+    {
+      v->value = value;
+    }
+
+    void update_struct(int value, struct_ptr v)
+    {
+      v->value = value;
     }
 
     void print_struct(struct_ptr v)
@@ -23,6 +35,27 @@ namespace splashkit_lib
     {
        a_struct *result = (a_struct*)malloc(sizeof(a_struct));
        result->value = 30;
+       result->deleted = false;
        return result;
+    }
+
+    static free_notifier *_free_notifier = nullptr;
+
+    void register_free_notifier(free_notifier *fn)
+    {
+      _free_notifier = fn;
+    }
+
+    void delete_struct_ptr(struct_ptr v)
+    {
+      if(_free_notifier != nullptr)
+        _free_notifier(v);
+      v->deleted = true;
+      free(v);
+    }
+
+    void deregister_free_notifier(free_notifier *handler)
+    {
+      _free_notifier = nullptr;
     }
 }

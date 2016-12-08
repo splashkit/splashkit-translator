@@ -51,7 +51,7 @@ module Translators
       # Handle char* as PChar
       return 'PChar' if char_pointer?(type_data)
       # Handle void * as Pointer
-      return 'Pointer' if void_pointer?(type_data)
+      return 'IntPtr' if void_pointer?(type_data)
       # Handle function pointers
       return type_data[:type].type_case if function_pointer?(type_data)
       # Handle generic pointer
@@ -71,8 +71,9 @@ module Translators
     #
     def signature_syntax(function, function_name, parameter_list, return_type, opts = {})
       external = "extern " if opts[:is_lib]
+      scope = opts[:is_lib] ? "private" : "public"
       return_type = return_type || "void"
-      "internal static #{external}#{return_type} #{function_name}(#{parameter_list})"
+      "#{scope} static #{external}#{return_type} #{function_name}(#{parameter_list})"
     end
 
     #
@@ -81,6 +82,19 @@ module Translators
     # as this function is used to for both Library and Front-End code
     #
     def parameter_list_syntax(parameters, type_conversion_fn, opts = {})
+      if opts[:is_method]
+        puts "<<<<< #{opts[:self]}"
+        puts parameters
+        parameters = parameters.select { |param_name|
+          puts "#{param_name} != #{opts[:self]} => #{param_name.to_s != opts[:self]}"
+           param_name.to_s != opts[:self]
+         }
+        puts "====="
+
+        puts parameters
+        puts ">>>>>"
+      end
+
       parameters.map do |param_name, param_data|
         type = send(type_conversion_fn, param_data)
         if param_data[:is_reference]

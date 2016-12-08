@@ -17,10 +17,8 @@
     end.join(', ')
 %>
 
-    internal static <%= delegate_type_name %> __skadapter__to_sklib_<%= fp[:name] %>(<%= delegate_type_name %> v)
-    {
-      return v;
-    }
+    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)]
+    public delegate <%= return_type %> <%= delegate_type_name %>(<%= fp_param_decl %>);
 <%
   end # end function_pointers.each
 %>
