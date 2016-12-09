@@ -8,18 +8,18 @@ private static IntPtr ToIntPtr<T>(T[] items)
     int totalLength = length * items.Length;
 
     result = Marshal.AllocHGlobal(totalLength);
-    tmp = Marshal.AllocHGlobal(length);
 
     int start = 0;
     byte[] data = new byte[totalLength];   //prepare to get the whole items array to this bytes array
     foreach (T item in items)
     {
+        tmp = Marshal.AllocHGlobal(length);
         Marshal.StructureToPtr(item, tmp, false);
 
         Marshal.Copy(tmp, data, start, length);
         start += length;
+        Marshal.FreeHGlobal(tmp);
     }
-    Marshal.FreeHGlobal(tmp);
     Marshal.Copy(data, 0, result, totalLength);
 
     return result;
@@ -91,22 +91,7 @@ internal static extern void __sklib__free__sklib_vector_<%= type %>(__sklib_vect
 %>
 internal static void __skadapter__free__sklib_vector_<%= type %>(ref __sklib_vector_<%= type %> v)
 {
-<%
-    # Freeing a std::vector<string> requires us to recursively free the
-    # allocated __sklib_strings inside the std::vector.
-    # String resources in the library will be freed when the vector is converted
-    # and each of the strings are read back.
-    if type == 'string'
-%>
-  int i;
-
-  for i := 0 to v.size_from_app - 1 do
-  begin
-      __skadapter__free__sklib_string(v.data_from_app[i]);
-  end;
-<%
-    end # end if type is string
-%>
+  System.Console.WriteLine("Freeing data");
   Marshal.FreeHGlobal(v._data_from_app);
 }
 <%#

@@ -77,7 +77,21 @@
     end # end parameters.each
 %>
 <%#
-    4. Assign result to __skreturn variable if non-void
+    4. Free any string or vector parameters
+%>
+<%
+    params_to_free = function[:parameters].select do | _, param_data |
+      param_data[:type] == 'string' || param_data[:is_vector]
+    end # end select
+    params_to_free.each do | param_name, param_data |
+      type_name = lib_type_for(param_data)
+%>
+    __skadapter__free<%=type_name%>(ref __skparam__<%=param_name%>);
+<%
+    end # end each
+%>
+<%#
+    5. Assign result to __skreturn variable if non-void
 %>
 <%
     if is_func?(function)
