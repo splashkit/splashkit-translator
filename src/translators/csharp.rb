@@ -115,7 +115,7 @@ module Translators
     #
     # Defines a Pascal struct field
     #
-    def struct_field_syntax(field_name, field_type, _field_data)
+    def struct_field_syntax(field_name, field_type, field_data)
       "#{field_type} #{field_name}"
     end
 
@@ -124,9 +124,9 @@ module Translators
     #
     def array_declaration_syntax(array_type, dim1_size, dim2_size = nil)
       if dim2_size.nil?
-        "Array [0..#{dim1_size - 1}] of #{array_type}"
+        "#{array_type}[]"
       else
-        "Array [0..#{dim1_size - 1}, 0..#{dim2_size - 1}] of #{array_type}"
+        "#{array_type}[,]"
       end
     end
 

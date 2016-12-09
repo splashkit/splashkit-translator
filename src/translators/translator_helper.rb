@@ -113,7 +113,7 @@ module Translators::TranslatorHelper
     # Map directly otherwise...
     result = send(func, type)
     # Map as array of mapped type if applicable
-    if type_data[:is_array]
+    if type_data[:is_array] && ! opts[:ignore_array]
       dims = type_data[:array_dimension_sizes]
       # Only 1D arrays in library if lib is true
       dim1_size = opts[:is_lib] ? array_size_as_one_dimensional(type_data) : dims.first
@@ -128,8 +128,8 @@ module Translators::TranslatorHelper
   #
   # Converts a C++ type to its LanguageX type for use in lib
   #
-  def lib_type_for(type_data)
-    sk_type_for(type_data, is_lib: true)
+  def lib_type_for(type_data, opts = {})
+    sk_type_for(type_data, opts.merge({ is_lib: true}) )
   end
 
   #
