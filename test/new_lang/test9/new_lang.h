@@ -25,6 +25,7 @@ namespace splashkit_lib
    * @param value [description]
    * @attribute class struct_ptr
    * @attribute method update
+   * @attribute suffix with_value
    * @attribute self v
    */
   void update_struct(struct_ptr v, int value);
@@ -35,6 +36,7 @@ namespace splashkit_lib
    * @param v [description]
    * @attribute class struct_ptr
    * @attribute method update_other
+   * @attribute suffix swap_order
    * @attribute self v
    */
   void update_struct(int value, struct_ptr v);
@@ -55,6 +57,26 @@ namespace splashkit_lib
    * @attribute constructor true
    */
   struct_ptr get_struct();
+
+  /**
+   * [struct_ptr_get_value description]
+   * @param  v [description]
+   * @return   [description]
+   * @attribute class  struct_ptr
+   * @attribute getter value
+   * @attribute self v
+   */
+  int struct_ptr_get_value(struct_ptr v);
+
+  /**
+   * [struct_ptr_get_value description]
+   * @param  v [description]
+   * @param  data [description]
+   * @attribute class  struct_ptr
+   * @attribute setter value
+   * @attribute self v
+   */
+  void struct_ptr_set_value(struct_ptr v, int data);
 
   /**
    * [delete_struct_ptr description]
@@ -86,5 +108,18 @@ namespace splashkit_lib
    * @param handler The function to remove
    */
   void deregister_free_notifier(free_notifier *handler);
+
+  /**
+   * @attribute static test_static
+   * @attribute getter value
+   * @return value
+   */
+  int get_value();
+
+  /**
+   * @attribute static test_static
+   * @attribute method print
+   */
+  void print_value();
 
 }

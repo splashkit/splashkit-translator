@@ -39,6 +39,16 @@ namespace splashkit_lib
        return result;
     }
 
+    int struct_ptr_get_value(struct_ptr v)
+    {
+      return v->value;
+    }
+
+    void struct_ptr_set_value(struct_ptr v, int data)
+    {
+      v->value = data;
+    }
+
     static free_notifier *_free_notifier = nullptr;
 
     void register_free_notifier(free_notifier *fn)
@@ -57,5 +67,21 @@ namespace splashkit_lib
     void deregister_free_notifier(free_notifier *handler)
     {
       _free_notifier = nullptr;
+    }
+
+    static int value = 999;
+
+    int get_value()
+    {
+      return value;
+    }
+
+    /**
+     * @static test_static
+     * @method print
+     */
+    void print_value()
+    {
+      cout << value << endl;
     }
 }

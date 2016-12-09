@@ -3,10 +3,11 @@
 %>
 
 <%
-  @typealiases.pluck(:name).each do |typealias|
-    class_name = typealias.to_pascal_case
-%>
+  @classes.each do | class_id, the_class |
+    class_name = class_id.to_pascal_case
 
+    if the_class[:is_alias]
+%>
 public class <%= class_name %> : PointerWrapper
 {
   internal <%= class_name %>(IntPtr ptr) : base(ptr) {}
@@ -18,37 +19,92 @@ public class <%= class_name %> : PointerWrapper
     if (_ptrRegister.ContainsKey(ptr)) return _ptrRegister[ptr] as <%= class_name %>;
     return new <%= class_name %>(ptr);
   }
-
+<% else %>
+public static class <%= class_name %>
+{
 <%
-    methods = @functions.select { |f| f[:attributes].include?(:class) && f[:attributes][:class] == typealias }
+    end # if class alias
 
-    methods.each do |method_data|
-      method_name = method_data[:name].to_pascal_case
-      puts method_data
-      params = method_parameter_list_for(method_data)
-      args = method_argument_list_for(method_data)
+    def get_method_data(fn)
+      {
+        method_name: fn[:name].to_pascal_case,
+        params: method_parameter_list_for(fn),
+        args: method_argument_list_for(fn),
+        static: fn[:attributes][:static].nil? ? nil : "static "
+      }
+    end
 
-      if method_data[:attributes].include?(:method)
+    # Add constructors
+    the_class[:constructors].each do |fn|
+      method_data = get_method_data(fn)
 %>
-    public <%= method_data[:return][:type].variable_case %> <%= method_data[:attributes][:method].function_case %>(<%= params %>)
-    {
-<%      if is_func? method_data %>
-        return SplashKit.<%= method_data[:name].function_case %>(<%= args %>);
-<%      else %>
-        SplashKit.<%= method_data[:name].function_case %>(<%= args %>);
-<%      end %>
-    }
-<%    elsif method_data[:attributes].include? :destructor %>
+
+    public <%= class_name %>(<%= method_data[:params] %>) : this ( SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>) )
+    { }
+<%
+    end # constructors each
+
+    # Add constructors
+    if the_class[:destructor]
+      fn = the_class[:destructor]
+      method_data = get_method_data(fn)
+%>
     protected internal override void DoFree()
     {
-        System.Console.WriteLine("TODO: Free!");
-        SplashKit.<%= method_data[:name].function_case %>(this);
+        // System.Console.WriteLine("TODO: Free!");
+        SplashKit.<%= fn[:name].function_case %>(this);
     }
 <%
-      end
+    end #destructor
+
+    # Add methods
+    the_class[:methods].each do |fn|
+      method_data = get_method_data(fn)
+%>
+
+    public <%= method_data[:static] %><%= fn[:return][:type].variable_case %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
+    {
+<%      if is_func? fn %>
+        return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
+<%      else %>
+        SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
+<%      end %>
+    }
+
+<%
     end # methods
+
+    the_class[:properties].each do | property_name, property |
+      if property[:getter]
+        property_type = property[:getter][:return][:type].variable_case
+      else
+        raise "Need to add support for setter only properties!"
+      end
+%>
+    public <%= method_data[:static] %><%= property_type %> <%= property_name.to_pascal_case %>
+
+    {
+<%
+      if property[:getter]
+        fn = property[:getter]
+        method_data = get_method_data(fn)
+%>
+        get { return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>); }
+<%
+      end
+      if property[:setter]
+        fn = property[:setter]
+        method_data = get_method_data(fn)
+%>
+        set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+<%
+      end
+%>
+    }
+<%
+    end # properties
 %>
 }
 <%
-  end # typealiases.each
+  end # classes.each
 %>

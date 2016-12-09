@@ -36,6 +36,15 @@ module Translators
       @logging = logging
       @direct_types = []
       @enums = @data[:enums] || @data.values.pluck(:enums).flatten
+      if @data[:classes]
+        @classes = @data[:classes]
+      else
+        tmp = {}
+        @data.values.pluck(:classes).each { |c|
+          tmp = tmp.merge(c)
+        }
+        @classes = tmp
+      end
       @typealiases =
         (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
           !td[:is_function_pointer]

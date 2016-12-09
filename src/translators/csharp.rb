@@ -83,16 +83,9 @@ module Translators
     #
     def parameter_list_syntax(parameters, type_conversion_fn, opts = {})
       if opts[:is_method]
-        puts "<<<<< #{opts[:self]}"
-        puts parameters
         parameters = parameters.select { |param_name|
-          puts "#{param_name} != #{opts[:self]} => #{param_name.to_s != opts[:self]}"
            param_name.to_s != opts[:self]
          }
-        puts "====="
-
-        puts parameters
-        puts ">>>>>"
       end
 
       parameters.map do |param_name, param_data|

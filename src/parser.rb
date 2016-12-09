@@ -155,7 +155,8 @@ class Parser::HeaderFileParser
   #
   def parse
     # Start directly from 'header' node
-    parse_xml(@input_xml.xpath('header'))
+    result = parse_xml(@input_xml.xpath('header'))
+    post_process(result)
   end
 
   private
@@ -564,32 +565,31 @@ class Parser::HeaderFileParser
     fn_name = xml.xpath('name').text
     headerdoc_idx = fn_name.index(headerdoc_overload_tags)
     sanitized_name = headerdoc_idx ? fn_name[0..(headerdoc_idx - 1)] : fn_name
-    suffix = attributes[:suffix] if attributes
+    suffix = "_#{attributes[:suffix]}" if attributes && attributes.include?(:suffix)
     # Make a method name if specified
     method_name = attributes[:method] if attributes
+    class_name = attributes[:class] if method_name
+
     # Make a unique name using the suffix if specified
-    if suffix
-      unique_global_name = "#{sanitized_name}_#{suffix}"
-      unique_method_name = "#{method_name}_#{suffix}" unless method_name.nil?
+    unique_global_name = "#{sanitized_name}#{suffix}"
+    unique_method_name = "#{class_name}.#{method_name}#{suffix}" unless method_name.nil?
+
+    # Check if unique name is actually unique
+    if @unique_names[:unique_global].include? unique_global_name
+      raise Parser::RuleViolationError.new(
+            'Generated unique name (function name + suffix) is not unique: ' \
+            "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`", 14)
+    else
+      @unique_names[:unique_global] << unique_global_name
     end
-    # Unique global name was made?
-    unless unique_global_name.nil?
-      # Check if unique name is actually unique
-      if @unique_names[:unique_global].include? unique_global_name
-        raise Parser::RuleViolationError.new(
-              'Generated unique name (function name + suffix) is not unique: ' \
-              "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`", 14)
-      else
-        @unique_names[:unique_global] << unique_global_name
-      end
-    end
+
     # Unique method name was made?
     unless unique_method_name.nil?
       # Check if unique method name is actually unique
       if @unique_names[:unique_method].include? unique_method_name
         raise Parser::RuleViolationError.new(
               'Generated unique method name (method + suffix) is not unique: ' \
-              "`#{method}` + `#{suffix}` = `#{unique_method_name}`", 15)
+              "`#{class_name}.#{method_name}` + `#{suffix}` = `#{unique_method_name}`", 15)
       # Else register the unique name
       else
         @unique_names[:unique_method] << unique_method_name
@@ -859,4 +859,102 @@ class Parser::HeaderFileParser
     parsed[:defines]     = parse_defines(xml)
     parsed
   end
+
+  def empty_class_data(name)
+    {
+      name: name,
+      is_alias: false,
+      methods: [],
+      properties: {},
+      constructors: [],
+      destructor: nil
+    }
+  end
+
+  def post_extract_classes_from_types(typedefs)
+    puts "Extracting classes..."
+    result = typedefs.select { |td| ! td[:is_function_pointer] }.map { |td|
+      data = empty_class_data(td[:name])
+      data[:is_alias] = true
+      data[:alias_of] = td
+
+      [
+        td[:name], data
+      ]
+    }
+    result.to_h
+  end
+
+  def post_allocate_method(classes, functions)
+    puts "Identifying methods, properties, constructors, and destructors"
+    functions.select{ |fn| fn[:attributes] && fn[:attributes][:method] }.each do |fn|
+      in_class = fn[:attributes][:class] || fn[:attributes][:static]
+
+      the_class = classes[in_class]
+      if the_class.nil?
+        classes[in_class] = empty_class_data(in_class)
+        the_class = classes[in_class]
+      end
+      the_class[:methods] << fn
+    end
+
+    functions.select{ |fn| fn[:attributes] && (fn[:attributes][:getter] || fn[:attributes][:setter]) }.each do |fn|
+      in_class = fn[:attributes][:class] || fn[:attributes][:static]
+      property_name = fn[:attributes][:getter] || fn[:attributes][:setter]
+      kind = fn[:attributes][:getter] ? :getter : :setter
+
+      the_class = classes[in_class]
+      if the_class.nil?
+        classes[in_class] = empty_class_data(in_class)
+        the_class = classes[in_class]
+      end
+      the_property = the_class[:properties][property_name]
+      if the_property.nil?
+        the_property = { getter: nil, setter: nil }
+        the_class[:properties][property_name] = the_property
+      end
+      the_property[kind] = fn
+    end
+
+    functions.select{ |fn| fn[:attributes] && fn[:attributes][:constructor] }.each do |fn|
+      in_class = fn[:attributes][:class]
+
+      the_class = classes[in_class]
+      if the_class.nil?
+        classes[in_class] = empty_class_data(in_class)
+        the_class = classes[in_class]
+      end
+
+      the_class[:constructors] << fn
+    end
+
+    functions.select{ |fn| fn[:attributes] && fn[:attributes][:destructor] }.each do |fn|
+      in_class = fn[:attributes][:class]
+
+      the_class = classes[in_class]
+      if the_class.nil?
+        classes[in_class] = empty_class_data(in_class)
+        the_class = classes[in_class]
+      end
+
+      raise "Duplicate destructor for #{class_name}" unless the_class[:destructor].nil?
+      the_class[:destructor] = fn
+    end
+  end
+
+  def post_create_classes(parsed)
+    result = post_extract_classes_from_types(parsed[:typedefs])
+    post_allocate_method(result, parsed[:functions])
+    result
+  end
+
+  #
+  # Post process is passed the hash containing the parsed data from parse_xml
+  # This is then processed to identify
+  #
+  def post_process(parsed)
+    parsed[:classes] = post_create_classes(parsed)
+    parsed
+  end
+
 end
