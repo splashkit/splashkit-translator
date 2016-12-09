@@ -67,26 +67,4 @@ namespace splashkit_lib
    */
   void update_triangle(triangle &t);
 
-  /**
-  * The free notifier can be registered with the system. It is called every
-  * time a resource is freed.
-  *
-  * @param pointer   The pointer to the resource that is being freed.
-  */
-  typedef void (free_notifier)(void *pointer);
-
-  /**
-   * Register a function to be called when any resource is freed.
-   *
-   * @param fn The function to be called when a resource is freed.
-   */
-  void register_free_notifier(free_notifier *fn);
-
-  /**
-   * Remove the function from the list of functions receiving notification
-   * of resource freeing.
-   *
-   * @param handler The function to remove
-   */
-  void deregister_free_notifier(free_notifier *handler);
 }
