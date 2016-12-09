@@ -4,6 +4,7 @@
 type __sklib_string = record
   str: PChar;
   size: Integer;
+  ptr: Pointer;
 end;
 <%#
   `__sklib_ptr' is a wrapper for typealiases to pointer types using type

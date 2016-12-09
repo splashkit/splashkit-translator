@@ -1,0 +1,34 @@
+<%#
+  String mappers
+%>
+
+  [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
+  internal struct __sklib_string
+  {
+    [MarshalAs(UnmanagedType.LPStr)]
+    internal string str;
+    internal int    size;
+    internal IntPtr ptr;
+  }
+
+  internal static __sklib_string __skadapter__to_sklib_string(string s)
+  {
+    __sklib_string result;
+    result.size = s.Length;
+    result.str = s;
+    result.ptr = IntPtr.Zero;
+    return result;
+  }
+
+  [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_string", CharSet=CharSet.Ansi)]
+  internal static extern void __sklib__free__sklib_string(__sklib_string s);
+
+  internal static void __skadapter__free__sklib_string(__sklib_string s)
+  { }
+
+  internal static string __skadapter__to_string(__sklib_string s)
+  {
+    string result = s.str;
+    __sklib__free__sklib_string(s);
+    return result;
+  }

@@ -40,7 +40,7 @@ module Translators
     }
     SK_TYPES_TO_CSHARP_TYPES = {
       'bool'      => 'bool',
-      'string'    => 'String'
+      'string'    => 'string'
     }
     SK_TYPES_TO_LIB_TYPES = {
       'bool'      => 'int',
