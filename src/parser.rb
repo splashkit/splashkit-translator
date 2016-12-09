@@ -192,8 +192,8 @@ class Parser::HeaderFileParser
   # Parses HeaderDoc's parsedparameterlist (ppl) element
   #
   def parse_ppl(xml)
-     xml.xpath('parsedparameterlist/parsedparameter').map do |p|
-      [p.xpath('name').text.to_sym, { type: p.xpath('type').text } ]
+    xml.xpath('parsedparameterlist/parsedparameter').map.with_index do |p, idx|
+      [p.xpath('name').text.to_sym, { type: p.xpath('type').text, index: idx }]
     end.to_h
   end
 
@@ -207,29 +207,32 @@ class Parser::HeaderFileParser
     # Get the type of the function
     fn_type = decl_types[0].children.to_s
     # types of the parameters...
-    param_types = decl_types[1..-1].map { |t| t.text }
+    param_types = decl_types[1..-1].map(&:text)
     # names of the parameters
     param_names = decl.xpath('declaration_param').map { |n| n.text.to_sym }
     # names of type parameters
-    template_types = decl.xpath('declaration_template').map { |n| n.text }
+    template_types = decl.xpath('declaration_template').map(&:text)
     # i tracks the template_types... first may be the return type
     i = fn_type == 'vector' ? 1 : 0
-    param_map = Hash[*param_names.zip(param_types).map do | n, t |
-      result ={ n => { base_type: t } }
+    param_map = Hash[*param_names.zip(param_types).map do |n, t|
+      result = { n => { base_type: t } }
       if t == 'vector'
         result[n][:type_parameter] = template_types[i]
-        i = i + 1
+        i += 1
       end
       result
-    end.collect{|h| h.to_a}.flatten]
+    end.collect(&:to_a).flatten]
 
     unless i == template_types.count
       raise Parser::Error,
-        "Unknown template type... mapped #{i + 1} or #{param_types.count + 1} templates !"
+            "Unknown template type... mapped #{i + 1} or #{param_types.count + 1} templates!"
     end
 
-    xml.xpath('parsedparameterlist/parsedparameter').each do |p|
-      param_map[p.xpath('name').text.to_sym][:type] = p.xpath('type').text
+    # Insert in index and type
+    ppl = parse_ppl(xml)
+    ppl.each do |key, data|
+      param_map[key][:index] = data[:index]
+      param_map[key][:type] = data[:type]
     end
 
     param_map
@@ -488,6 +491,14 @@ class Parser::HeaderFileParser
       raise Parser::Error, 'Missing parameters description for: '\
                            "`#{params_with_no_desc.join('`, `')}`"
     end
+    # Sort parameters by PPL index (for type information)
+    # That is, sorted by source code param index not documentation param index
+    params = params.sort do |a, b|
+      a_key = a[0]
+      b_key = b[0]
+      # Compare using the parsed PPL indicies
+      ppl[a_key][:index] <=> ppl[b_key][:index]
+    end.to_h
     params
   end
 
@@ -608,7 +619,6 @@ class Parser::HeaderFileParser
   #
   def parse_function(xml)
     signature = parse_signature(xml)
-    # Values from the <parsedparameter> elements
     ppl = parse_parameter_declaration(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
