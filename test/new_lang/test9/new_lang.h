@@ -51,6 +51,15 @@ namespace splashkit_lib
   void print_struct(struct_ptr v);
 
   /**
+   * [set_data description]
+   * @param v     [description]
+   * @param value [description]
+   * @attribute class struct_ptr
+   * @attribute setter data
+   */
+  void set_data(struct_ptr v, int value);
+
+  /**
    * [get_struct description]
    * @return [description]
    * @attribute class struct_ptr

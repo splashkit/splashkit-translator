@@ -630,6 +630,7 @@ class Parser::HeaderFileParser
   rescue Parser::Error => e
     e.signature = signature
     error e
+    {}
   end
 
   #
@@ -872,7 +873,6 @@ class Parser::HeaderFileParser
   end
 
   def post_extract_classes_from_types(typedefs)
-    puts "Extracting classes..."
     result = typedefs.select { |td| ! td[:is_function_pointer] }.map { |td|
       data = empty_class_data(td[:name])
       data[:is_alias] = true
@@ -886,8 +886,8 @@ class Parser::HeaderFileParser
   end
 
   def post_allocate_method(classes, functions)
-    puts "Identifying methods, properties, constructors, and destructors"
-    functions.select{ |fn| fn[:attributes] && fn[:attributes][:method] }.each do |fn|
+    functions.select{ |fn|
+      fn[:attributes] && fn[:attributes][:method] }.each do |fn|
       in_class = fn[:attributes][:class] || fn[:attributes][:static]
 
       the_class = classes[in_class]
@@ -937,7 +937,7 @@ class Parser::HeaderFileParser
         the_class = classes[in_class]
       end
 
-      raise "Duplicate destructor for #{class_name}" unless the_class[:destructor].nil?
+      raise "Duplicate destructor for #{the_class[:name]}" unless the_class[:destructor].nil?
       the_class[:destructor] = fn
     end
   end

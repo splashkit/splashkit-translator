@@ -78,7 +78,9 @@ public static class <%= class_name %>
       if property[:getter]
         property_type = property[:getter][:return][:type].variable_case
       else
-        raise "Need to add support for setter only properties!"
+
+        puts property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first[:type]
+        property_type = property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first[:type]
       end
 %>
     public <%= method_data[:static] %><%= property_type %> <%= property_name.to_pascal_case %>

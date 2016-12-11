@@ -31,6 +31,9 @@ namespace splashkit_lib
       cout << "The value is: " << v->value << endl;
     }
 
+    void set_data(struct_ptr v, int value)
+    {}
+
     struct_ptr get_struct()
     {
        a_struct *result = (a_struct*)malloc(sizeof(a_struct));
