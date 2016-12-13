@@ -4,7 +4,7 @@
 
 <%
   @classes.each do | class_id, the_class |
-    class_name = class_id.to_pascal_case
+    class_name = class_id.to_s.to_pascal_case
 
     if the_class[:is_alias]
 %>
@@ -27,10 +27,10 @@ public static class <%= class_name %>
 
     def get_method_data(fn)
       {
-        method_name: fn[:name].to_pascal_case,
+        method_name: fn[:name].to_s.to_pascal_case,
         params: method_parameter_list_for(fn),
         args: method_argument_list_for(fn),
-        static: fn[:attributes][:static].nil? ? nil : "static "
+        static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static "
       }
     end
 
@@ -55,14 +55,20 @@ public static class <%= class_name %>
         SplashKit.<%= fn[:name].function_case %>(this);
     }
 <%
+    elsif the_class[:no_destructor]
+    %>
+        protected internal override void DoFree()
+        {}
+    <%
     end #destructor
 
     # Add methods
     the_class[:methods].each do |fn|
       method_data = get_method_data(fn)
+      return_type = is_func?(fn) ? sk_type_for(fn[:return][:type]) : 'void'
 %>
 
-    public <%= method_data[:static] %><%= fn[:return][:type].variable_case %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
+    public <%= method_data[:static] %><%= return_type %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
     {
 <%      if is_func? fn %>
         return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
@@ -76,30 +82,36 @@ public static class <%= class_name %>
 
     the_class[:properties].each do | property_name, property |
       if property[:getter]
-        property_type = property[:getter][:return][:type].variable_case
+        property_type = sk_type_for(property[:getter][:return][:type])
       else
-
-        puts property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first[:type]
-        property_type = property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first[:type]
+        property_type = sk_type_for(property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first[:type])
       end
 %>
-    public <%= method_data[:static] %><%= property_type %> <%= property_name.to_pascal_case %>
+    public <%= method_data[:static] %><%= property_type %> <%= property_name.to_s.to_pascal_case %>
 
     {
 <%
       if property[:getter]
         fn = property[:getter]
         method_data = get_method_data(fn)
+        if method_data[:static].nil?
 %>
-        get { return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>); }
+        get { return SplashKit.<%= fn[:name].function_case %>(this); }
+<%      else %>
+        get { return SplashKit.<%= fn[:name].function_case %>(); }
 <%
+        end
       end
       if property[:setter]
         fn = property[:setter]
         method_data = get_method_data(fn)
+        if method_data[:static].nil?
 %>
-        set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+          set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+<%      else %>
+          set { SplashKit.<%= fn[:name].function_case %>(value); }
 <%
+        end
       end
 %>
     }

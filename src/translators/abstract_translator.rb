@@ -31,20 +31,17 @@ module Translators
     #
     # Initializes the translator with the data and source directories provided
     #
-    def initialize(data, logging = false)
-      @data = data
+    def initialize(input, logging = false)
+      if input.include? :data
+        @data = input[:data]
+      else
+        @data = input
+      end
+
       @logging = logging
       @direct_types = []
       @enums = @data[:enums] || @data.values.pluck(:enums).flatten
-      if @data[:classes]
-        @classes = @data[:classes]
-      else
-        tmp = {}
-        @data.values.pluck(:classes).each { |c|
-          tmp = tmp.merge(c)
-        }
-        @classes = tmp
-      end
+      @classes = input[:classes]
       @typealiases =
         (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
           !td[:is_function_pointer]

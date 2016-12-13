@@ -1,0 +1,42 @@
+<%#
+    Structs must have each field converted to a compatible Lib type (i.e., the
+    field type `foo' becomes `__sklib_foo'). Then mappers must be made to and
+    from the Lib and SK code. Can't use a macro for this and cannot be a static
+    cast so we must generate the functions individually.
+ %>
+<%
+  @structs.each do |struct|
+%>
+<%#
+    Definition of structs can use lib_struct_field_for for convenience
+%>
+    [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
+    internal struct __sklib_<%= struct[:name] %>
+
+    {
+<%
+      struct[:fields].each do |field_name, field_data|
+        if field_data[:is_array]
+          total_size = field_data[:array_dimension_sizes].inject :*
+%>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst=<%= total_size %>)]
+<%      end     %>
+        public <%= lib_struct_field_for(field_name, field_data) %>;
+<%
+      end # end fields.each
+%>
+    }
+
+    public struct <%= struct[:name].to_pascal_case() %>
+    {
+<%
+    struct[:fields].each do |field_name, field_data|
+%>
+      public <%= sk_struct_field_for(field_name, field_data) %>;
+<%
+    end # end fields.each
+%>
+  }
+<%
+    end # end struct.each
+%>

@@ -673,8 +673,7 @@ for reference to this list.
    [instance setter](#pr4-instance-setter) along with a constructor or
    destructor of that instance by the _one_ function.
 5. <p id="rule-5"/>
-   You cannot supply [`constructor`](#pr5-constructor) or
-   [`destructor`](#pr5-destructor)  and `method` unless
+   You cannot supply [`constructor`](#pr5-constructor) and `method` unless
    `static` is also supplied. This will make a static method on
    the class or module specified by static but a destructor/constructor on
    the class indicated by `class`.

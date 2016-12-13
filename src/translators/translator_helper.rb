@@ -311,7 +311,7 @@ module Translators::TranslatorHelper
         }
       else
         {
-          name: param_name,
+          name: param_name.variable_case,
           param_data: param_data
         }
       end

@@ -256,6 +256,113 @@ def run_translate(parsed)
   end
 end
 
+def empty_class_data(name)
+  {
+    name: name,
+    is_alias: false,
+    methods: [],
+    properties: {},
+    constructors: [],
+    destructor: nil
+  }
+end
+
+def extract_classes_from_types(typedefs)
+  result = typedefs.select { |td| ! td[:is_function_pointer] }.map { |td|
+    puts td[:attributes][:no_destructor] if td[:name] == "display"
+    data = empty_class_data(td[:name])
+    data[:is_alias] = true
+    data[:alias_of] = td
+    data[:no_destructor] = true if td[:attributes][:no_destructor]
+    [
+      td[:name], data
+    ]
+  }
+  result.to_h
+end
+
+def allocate_methods(classes, functions)
+  functions.select{ |fn|
+    fn[:attributes] && fn[:attributes][:method] }.each do |fn|
+    in_class = fn[:attributes][:class] || fn[:attributes][:static]
+    in_class = in_class.downcase
+
+    the_class = classes[in_class]
+    if the_class.nil?
+      classes[in_class] = empty_class_data(in_class)
+      the_class = classes[in_class]
+    end
+    the_class[:methods] << fn
+  end
+
+  functions.select{ |fn| fn[:attributes] && (fn[:attributes][:getter] || fn[:attributes][:setter]) }.each do |fn|
+    in_class = fn[:attributes][:class] || fn[:attributes][:static]
+    in_class = in_class.downcase
+    property_name = fn[:attributes][:getter] || fn[:attributes][:setter]
+    property_name = property_name.downcase
+    kind = fn[:attributes][:getter] ? :getter : :setter
+
+    the_class = classes[in_class]
+    if the_class.nil?
+      classes[in_class] = empty_class_data(in_class)
+      the_class = classes[in_class]
+    end
+    the_property = the_class[:properties][property_name]
+    if the_property.nil?
+      the_property = { getter: nil, setter: nil }
+      the_class[:properties][property_name] = the_property
+    end
+    the_property[kind] = fn
+  end
+
+  functions.select{ |fn| fn[:attributes] && fn[:attributes][:constructor] }.each do |fn|
+    in_class = fn[:attributes][:class]
+
+    the_class = classes[in_class]
+    if the_class.nil?
+      classes[in_class] = empty_class_data(in_class)
+      the_class = classes[in_class]
+    end
+
+    the_class[:constructors] << fn
+  end
+
+  functions.select{ |fn| fn[:attributes] && fn[:attributes][:destructor] }.each do |fn|
+    in_class = fn[:attributes][:class]
+
+    the_class = classes[in_class]
+    if the_class.nil?
+      classes[in_class] = empty_class_data(in_class)
+      the_class = classes[in_class]
+    end
+
+    raise "Duplicate destructor for #{the_class[:name]}" unless the_class[:destructor].nil?
+    the_class[:destructor] = fn
+  end
+end
+
+#
+# Post process is passed the hash containing the parsed data from parse_xml
+# This is then processed to identify
+#
+def identify_classes(parsed)
+  result = {}
+  puts "Identifying classes" if RunOpts.logging
+  parsed.each do |k, v|
+    result = result.merge extract_classes_from_types(v[:typedefs])
+  end
+
+  puts "Allocating members" if RunOpts.logging
+  parsed.each do |k, v|
+    allocate_methods(result, v[:functions])
+  end
+
+  {
+    data: parsed,
+    classes: result
+  }
+end
+
 # Main
 parse_options
-run_translate run_parser
+run_translate identify_classes run_parser

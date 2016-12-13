@@ -127,6 +127,13 @@ namespace splashkit_lib
 
   /**
    * @attribute static test_static
+   * @attribute setter value
+   * @param val as
+   */
+  void set_value(int val);
+
+  /**
+   * @attribute static test_static
    * @attribute method print
    */
   void print_value();

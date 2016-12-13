@@ -79,6 +79,11 @@ namespace splashkit_lib
       return value;
     }
 
+    void set_value(int val)
+    {
+      value = val;
+    }
+
     /**
      * @static test_static
      * @method print

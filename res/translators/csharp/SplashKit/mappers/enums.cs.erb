@@ -6,22 +6,6 @@
     enum_type_name = enum[:name].to_pascal_case
     enum_name = enum[:name]
 %>
-    public enum <%= enum_type_name %>
-    {
-<%
-    enum[:constants].each do |constant_key, constant_data|
-      is_last = constant_key == enum[:constants].keys.last
-      has_numb = constant_data[:number].is_a? Integer
-      numb = " = #{constant_data[:number]}" if has_numb
-      last = ',' unless is_last
-      constant_decl = "#{constant_key.to_s.to_pascal_case}#{numb}#{last}"
-%>
-    <%= constant_decl %>
-
-<%
-    end # end constants.each
-%>
-    }
 
     internal static int __skadapter__to_sklib_<%= enum_name %>(<%= enum_type_name %> v)
     {

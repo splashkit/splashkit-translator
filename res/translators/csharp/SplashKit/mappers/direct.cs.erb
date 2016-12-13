@@ -3,6 +3,9 @@
   can therefore directly translate one to the other by just returning the
   value
 %>
+
+    internal static IntPtr __skadapter__to_sklib_ptr(IntPtr v) { return v; }
+    internal static IntPtr __skadapter__to_ptr(IntPtr v) { return v; }
 <%
   direct_types.each do |c_type, cs_type|
     c_type = c_type.tr("\s", "_")

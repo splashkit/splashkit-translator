@@ -7,7 +7,7 @@ module Translators
   class CPP < AbstractTranslator
     def initialize(data, logging = false)
       super(data, logging)
-      @clib = ReusableCAdapter.new(@data, @logging)
+      @clib = ReusableCAdapter.new(data, @logging)
     end
 
     def render_templates
