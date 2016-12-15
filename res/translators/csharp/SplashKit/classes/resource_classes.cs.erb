@@ -3,14 +3,14 @@
 %>
 
 <%
-  @classes.each do | class_id, the_class |
+  @classes.select{ |k, c| ! c[:is_struct] }.each do | class_id, the_class |
     class_name = class_id.to_s.to_pascal_case
 
     if the_class[:is_alias]
 %>
 public class <%= class_name %> : PointerWrapper
 {
-  internal <%= class_name %>(IntPtr ptr) : base(ptr) {}
+  internal <%= class_name %>(IntPtr ptr) : base(ptr, true) {}
 
   internal static <%= class_name %> FetchOrCreate(IntPtr ptr)
   {
@@ -39,7 +39,7 @@ public static class <%= class_name %>
       method_data = get_method_data(fn)
 %>
 
-    public <%= class_name %>(<%= method_data[:params] %>) : this ( SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>) )
+    public <%= class_name %>(<%= method_data[:params] %>) : base ( SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>), false )
     { }
 <%
     end # constructors each
@@ -83,9 +83,12 @@ public static class <%= class_name %>
     the_class[:properties].each do | property_name, property |
       if property[:getter]
         property_type = sk_type_for(property[:getter][:return][:type])
+        method_data = get_method_data(property[:getter])
       else
         property_type = sk_type_for(property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first[:type])
+        method_data = get_method_data(property[:setter])
       end
+
 %>
     public <%= method_data[:static] %><%= property_type %> <%= property_name.to_s.to_pascal_case %>
 

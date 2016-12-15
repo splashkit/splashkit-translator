@@ -23,7 +23,7 @@
         [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         internal static void Remove(IntPtr ptr)
         {
-          System.Console.WriteLine("Delete {0}", ptr);
+            // System.Console.WriteLine("Delete {0}", ptr);
             if (_ptrRegister.ContainsKey(ptr))
             {
                 _ptrRegister.Remove(ptr);
@@ -63,11 +63,19 @@
         protected internal abstract void DoFree();
 
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough(), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        internal PointerWrapper(IntPtr ptr)
+        internal PointerWrapper(IntPtr ptr, bool register)
         {
+            Pointer = ptr;
+
+            if ( ! register ) return;
+
             if ( PointerWrapper._ptrRegister.ContainsKey(ptr) ) throw new InvalidOperationException("Error managing resources -- attempting to create/load object twice.");
             PointerWrapper._ptrRegister[ptr] = this;
-            Pointer = ptr;
+        }
+
+        protected PointerWrapper(PointerWrapper other)
+        {
+          Pointer = other.Pointer;
         }
 
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough(),System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]

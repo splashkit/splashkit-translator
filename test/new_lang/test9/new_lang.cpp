@@ -11,6 +11,11 @@ namespace splashkit_lib
       int value;
     };
 
+    test_struct get_test_struct()
+    {
+      return { 10 };
+    }
+
     void update_struct(struct_ptr v)
     {
        v->value -= 30;

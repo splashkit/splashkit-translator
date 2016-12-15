@@ -16,6 +16,7 @@
 %>
 <%
   @functions.each do |function|
+    is_constructor = ! function[:attributes][:constructor].nil?
 %>
     <%= sk_signature_for(function) %>
 

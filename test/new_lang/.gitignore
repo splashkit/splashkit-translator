@@ -1,6 +1,11 @@
 libSplashKit.dylib
 libSplashKit.dylib.dSYM
+libSplashKit-i386.dylib
+libSplashKit-i386.dylib.dSYM
+libSplashKit-x64.dylib
+libSplashKit-x64.dylib.dSYM
 TestProgram
+TestProgram.exe
 TestProgram.o
 splashkit.o
 splashkit.ppu

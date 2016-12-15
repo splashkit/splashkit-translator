@@ -263,13 +263,13 @@ def empty_class_data(name)
     methods: [],
     properties: {},
     constructors: [],
-    destructor: nil
+    destructor: nil,
+    is_struct: false
   }
 end
 
-def extract_classes_from_types(typedefs)
+def extract_classes_from_types(typedefs, structs)
   result = typedefs.select { |td| ! td[:is_function_pointer] }.map { |td|
-    puts td[:attributes][:no_destructor] if td[:name] == "display"
     data = empty_class_data(td[:name])
     data[:is_alias] = true
     data[:alias_of] = td
@@ -278,6 +278,20 @@ def extract_classes_from_types(typedefs)
       td[:name], data
     ]
   }
+
+  result = result + structs.map { |struct|
+    struct[:properties] = {}
+    struct[:constructors] = []
+    struct[:methods] = []
+    struct[:is_alias] = false
+    struct[:is_struct] = true
+    [
+      struct[:name], struct
+    ]
+  }
+
+  puts result
+
   result.to_h
 end
 
@@ -349,7 +363,7 @@ def identify_classes(parsed)
   result = {}
   puts "Identifying classes" if RunOpts.logging
   parsed.each do |k, v|
-    result = result.merge extract_classes_from_types(v[:typedefs])
+    result = result.merge extract_classes_from_types(v[:typedefs], v[:structs])
   end
 
   puts "Allocating members" if RunOpts.logging

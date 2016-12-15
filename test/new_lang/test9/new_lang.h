@@ -11,6 +11,24 @@ namespace splashkit_lib
   typedef struct a_struct *struct_ptr;
 
   /**
+   * BackslashKey
+   * @field x s
+   */
+  struct test_struct
+  {
+    int x;
+  };
+
+  /**
+   * [get_test_struct description]
+   * @return [description]
+   *
+   * @attribute static test_struct
+   * @attribute getter get_test
+   */
+  test_struct get_test_struct();
+
+  /**
    * [print_vector description]
    * @param v [description]
    * @attribute class struct_ptr
