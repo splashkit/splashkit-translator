@@ -40,7 +40,8 @@
       {
         method_name: fn[:name].to_s.to_pascal_case,
         params: method_parameter_list_for(fn),
-        args: method_argument_list_for(fn)
+        args: method_argument_list_for(fn),
+        static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static "
       }
     end
 
@@ -50,7 +51,7 @@
       return_type = is_func?(fn) ? sk_type_for(fn[:return][:type]) : 'void'
 %>
 
-    public static <%= return_type %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
+    public <%= method_data[:static] %><%= return_type %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
     {
 <%      if is_func? fn %>
         return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
@@ -72,24 +73,31 @@
       end
 
 %>
-    public static <%= property_type %> <%= property_name.to_s.to_pascal_case %>
+    public <%= method_data[:static] %><%= property_type %> <%= property_name.to_s.to_pascal_case %>
 
     {
 <%
       if property[:getter]
         fn = property[:getter]
         method_data = get_method_data(fn)
+        if method_data[:static].nil?
 %>
+        get { return SplashKit.<%= fn[:name].function_case %>(this); }
+<%      else %>
         get { return SplashKit.<%= fn[:name].function_case %>(); }
 <%
+        end
       end
-
       if property[:setter]
         fn = property[:setter]
         method_data = get_method_data(fn)
+        if method_data[:static].nil?
 %>
-        set { SplashKit.<%= fn[:name].function_case %>(value); }
+          set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+<%      else %>
+          set { SplashKit.<%= fn[:name].function_case %>(value); }
 <%
+        end
       end
 %>
     }

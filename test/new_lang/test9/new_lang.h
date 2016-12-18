@@ -29,6 +29,16 @@ namespace splashkit_lib
   test_struct get_test_struct();
 
   /**
+   * [to_int description]
+   * @param  s [description]
+   * @return   [description]
+   *
+   * @attribute class test_struct
+   * @attribute method to_int
+   */
+  int to_int(test_struct s);
+
+  /**
    * [print_vector description]
    * @param v [description]
    * @attribute class struct_ptr

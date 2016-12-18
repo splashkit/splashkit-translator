@@ -9,6 +9,10 @@ public class Program
   {
     StructPtr sPtr, other;
 
+    TestStruct t = TestStruct.GetTest;
+
+    WriteLine("t.x = {0} t.ToInt = {1}", t.x, t.ToInt());
+
     sPtr = GetStruct();
     PrintStruct(sPtr);
     WriteLine("Calling update func!");
