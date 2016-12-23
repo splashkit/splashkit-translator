@@ -294,7 +294,7 @@ class Parser::HeaderFileParser
     if attrs[:class] && !instance_needs_self_attr.empty? && attrs[:self].nil?
 
       if ppl.length > 0
-        attrs[:self] = ppl.keys.first
+        attrs[:self] = ppl.keys.first.to_s
       else
         raise Parser::RuleViolationError.new(
               'Instance feature must have a self attribute', 14)
@@ -371,7 +371,7 @@ class Parser::HeaderFileParser
     if self_value && ppl
       class_type = attrs[:class]
       self_type  = ppl[self_value.to_sym][:type]
-      unless class_type == self_type
+      unless class_type == self_type || "const #{class_type} &amp;" == self_type
         raise Parser::RuleViolationError.new(
               'Attribute `self` must list a parameter whose type matches ' \
               "the `class` value (`class` is `#{class_type}` but `self` " \

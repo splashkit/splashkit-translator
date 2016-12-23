@@ -36,7 +36,7 @@ namespace splashkit_lib
    * @attribute class test_struct
    * @attribute method to_int
    */
-  int to_int(test_struct s);
+  int to_int(const test_struct &s);
 
   /**
    * [print_vector description]
