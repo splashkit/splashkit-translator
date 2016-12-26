@@ -290,8 +290,6 @@ def extract_classes_from_types(typedefs, structs)
     ]
   }
 
-  puts result
-
   result.to_h
 end
 
