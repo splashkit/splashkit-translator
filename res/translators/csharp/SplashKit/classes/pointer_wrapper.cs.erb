@@ -92,7 +92,8 @@
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
         public void Dispose()
         {
-            DoFree();
+            if (PointerWrapper._ptrRegister.ContainsKey(this.Pointer))
+                DoFree();
         }
 
         #endregion
