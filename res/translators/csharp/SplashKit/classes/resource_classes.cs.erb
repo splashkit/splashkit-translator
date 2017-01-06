@@ -10,7 +10,7 @@
 %>
 public class <%= class_name %> : PointerWrapper
 {
-  internal <%= class_name %>(IntPtr ptr) : base(ptr, true) {}
+  private <%= class_name %>(IntPtr ptr) : base(ptr, true) {}
 
   internal static <%= class_name %> FetchOrCreate(IntPtr ptr)
   {

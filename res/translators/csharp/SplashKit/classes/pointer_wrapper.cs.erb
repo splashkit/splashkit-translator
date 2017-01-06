@@ -81,7 +81,8 @@
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough(),System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
         public static implicit operator IntPtr(PointerWrapper p)
         {
-            return p.Pointer;
+            if ( p == null ) return IntPtr.Zero;
+            else return p.Pointer;
         }
 
         #region IDisposable Members
