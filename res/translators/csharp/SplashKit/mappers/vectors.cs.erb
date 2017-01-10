@@ -58,7 +58,7 @@ private static T[] FromIntPtr<T>(IntPtr ptr, int count)
 %>
 
 [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi )]
-internal struct __sklib_vector_<%= type %>
+private struct __sklib_vector_<%= type %>
 {
   internal IntPtr _data_from_app;
   public <%= lib_type %>[] data_from_app
@@ -84,12 +84,12 @@ internal struct __sklib_vector_<%= type %>
     function to free the library part of the vector mapping.
 %>
 [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_vector_<%= type %>", CharSet=CharSet.Ansi)]
-internal static extern void __sklib__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+private static extern void __sklib__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
 
 <%#
    Free our part
 %>
-internal static void __skadapter__free__sklib_vector_<%= type %>(ref __sklib_vector_<%= type %> v)
+private static void __skadapter__free__sklib_vector_<%= type %>(ref __sklib_vector_<%= type %> v)
 {
   System.Console.WriteLine("Freeing data");
   Marshal.FreeHGlobal(v._data_from_app);
@@ -98,7 +98,7 @@ internal static void __skadapter__free__sklib_vector_<%= type %>(ref __sklib_vec
     Converts a array of type into a __sklib__vector by allocating each of its
     members onto the heap.
 %>
-internal static __sklib_vector_<%= type %> __skadapter__to_sklib_vector_<%= type %>(List<<%= sk_type %>> v)
+private static __sklib_vector_<%= type %> __skadapter__to_sklib_vector_<%= type %>(List<<%= sk_type %>> v)
 {
   int i = 0;
   __sklib_vector_<%= type %> result = new __sklib_vector_<%= type %>();
@@ -120,7 +120,7 @@ internal static __sklib_vector_<%= type %> __skadapter__to_sklib_vector_<%= type
     Converts a __sklib__vector to a dynamic array of type by copying each of
     its members into the dynamic array
 %>
-internal static List<<%= sk_type %>> __skadapter__to_vector_<%= type %>(__sklib_vector_<%= type %> v)
+private static List<<%= sk_type %>> __skadapter__to_vector_<%= type %>(__sklib_vector_<%= type %> v)
 {
   List<<%= sk_type %>> result = new List<<%= sk_type %>>();
   for (int i = 0; i < v.size_from_lib; i++)
@@ -140,7 +140,7 @@ internal static List<<%= sk_type %>> __skadapter__to_vector_<%= type %>(__sklib_
     and update them. These are used with pass by ref parameters to update the
     sklib_vector or std::vector from the other component.
 %>
-internal static void __skadapter__update_from_vector_<%= type %>(ref __sklib_vector_<%= type %> v, List<<%= sk_type %>> __skreturn)
+private static void __skadapter__update_from_vector_<%= type %>(ref __sklib_vector_<%= type %> v, List<<%= sk_type %>> __skreturn)
 {
   __skreturn.Clear();
   for (int i = 0; i < v.size_from_lib; i++)

@@ -3,14 +3,14 @@
 %>
 
   [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
-  internal struct __sklib_string
+  private struct __sklib_string
   {
     internal IntPtr str;
     internal int    size;
     internal IntPtr ptr;
   }
 
-  internal static __sklib_string __skadapter__to_sklib_string(string s)
+  private static __sklib_string __skadapter__to_sklib_string(string s)
   {
     int totalLength = s.Length + 1;
     __sklib_string result;
@@ -26,15 +26,15 @@
   }
 
   [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_string", CharSet=CharSet.Ansi)]
-  internal static extern void __sklib__free__sklib_string(__sklib_string s);
+  private static extern void __sklib__free__sklib_string(__sklib_string s);
 
-  internal static void __skadapter__free__sklib_string(ref __sklib_string s)
+  private static void __skadapter__free__sklib_string(ref __sklib_string s)
   {
     Marshal.FreeHGlobal(s.str);
     s.str = IntPtr.Zero;
   }
 
-  internal static string __skadapter__to_string(__sklib_string s)
+  private static string __skadapter__to_string(__sklib_string s)
   {
     byte[] bytes = new byte[s.size];
     Marshal.Copy(s.str, bytes, 0, bytes.Length);

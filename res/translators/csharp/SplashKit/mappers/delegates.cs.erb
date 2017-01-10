@@ -17,10 +17,8 @@
     end.join(', ')
 %>
 
-    internal static <%= delegate_type_name %> __skadapter__to_sklib_<%= fp[:name] %>(<%= delegate_type_name %> v)
-    {
-      return v;
-    }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static <%= delegate_type_name %> __skadapter__to_sklib_<%= fp[:name] %>(<%= delegate_type_name %> v) { return v; }
 <%
   end # end function_pointers.each
 %>

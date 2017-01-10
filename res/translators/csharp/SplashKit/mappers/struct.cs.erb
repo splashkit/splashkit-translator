@@ -15,7 +15,7 @@
 <%#
     Make mapper function for struct -> __sklib_struct
 %>
-  internal static __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name].to_pascal_case %> v)
+  private static __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name].to_pascal_case %> v)
   {
       __sklib_<%= struct[:name] %> __skreturn;
 <%#
@@ -46,7 +46,7 @@
 <%#
     Make mapper function for __sklib_struct -> struct
 %>
-  internal static <%= struct[:name].to_pascal_case() %> __skadapter__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v)
+  private static <%= struct[:name].to_pascal_case() %> __skadapter__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v)
   {
       <%= struct[:name].to_pascal_case() %> __skreturn;
 <%#
