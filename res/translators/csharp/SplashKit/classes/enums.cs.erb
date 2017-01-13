@@ -6,8 +6,9 @@
     enum_type_name = enum[:name].to_pascal_case
     enum_name = enum[:name]
 %>
-    public enum <%= enum_type_name %>
-    {
+  public enum <%= enum_type_name %>
+
+  {
 <%
     enum[:constants].each do |constant_key, constant_data|
       is_last = constant_key == enum[:constants].keys.last
@@ -21,7 +22,7 @@
 <%
     end # end constants.each
 %>
-    }
+  }
 <%
   end # end enums.each
 %>
