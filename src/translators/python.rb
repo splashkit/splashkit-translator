@@ -24,6 +24,7 @@ module Translators
       types:      :pascal_case,
       functions:  :snake_case,
       variables:  :snake_case,
+      fields:     :snake_case,
       constants:  :snake_case
     }
     DIRECT_TYPES = {

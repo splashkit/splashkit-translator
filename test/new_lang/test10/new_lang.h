@@ -31,10 +31,10 @@ namespace splashkit_lib
   };
 
   /**
-   * @field points points
+   * @field my_points points
    */
   struct triangle {
-    point points[3];
+    point my_points[3];
   };
 
   /**

@@ -17,23 +17,23 @@ namespace splashkit_lib
   triangle get_triangle()
   {
     triangle result;
-    result.points[0] = { 1, 1};
-    result.points[1] = {-2, -2};
-    result.points[2] = {10, -3.14};
+    result.my_points[0] = { 1, 1};
+    result.my_points[1] = {-2, -2};
+    result.my_points[2] = {10, -3.14};
     return result;
   }
 
   void print_triangle(triangle t)
   {
-    cout << t.points[0].x << ":" << t.points[0].y <<  " " << t.points[1].x << ":" << t.points[1].y << " " << t.points[2].x << ":" << t.points[2].y << endl;
+    cout << t.my_points[0].x << ":" << t.my_points[0].y <<  " " << t.my_points[1].x << ":" << t.my_points[1].y << " " << t.my_points[2].x << ":" << t.my_points[2].y << endl;
   }
 
   void update_triangle(triangle &t)
   {
     for( int i = 0; i < 3; i++ )
     {
-      t.points[i].x *= 2;
-      t.points[i].y *= 2;
+      t.my_points[i].x *= 2;
+      t.my_points[i].y *= 2;
     }
   }
 }

@@ -117,7 +117,7 @@ module Translators
     # Defines a Pascal struct field
     #
     def struct_field_syntax(field_name, field_type, field_data)
-      "#{field_type} #{field_name.field_case}"
+      "#{field_type} #{field_name}"
     end
 
     #

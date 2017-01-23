@@ -351,7 +351,7 @@ module Translators::TranslatorHelper
   # Front end struct field definition
   #
   def sk_struct_field_for(field_name, field_data)
-    field_name = field_name.variable_case
+    field_name = field_name.field_case
     field_type = sk_type_for(field_data)
     struct_field_syntax(field_name, field_type, field_data)
   end
@@ -360,7 +360,7 @@ module Translators::TranslatorHelper
   # Front end lib struct field, ensures arrays are converted to 1D
   #
   def lib_struct_field_for(field_name, field_data)
-    field_name = field_name.variable_case
+    field_name = field_name.field_case
     field_type = lib_type_for(field_data)
     struct_field_syntax(field_name, field_type, field_data)
   end

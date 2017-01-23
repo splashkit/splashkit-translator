@@ -30,9 +30,9 @@ public class Program
     PrintTriangle(t);
     UpdateTriangle(ref t);
     PrintTriangle(t);
-    t.Points[0].X = 100;
-    t.Points[0].Y = 200;
-    t.Points[1].X = 300;
+    t.MyPoints[0].X = 100;
+    t.MyPoints[0].Y = 200;
+    t.MyPoints[1].X = 300;
     PrintTriangle(t);
   }
 }
