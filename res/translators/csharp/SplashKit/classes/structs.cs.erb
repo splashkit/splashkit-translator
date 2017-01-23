@@ -10,29 +10,40 @@
 <%#
     Definition of structs can use lib_struct_field_for for convenience
 %>
-    [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
-    internal struct __sklib_<%= struct[:name] %>
 
-    {
+  [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
+  internal struct __sklib_<%= struct[:name] %>
+
+  {
 <%
       struct[:fields].each do |field_name, field_data|
         if field_data[:is_array]
-          total_size = field_data[:array_dimension_sizes].inject :*
 %>
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst=<%= total_size %>)]
-<%      end     %>
-        public <%= lib_struct_field_for(field_name, field_data) %>;
+    // Unpacking array due to C# Marshalling limitations
 <%
+          total_size = field_data[:array_dimension_sizes].inject :*
+          total_size.times do |i|
+%>
+    public <%= lib_type_for(field_data, ignore_array: true) %> <%= field_name.field_case %>_<%= i %>;
+<%
+          end # do total size times...
+        else
+%>
+    public <%= lib_struct_field_for(field_name, field_data) %>;
+<%
+        end
       end # end fields.each
 %>
-    }
 
-    public struct <%= struct[:name].to_pascal_case() %>
-    {
+  }
+
+  public struct <%= struct[:name].to_pascal_case() %>
+
+  {
 <%
     struct[:fields].each do |field_name, field_data|
 %>
-      public <%= sk_struct_field_for(field_name, field_data) %>;
+    public <%= sk_struct_field_for(field_name, field_data) %>;
 <%
     end # end fields.each
 

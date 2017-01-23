@@ -97,7 +97,8 @@ module Translators
             types:      :snake_case,
             functions:  :snake_case,
             variables:  :snake_case,
-            constants:   :upper_case
+            constants:  :upper_case,
+            fields:     :snake_case
           }
         end
       string_case_module = Module.new do
@@ -115,6 +116,9 @@ module Translators
         end
         define_method(:constant_case) do
           to_s.send_case_conversion_method converters[:constants]
+        end
+        define_method(:field_case) do
+          to_s.send_case_conversion_method converters[:fields]
         end
       end
       string_case_module.freeze

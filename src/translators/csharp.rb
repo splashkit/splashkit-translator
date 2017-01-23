@@ -24,6 +24,7 @@ module Translators
       types:      :pascal_case,
       functions:  :pascal_case,
       variables:  :camel_case,
+      fields:     :pascal_case,
       constants:  :upper_case
     }
     DIRECT_TYPES = {
@@ -116,7 +117,7 @@ module Translators
     # Defines a Pascal struct field
     #
     def struct_field_syntax(field_name, field_type, field_data)
-      "#{field_type} #{field_name}"
+      "#{field_type} #{field_name.field_case}"
     end
 
     #

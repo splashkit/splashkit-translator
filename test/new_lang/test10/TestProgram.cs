@@ -10,19 +10,19 @@ public class Program
     Array1D a1;
     Array2D a2;
 
-    a1.values = new int[2];
-    a2.values = new int[2,3];
+    a1.Values = new double[9];
+    a2.Values = new int[2,3];
 
-    a1.values[0] = 0;
-    a1.values[1] = 10;
-    WriteLine("Updating a1.values[1] from: {0}", a1.values[1]);
+    a1.Values[0] = 0;
+    a1.Values[1] = 10;
+    WriteLine("Updating a1.Values[1] from: {0}", a1.Values[1]);
     Update1D(ref a1);
-    WriteLine("It is now: {0}", a1.values[1]);
-    a2.values[0,0] = 0;
-    a2.values[1,2] = 30;
-    WriteLine("Updating a2.values[1,2] from: {0}", a2.values[1,2]);
+    WriteLine("It is now: {0}", a1.Values[1]);
+    a2.Values[0,0] = 0;
+    a2.Values[1,2] = 30;
+    WriteLine("Updating a2.Values[1,2] from: {0}", a2.Values[1,2]);
     Update2D(ref a2);
-    WriteLine("It is now: {0}", a2.values[1,2]);
+    WriteLine("It is now: {0}", a2.Values[1,2]);
 
     Triangle t;
 
@@ -30,7 +30,9 @@ public class Program
     PrintTriangle(t);
     UpdateTriangle(ref t);
     PrintTriangle(t);
-    t.points[0].x = 100;
+    t.Points[0].X = 100;
+    t.Points[0].Y = 200;
+    t.Points[1].X = 300;
     PrintTriangle(t);
   }
 }

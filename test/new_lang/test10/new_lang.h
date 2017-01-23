@@ -10,7 +10,7 @@ namespace splashkit_lib
    * @field values description
    */
   struct array_1d {
-    int values[2];
+    double values[9];
   };
 
   /**
@@ -27,7 +27,7 @@ namespace splashkit_lib
    * @field y desc
    */
   struct point {
-    float x, y;
+    double x, y;
   };
 
   /**

@@ -1,7 +1,7 @@
 from splashkit import *
 
-a1 = Array1d()
-a2 = Array2d()
+a1 = Array1D()
+a2 = Array2D()
 
 a1.values[0] = 0
 a1.values[1] = 10
