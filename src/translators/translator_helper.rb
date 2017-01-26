@@ -139,6 +139,14 @@ module Translators::TranslatorHelper
   end
 
   #
+  # Syntax to define a function signature for SK documentation
+  #
+  def doc_signature_syntax(_function)
+    # Override in concrete adapters
+    nil
+  end
+
+  #
   # Generates a Front-End function name from an SK function
   #
   def lib_function_name_for(function)
@@ -223,6 +231,13 @@ module Translators::TranslatorHelper
   #
   def lib_signature_for(function)
     sk_signature_for(function, is_lib: true)
+  end
+
+  #
+  # Generate documentation signature from SK function
+  #
+  def docs_signature_for(function)
+    doc_signature_syntax(function) || sk_signature_for(function)
   end
 
   #
