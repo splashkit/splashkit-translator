@@ -28,6 +28,7 @@ module Translators
       constants:  :upper_case
     }
     DIRECT_TYPES = {
+      'int8_t'          => 'byte',
       'int'             => 'int',
       'short'           => 'short',
       'int64_t'         => 'long',

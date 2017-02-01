@@ -8,6 +8,7 @@ module Translators
     def initialize(data, logging = false)
       super(data, logging)
       @direct_types = %w(
+        int8_t
         int
         short
         int64_t
@@ -92,6 +93,7 @@ module Translators
           'float'     => 'float',
           'double'    => 'double',
           'byte'      => 'unsigned char',
+          'int8_t'    => 'unsigned char',
           'char'      => 'char',
           'bool'      => 'int',
           'enum'      => 'int',

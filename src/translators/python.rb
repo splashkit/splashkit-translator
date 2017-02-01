@@ -33,6 +33,7 @@ module Translators
       'int64_t'         => 'c_int64',
       'float'           => 'c_float',
       'double'          => 'c_double',
+      'int8_t'          => 'c_byte',
       'byte'            => 'c_byte',
       'unsigned int'    => 'c_uint',
       'unsigned short'  => 'c_ushort'
