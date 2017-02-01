@@ -11,7 +11,7 @@ public class Program
 
     TestStruct t = TestStruct.GetTest;
 
-    WriteLine("t.x = {0} t.ToInt = {1}", t.x, t.ToInt());
+    WriteLine("t.x = {0} t.ToInt = {1}", t.X, t.ToInt());
 
     sPtr = GetStruct();
     PrintStruct(sPtr);
@@ -28,6 +28,10 @@ public class Program
     sPtr.Print();
 
     other = sPtr;
+
+    List<int> data = sPtr.DataList;
+
+    foreach(int i in data) WriteLine($"Got {i} from data list...");
 
     using ( sPtr = GetStruct() )
     {

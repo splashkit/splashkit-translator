@@ -62,6 +62,15 @@ namespace splashkit_lib
       v->value = data;
     }
 
+    vector<int> get_list_from_struct_ptr(struct_ptr v)
+    {
+      vector<int> result;
+      result.push_back(v->value);
+      result.push_back(v->value);
+      result.push_back(v->value);
+      return result;
+    }
+
     static free_notifier *_free_notifier = nullptr;
 
     void register_free_notifier(free_notifier *fn)

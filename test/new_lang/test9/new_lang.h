@@ -3,6 +3,9 @@
  * @attribute group test
  */
 
+#include <vector>
+using std::vector;
+
 namespace splashkit_lib
 {
   /**
@@ -122,6 +125,15 @@ namespace splashkit_lib
    * @attribute destructor true
    */
   void delete_struct_ptr(struct_ptr v);
+
+  /**
+   * @param v [description]
+   * @return a list
+   *
+   * @attribute class struct_ptr
+   * @attribute getter data_list
+   */
+  vector<int> get_list_from_struct_ptr(struct_ptr v);
 
   /**
   * The free notifier can be registered with the system. It is called every
