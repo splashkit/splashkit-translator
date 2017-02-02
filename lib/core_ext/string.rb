@@ -71,7 +71,7 @@ module CoreExtensions
     #
     def to_human_words
       gsub(/_([0-9])([a-zA-Z])/) { |match| "_#{$1}_#{$2}" }.split('_').map(&:capitalize).map do |input|
-        input.gsub(/^(Html|Rgb|Hsb|Css|Ip|Tcp|Udp|Uri)$/){ |match| "#{match.to_upper_case}" }
+        input.gsub(/^(Rgb|Hsb|Css|Ip|Tcp|Udp|Uri|Rgba)$/){ |match| "#{match.to_upper_case}" } #Dont do Html or Http
       end
     end
 
