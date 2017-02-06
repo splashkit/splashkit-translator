@@ -12,6 +12,7 @@
 
     private static __sklib_string __skadapter__to_sklib_string(string s)
     {
+      s = s == null ? "": s;
       int totalLength = s.Length + 1;
       __sklib_string result;
       result.size = totalLength;
