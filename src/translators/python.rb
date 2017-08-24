@@ -98,7 +98,7 @@ module Translators
     def sk_signature_for(function)
       name            = sk_function_name_for(function)
       parameter_list  = function[:parameters].map do |param_name, param_data| param_name end.join(', ')
-      "#{name}(#{parameter_list})"
+      "def #{name}(#{parameter_list}):"
     end
 
     #
