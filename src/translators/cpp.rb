@@ -35,6 +35,10 @@ module Translators
       "#{return_type} #{name}(#{parameter_list})"
     end
 
+    def docs_signatures_for(function)
+      [ sk_signature_for(function) ]
+    end  
+
     #=== internal ===
 
     private

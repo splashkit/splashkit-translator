@@ -8,7 +8,7 @@ module Translators
   class Python < AbstractTranslator
     include TranslatorHelper
 
-    def initialize(data, logging)
+    def initialize(data, logging = false)
       super(data, logging)
     end
 
@@ -93,6 +93,12 @@ module Translators
 
     def sk_function_name_for(function)
       "#{function[:name].function_case}#{function[:attributes][:suffix].nil? ? '':'_'}#{function[:attributes][:suffix]}"
+    end
+
+    def sk_signature_for(function)
+      name            = sk_function_name_for(function)
+      parameter_list  = function[:parameters].map do |param_name, param_data| param_name end.join(', ')
+      "#{name}(#{parameter_list})"
     end
 
     #

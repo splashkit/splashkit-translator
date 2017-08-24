@@ -46,6 +46,7 @@ module Translators
       # Must translate in order of adapters (case conversion must be
       # in order as String is prepended)
       Translators.adapters.each do |adpt|
+        puts adpt.name
         adpt = adpt.new(@data)
         yield adpt
       end
@@ -55,7 +56,7 @@ module Translators
       run_for_each_adapter do |adpt|
         data[:functions].each do |function_data|
           function_data[:signatures] = {} if function_data[:signatures].nil?
-          signature = adpt.sk_signature_for(function_data)
+          signature = adpt.docs_signatures_for(function_data)
           function_data[:signatures][adpt.name] = signature
         end
       end

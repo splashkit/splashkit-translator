@@ -78,6 +78,31 @@ module Translators
       "#{scope} static #{external}#{return_type} #{function_name}(#{parameter_list})"
     end
 
+    def docs_signatures_for(function)
+      result = [ 
+        sk_signature_for(function)
+      ]
+
+      if ! function[:attributes][:class].nil?
+        method_data = get_method_data(function)
+        result << "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
+      end
+
+      result
+    end
+  
+
+    def get_method_data(fn)
+      {
+        method_name: fn[:name].to_s.to_pascal_case,
+        class_name: fn[:attributes][:class].to_pascal_case(),
+        params: method_parameter_list_for(fn),
+        args: method_argument_list_for(fn),
+        static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static ",
+        return_type:  sk_return_type_for(fn) || "void"
+      }
+    end
+
     #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use

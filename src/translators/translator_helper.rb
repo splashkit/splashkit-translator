@@ -233,6 +233,10 @@ module Translators::TranslatorHelper
     signature_syntax(function, function_name, parameter_list, return_type, opts)
   end
 
+  def docs_signatures_for(function)
+    [ sk_signature_for(function) ]
+  end
+
   #
   # Generate a lib type signature from a SK function
   #
