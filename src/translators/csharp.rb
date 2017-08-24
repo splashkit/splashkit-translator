@@ -79,13 +79,32 @@ module Translators
     end
 
     def docs_signatures_for(function)
+      function_name = sk_function_name_for(function)
+      parameter_list = sk_parameter_list_for(function)
+      return_type = sk_return_type_for(function) || "void"
+
       result = [ 
-        sk_signature_for(function)
+        "public static #{return_type} SplashKit.#{function_name}(#{parameter_list});"
       ]
 
       if ! function[:attributes][:class].nil?
         method_data = get_method_data(function)
-        result << "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
+
+        if method_data[:is_constructor]
+          result << "public #{method_data[:class_name]}(#{method_data[:params]});"
+        elsif method_data[:is_property]
+          if function[:attributes][:getter] && function[:attributes][:setter]
+            text = "get; set"
+          elsif function[:attributes][:getter]
+            text = "get"
+          else
+            text = "set"
+          end
+
+          result << "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]} { #{text} }"
+        else
+          result << "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
+        end
       end
 
       result
@@ -99,7 +118,9 @@ module Translators
         params: method_parameter_list_for(fn),
         args: method_argument_list_for(fn),
         static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static ",
-        return_type:  sk_return_type_for(fn) || "void"
+        return_type:  sk_return_type_for(fn) || "void",
+        is_constructor: fn[:attributes][:constructor],
+        is_property: fn[:attributes][:getter] || fn[:attributes][:setter]
       }
     end
 
