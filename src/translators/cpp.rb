@@ -35,8 +35,18 @@ module Translators
       "#{return_type} #{name}(#{parameter_list})"
     end
 
+    def is_color_function(fn)
+      sk_type_for(fn[:return]) == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")
+    end
+
     def docs_signatures_for(function)
-      [ sk_signature_for(function) ]
+      result = [ sk_signature_for(function) ]
+
+      if is_color_function(function)
+        result.unshift "#define #{function[:name].to_upper_case}"
+      end
+
+      result
     end  
 
     #=== internal ===

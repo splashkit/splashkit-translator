@@ -46,7 +46,6 @@ module Translators
       # Must translate in order of adapters (case conversion must be
       # in order as String is prepended)
       Translators.adapters.each do |adpt|
-        puts adpt.name
         adpt = adpt.new(@data)
         yield adpt
       end

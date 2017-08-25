@@ -368,4 +368,12 @@ module Translators::TranslatorHelper
     field_type = lib_type_for(field_data)
     struct_field_syntax(field_name, field_type, field_data)
   end
+
+  #
+  # Allows test of a function to see if it is a color function
+  #
+  def is_color_function(fn)
+    (!sk_return_type_for(fn).nil?) && sk_return_type_for(fn).to_snake_case() == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")
+  end
+
 end

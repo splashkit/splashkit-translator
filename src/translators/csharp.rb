@@ -87,7 +87,7 @@ module Translators
         "public static #{return_type} SplashKit.#{function_name}(#{parameter_list});"
       ]
 
-      if ! function[:attributes][:class].nil?
+      if (! function[:attributes][:class].nil?) || (! function[:attributes][:static].nil? )
         method_data = get_method_data(function)
 
         if method_data[:is_constructor]
@@ -101,9 +101,9 @@ module Translators
             text = "set"
           end
 
-          result << "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]} { #{text} }"
+          result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]} { #{text} }"
         else
-          result << "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
+          result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
         end
       end
 
@@ -114,7 +114,7 @@ module Translators
     def get_method_data(fn)
       {
         method_name: fn[:name].to_s.to_pascal_case,
-        class_name: fn[:attributes][:class].to_pascal_case(),
+        class_name: fn[:attributes][:class].nil? ? fn[:attributes][:static].to_pascal_case() : fn[:attributes][:class].to_pascal_case(),
         params: method_parameter_list_for(fn),
         args: method_argument_list_for(fn),
         static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static ",
