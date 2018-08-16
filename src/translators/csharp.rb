@@ -95,13 +95,16 @@ module Translators
         elsif method_data[:is_property]
           if function[:attributes][:getter] && function[:attributes][:setter]
             text = "get; set"
+            property_name = function[:attributes][:getter]
           elsif function[:attributes][:getter]
             text = "get"
+            property_name = function[:attributes][:getter]
           else
             text = "set"
+            property_name = function[:attributes][:setter]
           end
 
-          result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]} { #{text} }"
+          result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{property_name.to_pascal_case()} { #{text} }"
         else
           result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
         end
