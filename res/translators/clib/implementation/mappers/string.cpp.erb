@@ -22,7 +22,7 @@ __sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s) {
     return __skreturn;
 }
 std::string <%= func_prefix %>__to_string(const __sklib_string &s) {
-    std:string result = std::string(s.string);
+    std::string result = std::string(s.string);
 <%
     # The library does not free string that it is converting. This will be
     # handled by the adapters that are calling into the SplashKit c library
