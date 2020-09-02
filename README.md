@@ -44,7 +44,7 @@ Ensure you have HeaderDoc installed:
 
 - Under macOS, you will need to have Xcode with Developer Tools installed.
 - Under Ubuntu, you can download HeaderDoc at Apple's OpenSource Developer Tools
-  [here](http://opensource.apple.com/release/developer-tools-64/).
+  [here](https://opensource.apple.com/tarballs/headerdoc/).
 
 Install dependencies using `bundle`:
 
