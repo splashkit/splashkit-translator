@@ -1,0 +1,127 @@
+<%#
+  Declare typealias struct pointer declaration
+%>
+
+<%
+  @classes.select{ |k, c| ! c[:is_struct] }.each do | class_id, the_class |
+    class_name = class_id.to_s.to_pascal_case
+
+    if the_class[:is_alias]
+%>
+public class <%= class_name %> : PointerWrapper
+{
+  private <%= class_name %>(IntPtr ptr) : base(ptr, true) {}
+
+  internal static <%= class_name %> FetchOrCreate(IntPtr ptr)
+  {
+    if (ptr == IntPtr.Zero) return null;
+
+    if (_ptrRegister.ContainsKey(ptr)) return _ptrRegister[ptr] as <%= class_name %>;
+    return new <%= class_name %>(ptr);
+  }
+<% else %>
+public static class <%= class_name %>
+{
+<%
+    end # if class alias
+
+    def get_method_data(fn)
+      {
+        method_name: fn[:name].to_s.to_pascal_case,
+        params: method_parameter_list_for(fn),
+        args: method_argument_list_for(fn),
+        static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static "
+      }
+    end
+
+    # Add constructors
+    the_class[:constructors].each do |fn|
+      method_data = get_method_data(fn)
+%>
+
+    public <%= class_name %>(<%= method_data[:params] %>) : base ( SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>), false )
+    { }
+<%
+    end # constructors each
+
+    # Add constructors
+    if the_class[:destructor]
+      fn = the_class[:destructor]
+      method_data = get_method_data(fn)
+%>
+    protected internal override void DoFree()
+    {
+        // System.Console.WriteLine("TODO: Free!");
+        SplashKit.<%= fn[:name].function_case %>(this);
+    }
+<%
+    elsif the_class[:no_destructor]
+    %>
+        protected internal override void DoFree()
+        {}
+    <%
+    end #destructor
+
+    # Add methods
+    the_class[:methods].each do |fn|
+      method_data = get_method_data(fn)
+      return_type = is_func?(fn) ? sk_type_for(fn[:return]) : 'void'
+%>
+
+    public <%= method_data[:static] %><%= return_type %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
+    {
+<%      if is_func? fn %>
+        return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
+<%      else %>
+        SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
+<%      end %>
+    }
+
+<%
+    end # methods
+
+    the_class[:properties].each do | property_name, property |
+      if property[:getter]
+        property_type = sk_type_for(property[:getter][:return])
+        method_data = get_method_data(property[:getter])
+      else
+        property_type = sk_type_for(property[:setter][:parameters].select { |k,v| v[:type] != the_class[:name] }.map { |k,v| v }.first)
+        method_data = get_method_data(property[:setter])
+      end
+
+%>
+    public <%= method_data[:static] %><%= property_type %> <%= property_name.to_s.to_pascal_case %>
+
+    {
+<%
+      if property[:getter]
+        fn = property[:getter]
+        method_data = get_method_data(fn)
+        if method_data[:static].nil?
+%>
+        get { return SplashKit.<%= fn[:name].function_case %>(this); }
+<%      else %>
+        get { return SplashKit.<%= fn[:name].function_case %>(); }
+<%
+        end
+      end
+      if property[:setter]
+        fn = property[:setter]
+        method_data = get_method_data(fn)
+        if method_data[:static].nil?
+%>
+          set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+<%      else %>
+          set { SplashKit.<%= fn[:name].function_case %>(value); }
+<%
+        end
+      end
+%>
+    }
+<%
+    end # properties
+%>
+}
+<%
+  end # classes.each
+%>

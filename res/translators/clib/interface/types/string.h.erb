@@ -4,5 +4,6 @@
 typedef struct {
     char *string;
     unsigned int size;
+    void *ptr;
 } __sklib_string;
 void <%= CLib::FUNC_PREFIX %>__free__sklib_string(__sklib_string s);

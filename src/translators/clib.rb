@@ -8,9 +8,10 @@ module Translators
     def initialize(data, logging = false)
       super(data, logging)
       @direct_types = %w(
+        int8_t
         int
         short
-        long
+        int64_t
         float
         double
         char
@@ -88,10 +89,11 @@ module Translators
           'void'      => 'void',
           'int'       => 'int',
           'short'     => 'short',
-          'long'      => 'long',
+          'int64_t'   => 'int64_t',
           'float'     => 'float',
           'double'    => 'double',
           'byte'      => 'unsigned char',
+          'int8_t'    => 'unsigned char',
           'char'      => 'char',
           'bool'      => 'int',
           'enum'      => 'int',
@@ -272,7 +274,7 @@ module Translators
     # Ensure name is the same as the parent class for template lookup
     #
     def name
-      'CLib'
+      'clib'
     end
   end
 end

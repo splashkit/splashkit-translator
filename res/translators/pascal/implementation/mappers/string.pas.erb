@@ -5,6 +5,7 @@ function __skadapter__to_sklib_string(s: String): __sklib_string;
 begin
   result.size := Length(s);
   result.str := StrAlloc(Length(s) + 1);
+  result.ptr := nil;
   StrPCopy(result.str, s);
 end;
 procedure __sklib__free__sklib_string(s: __sklib_string); cdecl; external;

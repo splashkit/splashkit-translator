@@ -2,22 +2,12 @@
   @vector_types.each do |type|
 %>
 <%#
-    Must forward declare the library free function if this is the adapter
-    (it is within the implementation to call the library function to free vector).
-%>
-<%
-    if splashkit_adapter?
-%>
-extern "C" void <%= CLib::FUNC_PREFIX %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
-<%
-    end
-%>
-<%#
     Free __sklib_vector function frees heap data that the library has allocated.
     Must mark with extern "C" if being declared by library.
 %>
-<% if splashkit_library? %>extern "C" <% end %>
+<% if splashkit_adapter? %>
 void <%= func_prefix %>__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
+<% end %>
 <%#
     Converts a std::vector into a __sklib__vector by allocating each of its members
     onto the heap.

@@ -5,7 +5,7 @@ module Translators
   def all
     Translators.constants
                .select { |c| Class === Translators.const_get(c) }
-               .select { |c| ![:AbstractTranslator, :ReusableCAdapter].include? c }
+               .select { |c| ![:Namespace, :AbstractTranslator, :ReusableCAdapter].include? c }
                .map { |t| [t.upcase, Translators.const_get(t)] }
                .to_h
   end
@@ -14,6 +14,21 @@ module Translators
   end
   module_function :all
   module_function :adapters
+
+  #
+  # Namespace for dynamic binding in ERBs
+  #
+  class Namespace
+    def initialize(hash)
+      hash.each do |key, value|
+        singleton_class.send(:define_method, key) { value }
+      end
+    end
+
+    def get_binding
+      binding
+    end
+  end
 
   #
   # Common helper methods for translators
@@ -31,11 +46,17 @@ module Translators
     #
     # Initializes the translator with the data and source directories provided
     #
-    def initialize(data, logging = false)
-      @data = data
+    def initialize(input, logging = false)
+      if input.include? :data
+        @data = input[:data]
+      else
+        @data = input
+      end
+
       @logging = logging
       @direct_types = []
       @enums = @data[:enums] || @data.values.pluck(:enums).flatten
+      @classes = input[:classes]
       @typealiases =
         (@data[:typedefs] || @data.values.pluck(:typedefs).flatten).select do |td|
           !td[:is_function_pointer]
@@ -75,7 +96,9 @@ module Translators
           converters = {
             types:      :snake_case,
             functions:  :snake_case,
-            variables:  :snake_case
+            variables:  :snake_case,
+            constants:  :upper_case,
+            fields:     :snake_case
           }
         end
       string_case_module = Module.new do
@@ -90,6 +113,12 @@ module Translators
         end
         define_method(:variable_case) do
           to_s.send_case_conversion_method converters[:variables]
+        end
+        define_method(:constant_case) do
+          to_s.send_case_conversion_method converters[:constants]
+        end
+        define_method(:field_case) do
+          to_s.send_case_conversion_method converters[:fields]
         end
       end
       string_case_module.freeze
@@ -214,7 +243,7 @@ module Translators
     #
     # Reads a translator's template file (defaults to the primary template file)
     #
-    def read_template(name = self.name)
+    def read_template(name = self.name, namespace = nil)
       # Don't know the extension, but if it's module.tpl.* then it's the primary
       # template file
       puts "Running template #{name}..." if @logging
@@ -225,7 +254,8 @@ module Translators
       raise "No template files found under #{path}" if files.empty?
       raise "Need exactly one match for #{path}" unless files.length == 1
       template = read_res_file(files.first).strip << "\n"
-      ERB.new(template, nil, '>').result(binding)
+
+      ERB.new(template, nil, '>').result(namespace.nil? ? binding : namespace.get_binding )
     end
 
     #

@@ -54,8 +54,9 @@ module CoreExtensions
     # Converts from snake_case to camelCase
     #
     def to_camel_case
-      pascal_case = to_pascal_case
-      pascal_case[0, 1].downcase + pascal_case[1..-1]
+      human_case = to_human_words
+      human_case[0] = human_case[0].downcase
+      human_case.join('')
     end
 
     #
@@ -66,18 +67,35 @@ module CoreExtensions
     end
 
     #
-    # Converts from snake_case to Humanised Case
+    # Converts from snake_case to humanised words
     #
-    def to_human_case
-      split('_').map(&:capitalize).join(' ')
+    def to_human_words
+      gsub(/_([0-9])([a-zA-Z])/) { |match| "_#{$1}_#{$2}" }.split('_').map(&:capitalize).map do |input|
+        input.gsub(/^(Rgb|Hsb|Css|Ip|Tcp|Udp|Uri|Rgba)$/){ |match| "#{match.to_upper_case}" } #Dont do Html or Http
+      end
     end
 
     #
-    # Converts from snake_case to snake_case (no change)
+    # Converts from snake_case to Humanised Case
+    #
+    def to_human_case
+      to_human_words.join(' ')
+    end
+
+    #
+    # Converts from snake_case to snake_case (all lower)
     #
     def to_snake_case
-      self
+      self.downcase
     end
+
+    #
+    # Converts to UPPER_CASE (snake but uppercase)
+    #
+    def to_upper_case
+      self.upcase
+    end
+
 
     #
     # Converts from snake_case to kebab-case

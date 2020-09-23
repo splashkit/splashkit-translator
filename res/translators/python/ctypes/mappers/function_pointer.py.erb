@@ -1,0 +1,16 @@
+<%#
+    Function pointer translations
+%>
+<%
+  @function_pointers.each do |fp|
+    sk_fp_type = fp[:name].type_case
+    lib_fp_type = "__sklib_#{fp[:name]}"
+%>
+def __skadapter__to_sklib_<%= fp[:name] %>(v):
+    if isinstance(v, <%= fp[:name].type_case %>):
+        return v
+    return <%= fp[:name].type_case %>(v)
+
+<%
+  end # end function_pointers.each
+%>

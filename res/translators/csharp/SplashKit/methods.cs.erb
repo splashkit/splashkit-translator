@@ -1,0 +1,107 @@
+<%#
+  Forward declare each sklib function
+%>
+<%
+  @functions.each do |function|
+%>
+
+    [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="<%= lib_function_name_for(function) %>", CharSet=CharSet.Ansi)]
+    <%= lib_signature_for(function) %>;
+<%
+  end # functions.each
+%>
+
+<%#
+  Now write C# SplashKit functions that call the above
+%>
+<%
+  @functions.each do |function|
+    is_constructor = ! function[:attributes][:constructor].nil?
+%>
+    <%= sk_signature_for(function) %>
+
+    {
+<%#
+  Start variable declaration block
+%>
+<%
+    # Declare each parameter prefixed with __skparam
+    function[:parameters].each do |param_name, param_data|
+%>
+      <%= lib_type_for(param_data) %> __skparam__<%= param_name %>;
+<%
+    end # end parameters.each
+%>
+<%
+    # If returning a value, prefix a variable using __skreturn
+    if is_func?(function)
+%>
+      <%= sk_type_for(function[:return], is_lib: true) %> __skreturn;
+<%
+    end # end if func
+%>
+<%#
+  End variable declaration block
+%>
+<%#
+    1. Convert each parameter using the mapper functions available
+%>
+<%
+    function[:parameters].each do |param_name, param_data|
+%>
+      __skparam__<%= param_name %> = <%= lib_mapper_fn_for param_data %>(<%= param_name.variable_case %>);
+<%
+    end
+%>
+<%#
+    2. Make the function call (and assign __skreturn if non-void)
+%>
+<%
+    return_val  = "__skreturn = " if is_func?(function)
+    lib_fn_name = lib_function_name_for(function)
+    param_list  = lib_argument_list_for(function)
+    func_call   = "#{return_val}#{lib_fn_name}(#{param_list})"
+%>
+      <%= func_call %>;
+<%#
+    3. Update all non-const references.
+        -- if it can be directly copied... do that.
+        -- otherwise use the types update function
+%>
+<%
+    function[:parameters].each do |param_name, param_data|
+      if param_data[:is_reference] && !param_data[:is_const]
+%>
+      <%= param_name.variable_case %> = <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
+<%
+      end # end if is non const ref
+    end # end parameters.each
+%>
+<%#
+    4. Free any string or vector parameters
+%>
+<%
+    params_to_free = function[:parameters].select do | _, param_data |
+      param_data[:type] == 'string' || param_data[:is_vector]
+    end # end select
+    params_to_free.each do | param_name, param_data |
+      type_name = lib_type_for(param_data)
+%>
+    __skadapter__free<%=type_name%>(ref __skparam__<%=param_name%>);
+<%
+    end # end each
+%>
+<%#
+    5. Assign result to __skreturn variable if non-void
+%>
+<%
+    if is_func?(function)
+%>
+      return <%= sk_mapper_fn_for function[:return] %>(__skreturn);
+<%
+    end # end if function
+%>
+    }
+<%
+  end # functions.each
+%>

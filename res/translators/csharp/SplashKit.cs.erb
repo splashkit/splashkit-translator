@@ -1,0 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+using __sklib_ptr = System.IntPtr;
+
+namespace SplashKitSDK
+{
+  public static class SplashKit
+  {
+    <%= read_template 'SplashKit/mappers' %>
+    <%= read_template 'SplashKit/methods' %>
+  }
+
+  <%= read_template 'SplashKit/classes' %>
+}

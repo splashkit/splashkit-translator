@@ -75,13 +75,21 @@ module Translators::TranslatorHelper
   end
 
   #
+  # This is the prefix added to many lib types. Override in translator to
+  # change as needed.
+  #
+  def sklib_prefix
+    "__sklib"
+  end
+
+  #
   # Type name to use for when calling C library code
   #
   def lib_map_type_for(type_name)
     default_map = {
-      'struct'    => "__sklib_#{type_name}",
-      'string'    => '__sklib_string',
-      'typealias' => '__sklib_ptr'
+      'struct'    => "#{sklib_prefix}_#{type_name}",
+      'string'    => "#{sklib_prefix}_string",
+      'typealias' => "#{sklib_prefix}_ptr"
     }
     map = default_map.merge(library_types_hash).merge(direct_types_hash)
     type_name = raw_type_for(type_name)
@@ -105,7 +113,7 @@ module Translators::TranslatorHelper
     # Map directly otherwise...
     result = send(func, type)
     # Map as array of mapped type if applicable
-    if type_data[:is_array]
+    if type_data[:is_array] && ! opts[:ignore_array]
       dims = type_data[:array_dimension_sizes]
       # Only 1D arrays in library if lib is true
       dim1_size = opts[:is_lib] ? array_size_as_one_dimensional(type_data) : dims.first
@@ -120,8 +128,8 @@ module Translators::TranslatorHelper
   #
   # Converts a C++ type to its LanguageX type for use in lib
   #
-  def lib_type_for(type_data)
-    sk_type_for(type_data, is_lib: true)
+  def lib_type_for(type_data, opts = {})
+    sk_type_for(type_data, opts.merge({ is_lib: true}) )
   end
 
   #
@@ -134,8 +142,8 @@ module Translators::TranslatorHelper
   #
   # Syntax to define a function signature
   #
-  def sk_signature_syntax(_function)
-    raise '`sk_signature_syntax` is not yet implemented!'
+  def signature_syntax(_function)
+    raise '`signature_syntax` is not yet implemented!'
   end
 
   #
@@ -166,7 +174,7 @@ module Translators::TranslatorHelper
   def sk_parameter_list_for(function, opts = {})
     parameters = function[:parameters]
     type_conversion_fn = "#{opts[:is_lib] ? 'lib' : 'sk'}_type_for".to_sym
-    parameter_list_syntax(parameters, type_conversion_fn)
+    parameter_list_syntax(parameters, type_conversion_fn, opts)
   end
 
   #
@@ -174,6 +182,13 @@ module Translators::TranslatorHelper
   #
   def lib_parameter_list_for(function)
     sk_parameter_list_for(function, is_lib: true)
+  end
+
+  #
+  # Generates a Method parameter list from a SK function
+  #
+  def method_parameter_list_for(function)
+    sk_parameter_list_for(function, { is_method: true, self: function[:attributes][:self] })
   end
 
   #
@@ -223,7 +238,11 @@ module Translators::TranslatorHelper
     return_type = send(return_type_func, function)
 
     # Generate the signature from the mapped types
-    signature_syntax(function, function_name, parameter_list, return_type)
+    signature_syntax(function, function_name, parameter_list, return_type, opts)
+  end
+
+  def docs_signatures_for(function)
+    [ sk_signature_for(function) ]
   end
 
   #
@@ -284,19 +303,39 @@ module Translators::TranslatorHelper
   #
   # Syntax when defining a list of arguments.
   #
-  def argument_list_syntax(_arguments)
-    raise '`argument_list_syntax` not implemented! Use this function to '\
-          'define how to separate a list of arguments (e.g., comma separated '\
-          'values). This function recieves a list of argument names only.'
+  def argument_list_syntax(arguments)
+    arguments.map { |arg_data| arg_data[:name] }.join(', ')
   end
 
   #
   # Argument list when making C library calls
   #
   def lib_argument_list_for(function)
-    args = function[:parameters].map do |param_name, _|
-      "__skparam__#{param_name}"
+    args = function[:parameters].map do |param_name, param_data|
+      {
+        name: "__skparam__#{param_name}",
+        param_data: param_data
+      }
     end
+
+    argument_list_syntax(args)
+  end
+
+  def method_argument_list_for(function)
+    args = function[:parameters].map do |param_name, param_data|
+      if param_name.to_s == function[:attributes][:self]
+        {
+          name: "this",
+          param_data: param_data
+        }
+      else
+        {
+          name: param_name.variable_case,
+          param_data: param_data
+        }
+      end
+    end
+
     argument_list_syntax(args)
   end
 
@@ -331,7 +370,7 @@ module Translators::TranslatorHelper
   # Front end struct field definition
   #
   def sk_struct_field_for(field_name, field_data)
-    field_name = field_name.variable_case
+    field_name = field_name.field_case
     field_type = sk_type_for(field_data)
     struct_field_syntax(field_name, field_type, field_data)
   end
@@ -340,8 +379,16 @@ module Translators::TranslatorHelper
   # Front end lib struct field, ensures arrays are converted to 1D
   #
   def lib_struct_field_for(field_name, field_data)
-    field_name = field_name.variable_case
+    field_name = field_name.field_case
     field_type = lib_type_for(field_data)
     struct_field_syntax(field_name, field_type, field_data)
   end
+
+  #
+  # Allows test of a function to see if it is a color function
+  #
+  def is_color_function(fn)
+    (!sk_return_type_for(fn).nil?) && sk_return_type_for(fn).to_snake_case() == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")
+  end
+
 end

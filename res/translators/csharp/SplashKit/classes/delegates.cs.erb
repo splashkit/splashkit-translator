@@ -1,0 +1,24 @@
+<%#
+    Declare function pointers
+%>
+<%
+  @function_pointers.each do |fp|
+%>
+<%
+    delegate_type_name = fp[:name].function_case
+    if is_func? fp
+      return_type = sk_type_for fp[:return]
+    else
+      return_type = 'void'
+    end
+    fp_param_decl = fp[:parameters].map do |param_name, param_data|
+      type = sk_type_for param_data
+      "#{type} #{param_name}"
+    end.join(', ')
+%>
+
+    [UnmanagedFunctionPointerAttribute(CallingConvention.Cdecl)]
+    public delegate <%= return_type %> <%= delegate_type_name %>(<%= fp_param_decl %>);
+<%
+  end # end function_pointers.each
+%>

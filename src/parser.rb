@@ -32,6 +32,7 @@ class Parser
     suffix
     getter
     setter
+    no_destructor
   ).freeze
 
   #
@@ -57,6 +58,7 @@ class Parser
       raise Parser::Error, 'headerdoc2html is not installed!'
     end
     hcfg_file = File.expand_path('../../res/headerdoc.config', __FILE__)
+
     parsed = @src.map do |hfile|
       puts "Parsing #{hfile}..." if @logging
       cmd = %(headerdoc2html -XPOLltjbq -c #{hcfg_file} #{hfile})
@@ -82,6 +84,7 @@ class Parser
       hfparsed.delete(:name)
       [hfname, hfparsed]
     end
+
     if parsed.empty?
       raise Parser::Error,
             "Nothing parsed! Check that `#{@src.join('`, `')}` is the correct "\
@@ -155,7 +158,7 @@ class Parser::HeaderFileParser
   #
   def parse
     # Start directly from 'header' node
-    parse_xml(@input_xml.xpath('header'))
+    result = parse_xml(@input_xml.xpath('header'))
   end
 
   private
@@ -192,8 +195,8 @@ class Parser::HeaderFileParser
   # Parses HeaderDoc's parsedparameterlist (ppl) element
   #
   def parse_ppl(xml)
-     xml.xpath('parsedparameterlist/parsedparameter').map do |p|
-      [p.xpath('name').text.to_sym, { type: p.xpath('type').text } ]
+    xml.xpath('parsedparameterlist/parsedparameter').map.with_index do |p, idx|
+      [p.xpath('name').text.to_sym, { type: p.xpath('type').text, index: idx }]
     end.to_h
   end
 
@@ -207,29 +210,32 @@ class Parser::HeaderFileParser
     # Get the type of the function
     fn_type = decl_types[0].children.to_s
     # types of the parameters...
-    param_types = decl_types[1..-1].map { |t| t.text }
+    param_types = decl_types[1..-1].map(&:text)
     # names of the parameters
     param_names = decl.xpath('declaration_param').map { |n| n.text.to_sym }
     # names of type parameters
-    template_types = decl.xpath('declaration_template').map { |n| n.text }
+    template_types = decl.xpath('declaration_template').map(&:text)
     # i tracks the template_types... first may be the return type
     i = fn_type == 'vector' ? 1 : 0
-    param_map = Hash[*param_names.zip(param_types).map do | n, t |
-      result ={ n => { base_type: t } }
+    param_map = Hash[*param_names.zip(param_types).map do |n, t|
+      result = { n => { base_type: t } }
       if t == 'vector'
         result[n][:type_parameter] = template_types[i]
-        i = i + 1
+        i += 1
       end
       result
-    end.collect{|h| h.to_a}.flatten]
+    end.collect(&:to_a).flatten]
 
     unless i == template_types.count
       raise Parser::Error,
-        "Unknown template type... mapped #{i + 1} or #{param_types.count + 1} templates !"
+            "Unknown template type... mapped #{i + 1} or #{param_types.count + 1} templates!"
     end
 
-    xml.xpath('parsedparameterlist/parsedparameter').each do |p|
-      param_map[p.xpath('name').text.to_sym][:type] = p.xpath('type').text
+    # Insert in index and type
+    ppl = parse_ppl(xml)
+    ppl.each do |key, data|
+      param_map[key][:index] = data[:index]
+      param_map[key][:type] = data[:type]
     end
 
     param_map
@@ -285,6 +291,19 @@ class Parser::HeaderFileParser
       raise Parser::Error, 'Unknown attribute keys are present: '\
                            "`#{unknown_attributes.join('`, `')}`"
     end
+
+    # `self` must be supplied to class, methods, getter, setters and destructors
+    instance_needs_self_attr = attrs.keys & [:method, :destructor, :getter, :setter]
+    if attrs[:class] && !instance_needs_self_attr.empty? && attrs[:self].nil?
+
+      if ppl.length > 0
+        attrs[:self] = ppl.keys.first.to_s
+      else
+        raise Parser::RuleViolationError.new(
+              'Instance feature must have a self attribute', 14)
+      end
+    end
+
     # Method, self, destructor, constructor must have a class attribute also
     enforce_class_keys = [
       :self,
@@ -326,12 +345,11 @@ class Parser::HeaderFileParser
             .join('\', `')}'. Choose one or the other.", 4)
     end
     # Can't have (`destructor` | `constructor`) & `method` if no `static`
-    if !destructor_constructor_keys_found.empty? &&
+    if !attrs[:constructor].nil? &&
        !attrs[:method].nil? &&
        !marked_with_static
       raise Parser::RuleViolationError.new(
-            "Attribute(s) `#{destructor_constructor_keys_found.map(&:to_s)
-            .join('\', `')}' violate `method`. Choose one or the other " \
+            "Attribute(s) `constructor' violate `method`. Choose one or the other " \
             'or mark with `static` to indicate that this is a static ' \
             'method.', 5)
     end
@@ -356,7 +374,7 @@ class Parser::HeaderFileParser
     if self_value && ppl
       class_type = attrs[:class]
       self_type  = ppl[self_value.to_sym][:type]
-      unless class_type == self_type
+      unless class_type == self_type || "const #{class_type} &amp;" == self_type
         raise Parser::RuleViolationError.new(
               'Attribute `self` must list a parameter whose type matches ' \
               "the `class` value (`class` is `#{class_type}` but `self` " \
@@ -390,7 +408,7 @@ class Parser::HeaderFileParser
       end
     end
     # `static` rules applicable to `getter`s and `setter`s
-    if attrs[:class]
+    if attrs[:static]
       # Getters must have 0 parameters
       if attrs[:getters] && ppl && ppl.empty?
         raise Parser::RuleViolationError.new(
@@ -488,6 +506,14 @@ class Parser::HeaderFileParser
       raise Parser::Error, 'Missing parameters description for: '\
                            "`#{params_with_no_desc.join('`, `')}`"
     end
+    # Sort parameters by PPL index (for type information)
+    # That is, sorted by source code param index not documentation param index
+    params = params.sort do |a, b|
+      a_key = a[0]
+      b_key = b[0]
+      # Compare using the parsed PPL indicies
+      ppl[a_key][:index] <=> ppl[b_key][:index]
+    end.to_h
     params
   end
 
@@ -564,32 +590,31 @@ class Parser::HeaderFileParser
     fn_name = xml.xpath('name').text
     headerdoc_idx = fn_name.index(headerdoc_overload_tags)
     sanitized_name = headerdoc_idx ? fn_name[0..(headerdoc_idx - 1)] : fn_name
-    suffix = attributes[:suffix] if attributes
+    suffix = "_#{attributes[:suffix]}" if attributes && attributes.include?(:suffix)
     # Make a method name if specified
     method_name = attributes[:method] if attributes
+    class_name = attributes[:class] if method_name
+
     # Make a unique name using the suffix if specified
-    if suffix
-      unique_global_name = "#{sanitized_name}_#{suffix}"
-      unique_method_name = "#{method_name}_#{suffix}" unless method_name.nil?
+    unique_global_name = "#{sanitized_name}#{suffix}"
+    unique_method_name = "#{class_name}.#{method_name}#{suffix}" unless method_name.nil?
+
+    # Check if unique name is actually unique
+    if @unique_names[:unique_global].include? unique_global_name
+      raise Parser::RuleViolationError.new(
+            'Generated unique name (function name + suffix) is not unique: ' \
+            "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`", 14)
+    else
+      @unique_names[:unique_global] << unique_global_name
     end
-    # Unique global name was made?
-    unless unique_global_name.nil?
-      # Check if unique name is actually unique
-      if @unique_names[:unique_global].include? unique_global_name
-        raise Parser::RuleViolationError.new(
-              'Generated unique name (function name + suffix) is not unique: ' \
-              "`#{sanitized_name}` + `#{suffix}` = `#{unique_global_name}`", 14)
-      else
-        @unique_names[:unique_global] << unique_global_name
-      end
-    end
+
     # Unique method name was made?
     unless unique_method_name.nil?
       # Check if unique method name is actually unique
       if @unique_names[:unique_method].include? unique_method_name
         raise Parser::RuleViolationError.new(
               'Generated unique method name (method + suffix) is not unique: ' \
-              "`#{method}` + `#{suffix}` = `#{unique_method_name}`", 15)
+              "`#{class_name}.#{method_name}` + `#{suffix}` = `#{unique_method_name}`", 15)
       # Else register the unique name
       else
         @unique_names[:unique_method] << unique_method_name
@@ -608,7 +633,6 @@ class Parser::HeaderFileParser
   #
   def parse_function(xml)
     signature = parse_signature(xml)
-    # Values from the <parsedparameter> elements
     ppl = parse_parameter_declaration(xml)
     attributes = parse_attributes(xml, ppl)
     parameters = parse_parameters(xml, ppl)
@@ -630,6 +654,7 @@ class Parser::HeaderFileParser
   rescue Parser::Error => e
     e.signature = signature
     error e
+    {}
   end
 
   #

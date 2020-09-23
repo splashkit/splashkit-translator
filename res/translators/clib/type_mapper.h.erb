@@ -13,7 +13,7 @@ guard_name = splashkit_library? ? "lib" : "adapter"
   Dependent header includes. Must always include "sk_clib.h" to have access
   to library-defined __sklib_ types which are defined in this header.
 %>
-#include <stdlib.h>
+#include <cstdlib>
 #include <string>
 #include <cstring>
 #include <vector>

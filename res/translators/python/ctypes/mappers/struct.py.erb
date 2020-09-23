@@ -1,0 +1,69 @@
+<%#
+  Struct adapter functions mapping all fields to/from their __sklib type
+ %>
+<%
+  @structs.each do |struct|
+%>
+<%#
+    Make mapper function for struct -> __sklib_struct
+%>
+def __skadapter__to_sklib_<%= struct[:name] %>(v):
+<%#
+    For every field, convert using mapper functions for this field's type
+%>
+    if isinstance(v, <%= "#{sklib_prefix()}_#{struct[:name]}" %>):
+        return v
+
+    result = <%= struct[:name].type_case %>()
+<%
+    struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
+      # If an array copy over each value in the array (1D array << {1,2}D array)
+      if field_data[:is_array]
+        field_name = "#{field_name}"
+        array_size_as_one_dimensional(field_data).times do |i|
+%>
+    result.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= array_mapper_index_for(field_data, i) %>)
+<%
+        end # end times
+      else # else, copy over using lib type and sk to lib type mapper
+%>
+    result.<%= field_name %> = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %>)
+<%
+      end # end if
+    end # end fields.each
+%>
+    return result
+<%#
+    Make mapper function for __sklib_struct -> struct
+%>
+def __skadapter__to_<%= struct[:name] %>(v):
+    if isinstance(v, <%= struct[:name].type_case %>):
+        return v
+<%#
+    For every field, convert using mapper functions for this field's type
+%>
+    result = <%= struct[:name].type_case %>()
+<%
+    struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
+      # If an array copy over each value in the array ({1,2}D array << 1D array)
+      if field_data[:is_array]
+        array_size_as_one_dimensional(field_data).times do |i|
+%>
+    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+<%
+        end # end times
+      else # else standard copy converted as SK type using SK type mapper
+%>
+    result.<%= field_name %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>)
+<%
+      end # end if
+    end # fields.each
+%>
+    return result
+<%
+  end # structs.each
+%>

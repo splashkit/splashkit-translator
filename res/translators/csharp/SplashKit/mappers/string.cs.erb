@@ -1,0 +1,46 @@
+<%#
+  String mappers
+%>
+
+    [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
+    private struct __sklib_string
+    {
+      internal IntPtr str;
+      internal int    size;
+      internal IntPtr ptr;
+    }
+
+    private static __sklib_string __skadapter__to_sklib_string(string s)
+    {
+      s = s == null ? "": s;
+      int totalLength = s.Length + 1;
+      __sklib_string result;
+      result.size = totalLength;
+
+      result.str = Marshal.AllocHGlobal(totalLength);
+
+      Marshal.Copy(System.Text.Encoding.ASCII.GetBytes(s), 0, result.str, s.Length);
+      Marshal.WriteByte(result.str, s.Length, 0);
+
+      result.ptr = IntPtr.Zero;
+      return result;
+    }
+
+    [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_string", CharSet=CharSet.Ansi)]
+    private static extern void __sklib__free__sklib_string(__sklib_string s);
+
+    private static void __skadapter__free__sklib_string(ref __sklib_string s)
+    {
+      Marshal.FreeHGlobal(s.str);
+      s.str = IntPtr.Zero;
+    }
+
+    private static string __skadapter__to_string(__sklib_string s)
+    {
+      byte[] bytes = new byte[s.size];
+      Marshal.Copy(s.str, bytes, 0, bytes.Length);
+
+      string result = System.Text.Encoding.ASCII.GetString (bytes);
+      __sklib__free__sklib_string(s);
+      return result;
+    }

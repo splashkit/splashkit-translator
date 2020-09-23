@@ -1,0 +1,24 @@
+from ctypes import *
+from enum import Enum
+from platform import system
+
+if system() == 'Darwin':
+  # macOS uses .dylib extension
+  cdll.LoadLibrary("libSplashKit.dylib")
+  sklib = CDLL("libsplashkit.dylib")
+elif system() == 'Linux':
+  # Linux uses .so extension
+  cdll.LoadLibrary("libSplashKit.so")
+  sklib = CDLL("libSplashKit.so")
+else:
+  # Windows uses .dll extension:
+  cdll.LoadLibrary("libSplashKit.dll")
+  sklib = CDLL("libsplashkit.dll")
+
+<%= read_template 'ctypes/types' %>
+
+<%= read_template 'ctypes/mappers' %>
+
+<%= read_template 'ctypes/functions' %>
+
+<%= read_template 'implementation/functions' %>

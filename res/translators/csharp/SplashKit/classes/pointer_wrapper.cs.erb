@@ -1,0 +1,155 @@
+<%
+  if @typealiases.count > 0
+%>
+//----------------------------------------------------------------------------
+// PointerWrapper.cs
+//----------------------------------------------------------------------------
+//
+//  Contains code used by the SplashKit resources.
+//
+//----------------------------------------------------------------------------
+
+    /// <summary>
+    /// Wraps a pointer to a SplashKit resource
+    /// </summary>
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public abstract class PointerWrapper : IDisposable
+    {
+        /// <summary>
+        /// The ptrRegistry is responsible for maintaining copies of all wrapped SplashKit pointers.
+        /// </summary>
+        protected static readonly Dictionary<IntPtr, PointerWrapper> _ptrRegister;
+
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        internal static void Remove(IntPtr ptr)
+        {
+            // System.Console.WriteLine("Delete {0}", ptr);
+            if (_ptrRegister.ContainsKey(ptr))
+            {
+                _ptrRegister.Remove(ptr);
+            }
+        }
+
+        private static FreeNotifier _RemoveMethod = PointerWrapper.Remove;
+
+        static PointerWrapper()
+        {
+            //Register Remove with SplashKit
+            //Console.WriteLine("Registering");
+            _ptrRegister = new Dictionary<IntPtr, PointerWrapper>();
+            SplashKit.RegisterFreeNotifier(_RemoveMethod);
+        }
+
+        /// <summary>
+        /// "Super Dodgy" (but correct) work around for the fact that C# has no unload methods for classes.
+        /// </summary>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        internal class ReleaserClass
+        {
+            ~ReleaserClass()
+            {
+                //Console.WriteLine("Deregistering");
+                SplashKit.DeregisterFreeNotifier(_RemoveMethod);
+            }
+        }
+
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        internal static ReleaserClass releaser = new ReleaserClass();
+
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        protected internal IntPtr Pointer;
+
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        protected internal abstract void DoFree();
+
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough(), System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        internal PointerWrapper(IntPtr ptr, bool register)
+        {
+            Pointer = ptr;
+
+            if ( ! register ) return;
+
+            if ( PointerWrapper._ptrRegister.ContainsKey(ptr) ) throw new InvalidOperationException("Error managing resources -- attempting to create/load object twice.");
+            PointerWrapper._ptrRegister[ptr] = this;
+        }
+
+        protected PointerWrapper(PointerWrapper other)
+        {
+          Pointer = other.Pointer;
+        }
+
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough(),System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static implicit operator IntPtr(PointerWrapper p)
+        {
+            if ( p == null ) return IntPtr.Zero;
+            else return p.Pointer;
+        }
+
+        #region IDisposable Members
+
+        /// <summary>
+        /// Clean up the native resources used by this resource.
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
+        public void Dispose()
+        {
+            if (PointerWrapper._ptrRegister.ContainsKey(this.Pointer))
+                DoFree();
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Returns a string representation of the resource. This is in the format
+        /// "Type @address".
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
+        public override String ToString()
+        {
+            return String.Format("{0} @{1:x}", GetType().Name, Pointer);
+        }
+
+        /// <summary>
+        /// Determines if the PointerWrappers is equal to the passed in object.
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
+        public override bool Equals(object other)
+        {
+            if (other == null) return this.Pointer == IntPtr.Zero;
+            if (other is PointerWrapper) return this.Pointer == ((PointerWrapper)other).Pointer;
+            else if (other is IntPtr) return this.Pointer == ((IntPtr)other);
+            else return false;
+        }
+
+        /// <summary>
+        /// Returns the hash code of the PointerWrapper based on what it points to.
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
+        public override int GetHashCode()
+        {
+            return this.Pointer.GetHashCode();
+        }
+
+        /// <summary>
+        /// Determines if two PointerWrappers are equal.
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
+        public static bool operator ==(PointerWrapper pw1, PointerWrapper pw2)
+        {
+            if ((object)pw1 == null && (object)pw2 == null) return true;
+            if ((object)pw1 == null || (object)pw2 == null) return false;
+            return pw1.Pointer == pw2.Pointer;
+        }
+
+        /// <summary>
+        /// Determines if two PointerWrappers are not equal.
+        /// </summary>
+        [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
+        public static bool operator !=(PointerWrapper pw1, PointerWrapper pw2)
+        {
+            if ((object)pw1 == null && (object)pw2 == null) return false;
+            if ((object)pw1 == null || (object)pw2 == null) return true;
+            return pw1.Pointer != pw2.Pointer;
+        }
+    }
+<% end %>

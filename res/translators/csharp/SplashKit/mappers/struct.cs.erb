@@ -1,0 +1,78 @@
+<%#
+    Structs must have each field converted to a compatible Lib type (i.e., the
+    field type `foo' becomes `__sklib_foo'). Then mappers must be made to and
+    from the Lib and SK code. Can't use a macro for this and cannot be a static
+    cast so we must generate the functions individually.
+ %>
+<%
+  @structs.each do |struct|
+%>
+<%#
+    Struct mappers must be made to and from the Lib and SK code.
+    Can't use a macro for this and cannot be a static cast so we must
+    generate the functions individually.
+ %>
+<%#
+    Make mapper function for struct -> __sklib_struct
+%>
+
+    private static __sklib_<%= struct[:name] %> __skadapter__to_sklib_<%= struct[:name] %>(<%= struct[:name].to_pascal_case %> v)
+    {
+      __sklib_<%= struct[:name] %> __skreturn;
+<%#
+      For every field, convert using mapper functions for this field's type
+%>
+<%
+      struct[:fields].each do |field_name, field_data|
+        # If an array copy over each value in the array (1D array << {1,2}D array)
+        if field_data[:is_array]
+          total_size = field_data[:array_dimension_sizes].inject :*
+          array_size_as_one_dimensional(field_data).times do |i|
+%>
+      __skreturn.<%= field_name.field_case %>_<%= i %> = <%= lib_mapper_fn_for field_data %>(v.<%= field_name.field_case %><%= array_mapper_index_for(field_data, i) %>);
+<%
+          end # end times
+        else # else, copy over using lib type and sk to lib type mapper
+%>
+      __skreturn.<%= field_name.field_case %> = <%= lib_mapper_fn_for field_data %>(v.<%= field_name.field_case %>);
+<%
+        end # end if
+      end # end fields.each
+%>
+      return __skreturn;
+    }
+<%#
+    Make mapper function for __sklib_struct -> struct
+%>
+    private static <%= struct[:name].to_pascal_case() %> __skadapter__to_<%= struct[:name] %>(__sklib_<%= struct[:name] %> v)
+    {
+      <%= struct[:name].to_pascal_case() %> __skreturn;
+<%#
+      For every field, convert using mapper functions for this field's type
+%>
+<%
+      struct[:fields].each do |field_name, field_data|
+        # If an array copy over each value in the array ({1,2}D array << 1D array)
+        if field_data[:is_array]
+          sizes = field_data[:array_dimension_sizes].join ","
+%>
+      __skreturn.<%= field_name.field_case %> = new <%= sk_type_for(field_data, ignore_array: true) %>[<%= sizes %>];
+<%
+          array_size_as_one_dimensional(field_data).times do |i|
+%>
+      __skreturn.<%= field_name.field_case %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name.field_case %>_<%= i %>);
+<%
+          end # end times
+        else # else standard copy converted as SK type using SK type mapper)
+%>
+      __skreturn.<%= field_name.field_case %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name.field_case %>);
+<%
+        end # end if
+      end # end fields.each
+%>
+      return __skreturn;
+    }
+
+<%
+    end # end struct.each
+%>

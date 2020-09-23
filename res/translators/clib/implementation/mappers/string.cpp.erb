@@ -11,17 +11,18 @@
     7. Return the wrapped `Bar::String'
 %>
 void <%= func_prefix %>__free__sklib_string(__sklib_string s) {
-    free(s.string);
+    free(s.ptr);
 }
 __sklib_string <%= func_prefix %>__to_sklib_string(const std::string &s) {
     __sklib_string __skreturn;
     __skreturn.size = static_cast<unsigned int>(s.length());
     __skreturn.string = (char *)malloc(__skreturn.size + 1);
+    __skreturn.ptr = __skreturn.string;
     strcpy(__skreturn.string, s.c_str());
     return __skreturn;
 }
 std::string <%= func_prefix %>__to_string(const __sklib_string &s) {
-    std:string result = std::string(s.string);
+    std::string result = std::string(s.string);
 <%
     # The library does not free string that it is converting. This will be
     # handled by the adapters that are calling into the SplashKit c library

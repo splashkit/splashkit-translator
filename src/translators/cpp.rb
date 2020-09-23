@@ -7,7 +7,7 @@ module Translators
   class CPP < AbstractTranslator
     def initialize(data, logging = false)
       super(data, logging)
-      @clib = ReusableCAdapter.new(@data, @logging)
+      @clib = ReusableCAdapter.new(data, @logging)
     end
 
     def render_templates
@@ -34,6 +34,20 @@ module Translators
       parameter_list  = sk_parameter_list_for function
       "#{return_type} #{name}(#{parameter_list})"
     end
+
+    def is_color_function(fn)
+      sk_type_for(fn[:return]) == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")
+    end
+
+    def docs_signatures_for(function)
+      result = [ sk_signature_for(function) ]
+
+      if is_color_function(function)
+        result.unshift "#define #{function[:name].to_upper_case}"
+      end
+
+      result
+    end  
 
     #=== internal ===
 

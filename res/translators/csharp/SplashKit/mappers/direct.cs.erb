@@ -1,0 +1,20 @@
+<%#
+  Direct type mappers have no change between the C- and C#-types and
+  can therefore directly translate one to the other by just returning the
+  value
+%>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IntPtr __skadapter__to_sklib_ptr(IntPtr v) { return v; }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IntPtr __skadapter__to_ptr(IntPtr v) { return v; }
+<%
+  direct_types.each do |c_type, cs_type|
+    c_type = c_type.tr("\s", "_")
+%>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static <%= cs_type %> __skadapter__to_sklib_<%= c_type %>(<%= cs_type %> v) { return v; }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static <%= cs_type %> __skadapter__to_<%= c_type %>(<%= cs_type %> v) { return v; }
+<%
+  end
+%>

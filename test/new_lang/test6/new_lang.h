@@ -13,6 +13,7 @@ namespace splashkit_lib
     {
       float x, y;
       int multi_name;
+      bool mapped;
     };
 
     /**

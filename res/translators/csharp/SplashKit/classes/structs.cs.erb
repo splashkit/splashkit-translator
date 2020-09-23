@@ -1,0 +1,121 @@
+<%#
+    Structs must have each field converted to a compatible Lib type (i.e., the
+    field type `foo' becomes `__sklib_foo'). Then mappers must be made to and
+    from the Lib and SK code. Can't use a macro for this and cannot be a static
+    cast so we must generate the functions individually.
+ %>
+<%
+  @structs.each do |struct|
+%>
+<%#
+    Definition of structs can use lib_struct_field_for for convenience
+%>
+
+  [ StructLayout( LayoutKind.Sequential, CharSet=CharSet.Ansi ) ]
+  internal struct __sklib_<%= struct[:name] %>
+
+  {
+<%
+      struct[:fields].each do |field_name, field_data|
+        if field_data[:is_array]
+%>
+    // Unpacking array due to C# Marshalling limitations
+<%
+          total_size = field_data[:array_dimension_sizes].inject :*
+          total_size.times do |i|
+%>
+    public <%= lib_type_for(field_data, ignore_array: true) %> <%= field_name.field_case %>_<%= i %>;
+<%
+          end # do total size times...
+        else
+%>
+    public <%= lib_struct_field_for(field_name, field_data) %>;
+<%
+        end
+      end # end fields.each
+%>
+
+  }
+
+  public struct <%= struct[:name].to_pascal_case() %>
+
+  {
+<%
+    struct[:fields].each do |field_name, field_data|
+%>
+    public <%= sk_struct_field_for(field_name, field_data) %>;
+<%
+    end # end fields.each
+
+    def get_method_data(fn)
+      {
+        method_name: fn[:name].to_s.to_pascal_case,
+        params: method_parameter_list_for(fn),
+        args: method_argument_list_for(fn),
+        static: fn[:attributes][:class] || fn[:attributes][:static].nil? ? nil : "static "
+      }
+    end
+
+    # Add methods
+    struct[:methods].each do |fn|
+      method_data = get_method_data(fn)
+      return_type = is_func?(fn) ? sk_type_for(fn[:return][:type]) : 'void'
+%>
+
+    public <%= method_data[:static] %><%= return_type %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
+    {
+<%      if is_func? fn %>
+        return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
+<%      else %>
+        SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
+<%      end %>
+    }
+
+<%
+    end # methods
+
+    struct[:properties].each do | property_name, property |
+      if property[:getter]
+        property_type = sk_type_for(property[:getter][:return][:type])
+        method_data = get_method_data(property[:getter])
+      else
+        property_type = sk_type_for(property[:setter][:parameters].select { |k,v| v[:type] != struct[:name] }.map { |k,v| v }.first[:type])
+        method_data = get_method_data(property[:setter])
+      end
+
+%>
+    public <%= method_data[:static] %><%= property_type %> <%= property_name.to_s.to_pascal_case %>
+
+    {
+<%
+      if property[:getter]
+        fn = property[:getter]
+        method_data = get_method_data(fn)
+        if method_data[:static].nil?
+%>
+        get { return SplashKit.<%= fn[:name].function_case %>(this); }
+<%      else %>
+        get { return SplashKit.<%= fn[:name].function_case %>(); }
+<%
+        end
+      end
+      if property[:setter]
+        fn = property[:setter]
+        method_data = get_method_data(fn)
+        if method_data[:static].nil?
+%>
+          set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+<%      else %>
+          set { SplashKit.<%= fn[:name].function_case %>(value); }
+<%
+        end
+      end
+%>
+    }
+<%
+    end # properties
+%>
+  }
+<%
+    end # end struct.each
+%>

@@ -1,0 +1,22 @@
+<%#
+    Function pointer translations
+%>
+<%
+  @function_pointers.each do |fp|
+    return_type = lib_type_for(fp[:return]) if is_func?(fp)
+    fp_param_decl = lib_parameter_list_for fp
+%>
+<%
+    if is_func?(fp)
+%>
+<%= fp[:name].type_case %> = CFUNCTYPE(<%= return_type %>, <%= fp_param_decl %>)
+<%
+    else
+%>
+<%= fp[:name].type_case %> = CFUNCTYPE(None, <%= fp_param_decl %>)
+<%
+    end # end if func
+%>
+<%
+  end # end function_pointers.each
+%>

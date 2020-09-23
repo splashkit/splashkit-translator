@@ -1,0 +1,12 @@
+<%
+  @typealiases.pluck(:name).each do |typealias|
+    class_name = typealias.to_pascal_case
+%>
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static IntPtr __skadapter__to_sklib_<%= typealias %>(<%= class_name %> v) { return v; }
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static <%= class_name %> __skadapter__to_<%= typealias %>(IntPtr v) { return <%= class_name %>.FetchOrCreate(v); }
+<%
+  end # typealiases.each
+%>

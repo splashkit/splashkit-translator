@@ -1,0 +1,89 @@
+<%#
+  Record declaration from structs
+%>
+
+class _FieldIndexer:
+    def __init__(self, obj, field, dim1, dim2):
+        self.obj = obj
+        self.field = field
+        self.dim1 = dim1
+        self.dim2 = dim2
+
+    def __getitem__(self, index):
+        if ( isinstance(index, tuple)  ):
+            return getattr(self.obj, self.field)[index[0] * self.dim2 + index[1]]
+        else:
+            return getattr(self.obj, self.field)[index]
+
+    def __setitem__(self, index, value):
+        if ( isinstance(index, tuple)  ):
+            getattr(self.obj, self.field)[index[0] * self.dim2 + index[1]] = value
+        else:
+            getattr(self.obj, self.field)[index] = value
+
+
+<%
+  @structs.each do |struct|
+%>
+class <%= sklib_prefix() %>_<%= struct[:name].variable_case %>(Structure):
+    _fields_ = [
+<%
+    # Convert each field type into Python type
+    struct[:fields].each do |field_name, field_data|
+      if field_data[:is_array] || enum_type = @enums.select { |e| e[:name] == field_data[:type]}.first
+        field_name = "_#{field_name}"
+      end
+%>
+        ("<%= field_name.variable_case %>", <%= lib_type_for(field_data) %>),
+<%
+    end # end fields.each
+%>
+    ]
+
+    def __init__(self):
+<%
+    struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
+      # If an array copy over each value in the array (1D array << {1,2}D array)
+      if field_data[:is_array]
+        dim1 = field_data[:array_dimension_sizes][0]
+        dim2 = field_data[:array_dimension_sizes][1] || 0
+%>
+      self.<%= field_name %> = _FieldIndexer(self, "_<%= field_name %>", <%=dim1%>, <%=dim2%>)
+<%
+      end # end if
+    end # end fields.each
+%>
+      super().__init__()
+
+<%
+    struct[:fields].each do |field_name, field_data|
+      # Ensure field name is in correct case for language
+      field_name = field_name.variable_case
+      type_name = field_data[:type].type_case
+      enum_type = @enums.select { |e| e[:name] == field_data[:type]}.first
+
+      # If an array copy over each value in the array (1D array << {1,2}D array)
+      if enum_type
+%>
+    @property
+    def <%=field_name%>(self):
+        return <%=type_name%>(self._<%=field_name%>)
+
+    @<%=field_name%>.setter
+    def <%=field_name%>(self, value):
+        if isinstance(value, <%=type_name%>):
+            self._<%=field_name%> = value.value
+        else:
+            self._<%=field_name%> = value
+
+<%
+      end # if
+    end # fields each
+%>
+<%= struct[:name].type_case %> = <%= sklib_prefix() %>_<%= struct[:name].variable_case %>
+
+<%
+  end # end structs.each
+%>

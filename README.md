@@ -44,7 +44,7 @@ Ensure you have HeaderDoc installed:
 
 - Under macOS, you will need to have Xcode with Developer Tools installed.
 - Under Ubuntu, you can download HeaderDoc at Apple's OpenSource Developer Tools
-  [here](http://opensource.apple.com/release/developer-tools-64/).
+  [here](https://opensource.apple.com/tarballs/headerdoc/).
 
 Install dependencies using `bundle`:
 
@@ -245,7 +245,7 @@ When added to a typedef, the type will be declared as a class:
 typedef struct _sound_data *sound_effect;
 ```
 
-<p id="pr16-class"/>
+<a id="pr16-class"></a>
 Note that typedef aliases to pointers **must** be declared with a `class` attribute.
 
 #### Usage in functions
@@ -288,11 +288,11 @@ Associates a function to a class. Requires the `class` or `static` attribute to
 be set. The name specified by `method` will be the method name that will be used
 as the method on the class. See the above example.
 
-<p id="pr2-instance-method"/>
+<a id="pr2-instance-method"></a>
 When `method` is used with the `class` attribute, an _instance method_ will be
 generated on the class whose name is specified by `class`.
 
-<p id="pr2-static-method"/>
+<a id="pr2-static-method"></a>
 When `method` is used with the `static` attribute, a _static method_ will be
 generated on the class whose name is specified by `static`.
 
@@ -300,7 +300,7 @@ generated on the class whose name is specified by `static`.
 
 Associates a function as the constructor to a class.
 
-<p id="pr1-constructor"/>
+<a id="pr1-constructor"></a>
 Requires the `class` attribute to be set in order to construct an _instance_
 of that class.
 
@@ -322,12 +322,12 @@ This will convert the above to an equivalent OO constructor:
 SoundEffect(string name, string filename)
 ```
 
-<p id="pr3-constructor"/>
+<a id="pr3-constructor"></a>
 If defining a `constructor`, then you cannot violate this attribute with a
 `destructor` attribute in the same HeaderDoc block.
 
-<p id="pr4-constructor"/>
-<p id="pr5-destructor"/>
+<a id="pr4-constructor"></a>
+<a id="pr5-destructor"></a>
 Unless `static` is specified, then a `destructor` function cannot _also_ act as
 a instance `getter`, `setter` or `method`.
 
@@ -335,7 +335,7 @@ a instance `getter`, `setter` or `method`.
 
 Same as `constructor`, but for a destructor.
 
-<p id="pr1-destructor"/>
+<a id="pr1-destructor"></a>
 Requires the `class` attribute to be set in order to destruct an _instance_
 of that class.
 
@@ -363,12 +363,12 @@ the `effect` parameter:
 delete someSoundEffectInstance;
 ```
 
-<p id="pr3-destructor"/>
+<a id="pr3-destructor"></a>
 If defining a `destructor`, then you cannot violate this attribute with a
 `constructor` attribute in the same HeaderDoc block.
 
-<p id="pr4-destructor"/>
-<p id="pr5-destructor"/>
+<a id="pr4-destructor"></a>
+<a id="pr5-destructor"></a>
 Unless `static` is specified, then a `destructor` function cannot _also_ act as
 an instance `getter`, `setter` or `method`.
 
@@ -377,13 +377,13 @@ an instance `getter`, `setter` or `method`.
 Specifies the name of the parameter which should act as `this` or `self` on the
 function call.
 
-<p id="pr1-self"/>
+<a id="pr1-self"></a>
 When the function is converted to a method for an object-oriented language,
 the instance calling the method will be passed into parameter specified by
 `self`.
 
-<p id="pr7-self"/>
-<p id="pr8-self"/>
+<a id="pr7-self"></a>
+<a id="pr8-self"></a>
 To know which type the `self` parameter would be, list the `class` of that
 parameter and make sure it matches the name of the parameter indicated by
 `self`.
@@ -435,14 +435,14 @@ For translated languages that do not support overloaded function names, the
 name specified by `suffix` name will be used as a suffix appended to the global
 and instance name of the function.
 
-<p id="pr15-suffix"/>
+<a id="pr15-suffix"></a>
 If `class` is specified, then the `method` name appended with `suffix` must be
 unique _within that `class`_.
 
 If `static` is specified, then function name appended with `suffix` must be
 unique _within that `static` namespace_.
 
-<p id="pr14-suffix"/>
+<a id="pr14-suffix"></a>
 If neither are specified, then function name appended with `suffix` must be
 unique _globally_.
 
@@ -480,9 +480,9 @@ Audio.PlaySoundEffect(effect, 3, 10.0f)
 Creates a getter method to the `class` or `static` module specified. Requires
 either:
 
-<p id="pr2-instance-getter"/>
-<p id="pr4-instance-getter"/>
-<p id="pr2-static-getter"/>
+<a id="pr2-instance-getter"></a>
+<a id="pr4-instance-getter"></a>
+<a id="pr2-static-getter"></a>
 
 * `class` and `self` to make an _instance_ getter on the an instance whose class
    is specified by `class`, or
@@ -490,16 +490,17 @@ either:
 
 Must be set on a function that:
 
-<p id="pr9-getter"/>
+<a id="pr9-getter"></a>
+
 * has __exactly__ _zero_ or _one_ parameters, depending on if you are using
   `class` or `static`, and
 * is non-void.
 
-<p id="pr12-getter"/>
+<a id="pr12-getter"></a>
 If you are writing a __`static`__ getter, then there must be no parameters.
 
-<p id="pr6-getter"/>
-<p id="pr10-getter"/>
+<a id="pr6-getter"></a>
+<a id="pr10-getter"></a>
 If you are writing a __`class`__ setter, then you will need __exactly _one_
 parameter__, that being the parameter which will be used as `self`. You must
 not specify that the function also a `method` (unless `static` is also supplied)
@@ -538,9 +539,9 @@ if (myDatabase.queryResult.IsEmpty) { ... };
 Creates a setter method on the `class` instance of `static` module. Requires
 either:
 
-<p id="pr2-instance-setter"/>
-<p id="pr4-instance-setter"/>
-<p id="pr2-static-setter"/>
+<a id="pr2-instance-setter"></a>
+<a id="pr4-instance-setter"></a>
+<a id="pr2-static-setter"></a>
 
 * `class` and `self` to make an _instance_ setter on the an instance whose class
    is specified by `class`, or
@@ -550,18 +551,18 @@ either:
 Must be set on a function that has __exactly__ _one_ or _two_ parameters, which
 depends on if you are using `class` or `static`.
 
-<p id="pr13-setter"/>
+<a id="pr13-setter"></a>
 If you are writing a __`static`__ setter, then you will need __exactly one
 parameter__, being the the second must the value that is to be set.
 
-<p id="pr11-setter"/>
+<a id="pr11-setter"></a>
 If you are writing a __`class`__ setter, then you will need __exactly _two_
 parameters__, where:
 
 1. the first must be the the parameter which will be used as `self`, and
 2. the second must the value that is to be set.
 
-<p id="pr6-setter"/>
+<a id="pr6-setter"></a>
 You must not specify that this is also a `method` (unless `static` is also
 supplied) or a `constructor` or `destructor`.
 
@@ -650,10 +651,10 @@ If any of these basic rules are violated, then the parser will throw a fatal
 error and stop parsing along with its respective parser rule (PR) number
 for reference to this list.
 
-1. <p id="rule-1"/>
+1. <a id="rule-1"></a>
    Attributes marked with [`self`](#pr1-self), [`destructor`](#pr1-destructor)
    [`constructor`](#pr1-constructor) must have a `class` attribute specified.
-2. <p id="rule-2"/>
+2. <a id="rule-2"></a>
    Attributes marked with `method`, `getter` or `setter` must be marked with
    either:
 
@@ -661,39 +662,39 @@ for reference to this list.
 
     (ii) **`static`** to make it a [static method](#pr2-static-method), [static getter](#pr2-static-getter) or [static setter](#pr2-static-setter) on a class or module indicated by static.
 
-3. <p id="rule-3"/>
+3. <a id="rule-3"></a>
    There can never be both [`constructor`](#pr3-constructor) and
    [`destructor`](#pr3-destructor) attributes marked together in the same
    HeaderDoc block.
-4. <p id="rule-4"/>
+4. <a id="rule-4"></a>
    If you do not supply `static`, then you cannot have a
    [`constructor`](#pr4-constructor) or [`destructor`](#pr4-destructor) with
    a `getter` or `setter` in the same block. This would imply that there is an
    [instance getter](#pr4-instance-getter) or
    [instance setter](#pr4-instance-setter) along with a constructor or
    destructor of that instance by the _one_ function.
-5. <p id="rule-5"/>
+5. <a id="rule-5"></a>
    You cannot supply [`constructor`](#pr5-constructor) or
    [`destructor`](#pr5-destructor)  and `method` unless
    `static` is also supplied. This will make a static method on
    the class or module specified by static but a destructor/constructor on
    the class indicated by `class`.
-6. <p id="rule-6"/>
+6. <a id="rule-6"></a>
    Same as above, except for [`getter`](#pr6-getter)s and
    [`setter`](#pr6-setter)s.
-7. <p id="rule-7"/>
+7. <a id="rule-7"></a>
    A `self` attribute [should always have a value that matches the name of a
    parameter](#pr7-self) in the function.
-8. <p id="rule-8"/>
+8. <a id="rule-8"></a>
    When `self` is specified, then the parameter name it specifies
    should [have the same type as the `class` specified](#pr8-self).
-9. <p id="rule-9"/>
+9. <a id="rule-9"></a>
    [A `getter` should always return something](#pr9-getter), and must not return
    `void` unless it is `void*`.
-10. <p id="rule-10"/>
+10. <a id="rule-10"></a>
     [When `class` is specified with a `getter`, there should
     always be one parameter](#pr10-getter) (the parameter for `self`).
-11. <p id="rule-11"/>
+11. <a id="rule-11"></a>
     [When `class` is specified with a `setter`, there should
     always be two parameters](#pr11-setter):
 
@@ -701,18 +702,18 @@ for reference to this list.
 
     (ii) the value to set.
 
-12. <p id="rule-12"/>
+12. <a id="rule-12"></a>
     [When `static` is specified with a `getter`, there should always be no
     parameters](#pr12-getter).
-13. <p id="rule-13"/>
+13. <a id="rule-13"></a>
     [When `static` is specified with a `setter`, there should always be one
     parameter](#pr13-setter). That is, the value to set.
-14. <p id="rule-14"/>
+14. <a id="rule-14"></a>
     [When `suffix` is used, the name must be unique to the global
     namespace](#pr14-suffix).
-15. <p id="rule-15"/>
+15. <a id="rule-15"></a>
     [When `suffix` is used with a `class` and `method`, the name must be unique
     to the class namespace](#pr15-suffix).
-16. <p id="rule-16"/>
+16. <a id="rule-16"></a>
     [When a `class` is used on a type alias, then the type alias must be an
     alias to a pointer](#pr16-class).

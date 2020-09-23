@@ -10,7 +10,7 @@ namespace splashkit_lib
    * @field values description
    */
   struct array_1d {
-    int values[2];
+    double values[9];
   };
 
   /**
@@ -19,6 +19,22 @@ namespace splashkit_lib
    */
   struct array_2d {
     int values[2][3];
+  };
+
+  /**
+   * point
+   * @field x desc
+   * @field y desc
+   */
+  struct point {
+    double x, y;
+  };
+
+  /**
+   * @field my_points points
+   */
+  struct triangle {
+    point my_points[3];
   };
 
   /**
@@ -32,4 +48,23 @@ namespace splashkit_lib
    * @param v [description]
    */
   void update_2d(array_2d &v);
+
+  /**
+   * [get_triangle description]
+   * @return [description]
+   */
+  triangle get_triangle();
+
+  /**
+   * [print_triangle description]
+   * @param t [description]
+   */
+  void print_triangle(triangle t);
+
+  /**
+   * [update_triangle description]
+   * @param t [description]
+   */
+  void update_triangle(triangle &t);
+
 }

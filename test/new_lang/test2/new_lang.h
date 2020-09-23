@@ -3,6 +3,8 @@
  * @attribute group test
  */
 
+#include<cstdint>
+
  namespace splashkit_lib
  {
     /**
@@ -50,7 +52,7 @@
      * [say_yay_long description];
      * @param x [description]
      */
-    void say_yay_long(long x);
+    void say_yay_long(int64_t x);
 
     /**
      * [say_yay_uint description];

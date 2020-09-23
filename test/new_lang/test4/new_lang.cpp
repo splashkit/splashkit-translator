@@ -41,7 +41,7 @@ namespace splashkit_lib
      x = x * 2;
    }
 
-   void update_long(long &x)
+   void update_long(int64_t &x)
    {
      x = x * 2;
    }
