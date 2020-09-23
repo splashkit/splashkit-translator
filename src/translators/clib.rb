@@ -274,7 +274,7 @@ module Translators
     # Ensure name is the same as the parent class for template lookup
     #
     def name
-      'CLib'
+      'clib'
     end
   end
 end
