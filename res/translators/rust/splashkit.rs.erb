@@ -1,0 +1,30 @@
+<%#
+  Define Rust - SplashKit interface
+%>
+#[link(name = "SplashKit")]
+extern "C" {
+<%
+  @functions.each do |function|
+%>
+  <%= lib_signature_for(function) %>;
+
+<%
+  end # functions.each
+%>
+}
+
+<%#
+  Implement Rust functions -- Rust --> this code --> Interface --> C/C++
+%>
+<%
+  @functions.each do |function|
+    lib_fn_name = lib_function_name_for(function)
+%>
+pub <%= sk_signature_for(function) %> {
+  unsafe {
+    <%= lib_fn_name %>();
+  }
+}
+<%
+  end # functions.each
+%>
