@@ -7,7 +7,6 @@ libSplashKit-x64.dylib.dSYM
 TestProgram
 TestProgram.exe
 TestProgram.o
-test_program.rs
 splashkit.o
 splashkit.ppu
 test_program
