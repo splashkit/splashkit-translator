@@ -32,10 +32,38 @@ module Translators
     }
 
     #
+    # Direct type map primitive data types between the adapter and library code.
+    #
+    DIRECT_TYPES = {
+      'int8_t'          => 'i8',
+      'int'             => 'i32',
+      'short'           => 'i16',
+      'int64_t'         => 'i64',
+      'float'           => 'f32',
+      'double'          => 'f64',
+      'byte'            => 'u8',
+      'unsigned int'    => 'u32',
+      'unsigned short'  => 'u16'
+    }
+
+    SK_TYPES_TO_LIB_TYPES = {
+      'bool'      => 'i32',
+      'enum'      => 'i32',
+      'char'      => 'u8',
+      'unsigned char'   => 'u8',
+    }
+
+    SK_TYPES_TO_RUST_TYPES = {
+      'bool'      => 'bool',
+      'char'      => 'char',
+      'unsigned char'   => 'char',
+    }
+
+    #
     # Generate a Rust type signature from a SK function
     #
     def signature_syntax(function, function_name, parameter_list, return_type, opts = {})
-      "fn #{function_name}()"
+      "fn #{function_name}(#{parameter_list})"
     end
 
     #
@@ -44,6 +72,22 @@ module Translators
     # as this function is used to for both Library and Front-End code
     #
     def parameter_list_syntax(parameters, type_conversion_fn, opts = {})
+      parameters.map do |param_name, param_data|
+        type = send(type_conversion_fn, param_data)
+        # if param_data[:is_reference]
+        #   var = param_data[:is_const] ? 'const ' : 'var '
+        # end
+        "#{param_name.variable_case}: #{type}"
+      end.join('; ')
     end
+
+    #
+    # Handle any explicitly mapped data types
+    #
+    def type_exceptions(type_data, type_conversion_fn, opts = {})
+      # No exception for this type
+      return nil
+    end
+
   end
 end
