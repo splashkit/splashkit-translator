@@ -26,7 +26,8 @@ extern "C" {
   @functions.each do |function|
     lib_fn_name = lib_function_name_for(function)
     param_list  = lib_argument_list_for(function)
-    func_call   = "#{lib_fn_name}(#{param_list})"
+    return_val  = "__skreturn = " if is_func?(function)
+    func_call   = "#{return_val}#{lib_fn_name}(#{param_list})"
 %>
 pub <%= sk_signature_for(function) %> {
 <%
@@ -36,10 +37,25 @@ pub <%= sk_signature_for(function) %> {
   let __skparam__<%= param_name %>: <%= lib_type_for(param_data) %> = <%= lib_mapper_fn_for param_data %>(<%= param_name.variable_case %>);
 <%
     end # end parameters.each
+
+    # if it is a function... then add a mutable return variable
+    if is_func?(function)
+%>
+  let mut __skreturn: <%= sk_type_for(function[:return], is_lib: true) %>;
+<%
+    end # end if func
 %>
   unsafe {
     <%= func_call %>;
   }
+
+<%
+    if is_func?(function)
+%>
+  return <%= sk_mapper_fn_for function[:return] %>(__skreturn);
+<%
+    end # end if function
+%>
 }
 <%
   end # functions.each

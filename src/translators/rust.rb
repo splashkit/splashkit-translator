@@ -63,7 +63,12 @@ module Translators
     # Generate a Rust type signature from a SK function
     #
     def signature_syntax(function, function_name, parameter_list, return_type, opts = {})
-      "fn #{function_name}(#{parameter_list})"
+      func_suffix = " -> #{return_type}" if is_func?(function)
+      "fn #{function_name}(#{parameter_list})#{func_suffix}"
+    end
+
+    def sk_function_name_for(function)
+      "#{function[:name].function_case}#{function[:attributes][:suffix].nil? ? '':'_'}#{function[:attributes][:suffix]}"
     end
 
     #
