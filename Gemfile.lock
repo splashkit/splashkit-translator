@@ -3,11 +3,11 @@ GEM
   specs:
     colorize (0.8.1)
     hashie (3.4.4)
-    mini_portile2 (2.1.0)
-    nokogiri (1.6.8)
-      mini_portile2 (~> 2.1.0)
-      pkg-config (~> 1.1.7)
-    pkg-config (1.1.7)
+    mini_portile2 (2.6.1)
+    nokogiri (1.12.5)
+      mini_portile2 (~> 2.6.1)
+      racc (~> 1.4)
+    racc (1.5.2)
 
 PLATFORMS
   ruby
