@@ -79,11 +79,28 @@ module Translators
     def parameter_list_syntax(parameters, type_conversion_fn, opts = {})
       parameters.map do |param_name, param_data|
         type = send(type_conversion_fn, param_data)
-        # if param_data[:is_reference]
-        #   var = param_data[:is_const] ? 'const ' : 'var '
-        # end
-        "#{param_name.variable_case}: #{type}"
+        var = if param_data[:is_reference]
+          '&mut ' # param_data[:is_const] ? '* const ' : '* mut '
+        else
+          ''
+        end
+        "#{param_name.variable_case}: #{var}#{type}"
       end.join('; ')
+    end
+
+    #
+    # Joins the argument list using a comma
+    #
+    def argument_list_syntax(arguments)
+      args = arguments.map do | arg_data |
+        if arg_data[:param_data][:is_reference] # && ! arg_data[:param_data][:is_const]
+          "&mut #{arg_data[:name]}"
+        else
+          arg_data[:name]
+        end
+      end
+
+      args.join(', ')
     end
 
     #

@@ -33,8 +33,10 @@ pub <%= sk_signature_for(function) %> {
 <%
     # Declare each parameter prefixed with __skparam
     function[:parameters].each do |param_name, param_data|
+      ptr = '*' if param_data[:is_reference]
+      mut = 'mut ' if param_data[:is_reference]
 %>
-  let __skparam__<%= param_name %>: <%= lib_type_for(param_data) %> = <%= lib_mapper_fn_for param_data %>(<%= param_name.variable_case %>);
+  let <%= mut%>__skparam__<%= param_name %>: <%= lib_type_for(param_data) %> = <%= lib_mapper_fn_for param_data %>(<%= ptr%> <%= param_name.variable_case %>);
 <%
     end # end parameters.each
 
@@ -50,6 +52,15 @@ pub <%= sk_signature_for(function) %> {
   }
 
 <%
+    # Declare each parameter prefixed with __skparam
+    function[:parameters].each do |param_name, param_data|
+      next unless param_data[:is_reference]
+%>
+  *<%= param_name.variable_case %> = <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
+<%
+    end # end parameters.each
+
+    # if it is a function... then return value...
     if is_func?(function)
 %>
   return <%= sk_mapper_fn_for function[:return] %>(__skreturn);
