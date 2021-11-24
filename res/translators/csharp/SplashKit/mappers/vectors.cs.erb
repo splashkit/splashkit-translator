@@ -3,7 +3,7 @@
 %>
 
     // Based on: https://social.msdn.microsoft.com/Forums/vstudio/en-US/0f5ba27d-92c2-4b41-b717-16e759b68087/how-to-marshal-an-array-of-struct-pointer?forum=csharpgeneral
-    private static IntPtr ToIntPtr<T>(T[] items)
+    private static IntPtr ToIntPtr<T>(T[] items) where T : struct
     {
         IntPtr result, tmp = IntPtr.Zero;
 
@@ -28,7 +28,7 @@
         return result;
     }
 
-    private static T[] FromIntPtr<T>(IntPtr ptr, int count)
+    private static T[] FromIntPtr<T>(IntPtr ptr, int count) where T : struct
     {
         T[] result = new T[count];
         IntPtr tmp;

@@ -14,9 +14,11 @@ public class <%= class_name %> : PointerWrapper
 
   internal static <%= class_name %> FetchOrCreate(IntPtr ptr)
   {
+    #pragma warning disable CS8603
     if (ptr == IntPtr.Zero) return null;
 
     if (_ptrRegister.ContainsKey(ptr)) return _ptrRegister[ptr] as <%= class_name %>;
+    #pragma warning restore CS8603
     return new <%= class_name %>(ptr);
   }
 <% else %>

@@ -79,7 +79,7 @@
         }
 
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough(),System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
-        public static implicit operator IntPtr(PointerWrapper p)
+        public static implicit operator IntPtr(PointerWrapper? p)
         {
             if ( p == null ) return IntPtr.Zero;
             else return p.Pointer;
@@ -113,7 +113,7 @@
         /// Determines if the PointerWrappers is equal to the passed in object.
         /// </summary>
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (other == null) return this.Pointer == IntPtr.Zero;
             if (other is PointerWrapper) return this.Pointer == ((PointerWrapper)other).Pointer;
@@ -134,10 +134,10 @@
         /// Determines if two PointerWrappers are equal.
         /// </summary>
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
-        public static bool operator ==(PointerWrapper pw1, PointerWrapper pw2)
+        public static bool operator ==(PointerWrapper? pw1, PointerWrapper? pw2)
         {
-            if ((object)pw1 == null && (object)pw2 == null) return true;
-            if ((object)pw1 == null || (object)pw2 == null) return false;
+            if (pw1 == null && pw2 == null) return true;
+            if (pw1 == null || pw2 == null) return false;
             return pw1.Pointer == pw2.Pointer;
         }
 
@@ -145,10 +145,10 @@
         /// Determines if two PointerWrappers are not equal.
         /// </summary>
         [System.Diagnostics.DebuggerNonUserCode(), System.Diagnostics.DebuggerStepThrough()]
-        public static bool operator !=(PointerWrapper pw1, PointerWrapper pw2)
+        public static bool operator !=(PointerWrapper? pw1, PointerWrapper? pw2)
         {
-            if ((object)pw1 == null && (object)pw2 == null) return false;
-            if ((object)pw1 == null || (object)pw2 == null) return true;
+            if (pw1 == null && pw2 == null) return false;
+            if (pw1 == null || pw2 == null) return true;
             return pw1.Pointer != pw2.Pointer;
         }
     }
