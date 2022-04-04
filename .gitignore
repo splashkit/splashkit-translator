@@ -55,9 +55,6 @@ build-iPhoneSimulator/
 # Remove build directory
 /build
 
-# Remove ruby version
-.ruby-version
-
 # Remove test out directory
 /test/out
 /test/new_lang/test_program.py
