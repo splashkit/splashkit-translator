@@ -5,7 +5,6 @@ USER 0
 RUN yum update -y \
     && yum install -y \
     libxml2-devel \
-    libxml2-devel \
     perl-Devel-Peek \
     perl-FreezeThaw \
     perl-HTML-Parser \
