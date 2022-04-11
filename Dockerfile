@@ -1,20 +1,18 @@
-FROM centos:centos8
+FROM centos/ruby-27-centos7:2.7
+
+USER 0
+
+RUN yum update -y \
+    && yum install -y \
+    libxml2-devel \
+    perl-Devel-Peek \
+    perl-FreezeThaw \
+    perl-HTML-Parser \
+    perl-libwww-perl \
+    wget \
+    && yum clean all
 
 WORKDIR /headerdoc_build
-RUN dnf update -y \
-&& dnf install -y epel-release \
-&& dnf groupinstall -y "Development Tools" \
-&& dnf install -y \
-libxml2-devel \
-perl-HTML-Parser \
-perl-libwww-perl \
-perl-FreezeThaw \
-libxml2-devel \
-wget \
-perl-Devel-Peek \
-ruby-devel \
-rubygem-bundler \
-&& dnf clean all
 
 RUN wget https://opensource.apple.com/tarballs/headerdoc/headerdoc-8.9.5.tar.gz -qO- | tar xzf -
 WORKDIR headerdoc-8.9.5
@@ -23,5 +21,7 @@ RUN make realinstall
 
 COPY . /translator
 WORKDIR /translator
-RUN gem install bundler && bundle install --system
+
+RUN bundle install --system
+
 CMD ./translate

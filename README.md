@@ -9,6 +9,7 @@ Translates the SplashKit C++ source into another language.
 - [SplashKit Translator](#splashkit-translator)
 - [Contents](#contents)
 - [Running](#running)
+   - [Docker](#docker)
    - [Dependencies](#dependencies)
    - [Validating](#validating)
    - [Converting](#converting)
@@ -37,6 +38,10 @@ Translates the SplashKit C++ source into another language.
 <!-- /MDTOC -->
 
 # Running
+
+## Docker
+
+This project can be setup on any platform through the use of Docker containers. A docker file can be found in the root of the repository, information on how to get setup and running with can be found in [Docker_README.md](https://github.com/thoth-tech/splashkit-translator/blob/master/Docker_README.md)
 
 ## Dependencies
 
