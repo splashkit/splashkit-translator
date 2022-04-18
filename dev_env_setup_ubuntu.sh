@@ -36,9 +36,9 @@ sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubun
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose
 
 # Run dockerd in the background
-sudo dockerd > /dev/null 2>&1 &
+#sudo dockerd > /dev/null 2>&1 &
 
-sudo docker-compose -d --
+#sudo docker-compose -d --
 
 # Build docker image
 docker build --tag headerdoc -f Dockerfile .
