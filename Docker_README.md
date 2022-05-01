@@ -14,15 +14,18 @@
 
 # Install Docker
 
-Please follow the instructions from the official website
-https://docs.docker.com/engine/install/
-
 ## Ubuntu
+
+https://docs.docker.com/engine/install/
 
 ```sh
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
+
+## macOS and Windows
+
+Please follow the instructions from the official [website](https://www.docker.com/products/docker-desktop/).
 
 # To Build
 
