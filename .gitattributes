@@ -1,2 +1,2 @@
-# Set all Ruby files to have LF line endings
-*.rb text eol=lf
+# Set all files to have LF line endings
+* text eol=lf

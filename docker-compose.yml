@@ -1,0 +1,11 @@
+---
+version: "3"
+services:
+  headerdoc:
+    container_name: headerdoc
+    build: .
+    stdin_open: true
+    tty: true
+    entrypoint: /bin/bash /translator/translate_wrapper
+    volumes:
+      - ../splashkit-core:/splashkit
