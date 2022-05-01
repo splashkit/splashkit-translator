@@ -6,6 +6,6 @@ services:
     build: .
     stdin_open: true
     tty: true
-    entrypoint: ./translate_wrapper
+    entrypoint: /bin/sh /translator/translate_wrapper
     volumes:
       - ../splashkit-core:/splashkit
