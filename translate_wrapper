@@ -5,7 +5,8 @@ set -eu
 translators="$1"
 
 echo "Translating SplashKit Core to ${translators}"
-./translate \
+
+./src/main.rb \
   -i /splashkit/ \
   -o /splashkit/generated \
   -g "$translators"
