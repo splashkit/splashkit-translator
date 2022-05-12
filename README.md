@@ -11,7 +11,7 @@ Translates the SplashKit C++ source into another language.
 - [Running](#running)
    - [Docker](#docker)
    - [Dependencies](#dependencies)
-   - [Known Issues](#known issues)
+   - [Known Issues](#known-issues)
    - [Validating](#validating)
    - [Converting](#converting)
 - [SplashKit Documentation Guidelines](#splashkit-documentation-guidelines)
