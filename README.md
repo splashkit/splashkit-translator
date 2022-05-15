@@ -11,6 +11,7 @@ Translates the SplashKit C++ source into another language.
 - [Running](#running)
    - [Docker](#docker)
    - [Dependencies](#dependencies)
+   - [Known Issues](#known-issues)
    - [Validating](#validating)
    - [Converting](#converting)
 - [SplashKit Documentation Guidelines](#splashkit-documentation-guidelines)
@@ -58,6 +59,16 @@ $ bundle install
 ```
 
 Then run using `translate`.
+
+## Known Issues
+
+- ### macOS Bundle Install error
+
+  If you get the following error when running `bundle install`:
+
+  `can't find gem bundler (>= 0.a) with executable bundle (Gem::GemNotFoundException)`
+
+  You need to use a [Ruby Version Manager](https://github.com/rbenv/rbenv) to install Ruby 2.7.5, rather than using the default version of Ruby that comes with macOS.
 
 ## Validating
 
