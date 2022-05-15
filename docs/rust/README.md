@@ -3,7 +3,7 @@
 ## Summary
 This article covers how to setup Rust, import and link the Splashkit.rs file and start development.
 
-## Setup
+## Setup Rust
 ### Ubuntu
 #### Install Rust
 - curl https://sh.rustup.rs -sSf | sh
@@ -11,9 +11,6 @@ This article covers how to setup Rust, import and link the Splashkit.rs file and
 ### Install Cmake
 - sudo apt install build-essential
 - sudo apt install cmake
-
-## Test
-TBC
 
 ## Linking the library
 
@@ -31,3 +28,6 @@ Add a using statement so you do not require referencing the module repeatedly.
 ```Rust
 use splashkit::say_yay();
 ```
+
+## Test
+TBC
