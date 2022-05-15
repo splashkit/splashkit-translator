@@ -18,7 +18,6 @@ Current supported languages are:
 5. Reference/import/include translator output in new project.
 6. Run project.
 
-## Development
 ## Docker
 
 This project can be setup on any platform through the use of Docker containers. A docker file can be found in the root of the repository, information on how to get setup and running with can be found in [Docker_README.md](https://github.com/thoth-tech/splashkit-translator/blob/master/Docker_README.md)
