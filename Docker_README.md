@@ -1,31 +1,65 @@
 # Clone SplashKit Repositories
-1. Clone the SplashKit-Core Repository
-    git clone https://github.com/thoth-tech/splashkit-core.git
 
-2. Clone the SplashKit-Translator Repository
-    git clone https://github.com/thoth-tech/splashkit-translator.git
+1. Clone the `splashkit-core` repository
+
+   ```sh
+   git clone https://github.com/thoth-tech/splashkit-core.git
+   ```
+
+2. Clone the `splashkit-translator` repository
+
+   ```sh
+   git clone https://github.com/thoth-tech/splashkit-translator.git
+   ```
 
 # Install Docker
-https://docs.docker.com/engine/install/
 
 ## Ubuntu
+
+https://docs.docker.com/engine/install/
+
 ```sh
 sudo apt-get update
-```
-```sh 
 sudo apt-get install docker-ce docker-ce-cli containerd.io
 ```
+
+## macOS and Windows
+
+Please follow the instructions from the official [website](https://www.docker.com/products/docker-desktop/).
 
 # To Build
 
 Run the following command in the `splashkit-translator` root directory
 
 ```sh
-docker build --tag headerdoc -f Dockerfile .
+docker compose build
 ```
 
 # To Run
 
+It is advisable to translate into a limited set of languages. Translating to all available languages
+will take some time to complete.
+
 ```sh
-docker run --rm -v <absolute path to splashkit-core>:/splashkit/ headerdoc ./translate -i /splashkit/ -o /splashkit/generated -g cpp,docs,clib,python,pascal,csharp
+docker compose run --rm headerdoc python,csharp
+
+Translating SplashKit Core to python,csharp
+Executing python translator...
+Done!
+Output written!
+
+Executing csharp translator...
+Done!
+Output written!
 ```
+
+By default, this expects the `splaskit-core` folder is located under the same
+location as the `splashkit-translator` folder.
+
+```sh
+.
+├── splashkit-core
+└── splashkit-translator
+```
+
+The translated code will be available under `splashkit-code/generated` folder on the host machine.
