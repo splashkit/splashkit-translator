@@ -21,3 +21,18 @@ Current supported languages are:
 ## Docker
 
 This project can be setup on any platform through the use of Docker containers. A docker file can be found in the root of the repository, information on how to get setup and running with can be found in [Docker_README.md](https://github.com/thoth-tech/splashkit-translator/blob/master/Docker_README.md)
+
+
+## Project Structure
+
+__splashkit-translator/core_ext__
+Ruby extensions nokogiri, array and string
+
+__splashkit-translator/res__
+Ruby template files for language translator. Contain hardcoded syntax and structure for the translated contents to be inserted into.
+
+__splashkit-translator/src__
+The core Ruby translator project. The Ruby translator parses the input files, converts to the target language, inserts into Ruby templates and saves to output location.
+
+__splashkit-translator/docs__
+All documentation about the SplashKit Translator project.
