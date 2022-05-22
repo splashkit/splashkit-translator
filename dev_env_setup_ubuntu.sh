@@ -5,7 +5,7 @@ echo "Splashkit Translator Ubuntu development environment setup."
 sudo snap install --classic code
 
 # Install git
-sudo apt-get install git
+yes | sudo apt-get install git
 
 # Change to current user directory and setup folder structure
 cd ~
