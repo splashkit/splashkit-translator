@@ -16,6 +16,10 @@ cd translator
 git clone https://github.com/thoth-tech/splashkit-core.git
 git clone https://github.com/thoth-tech/splashkit-translator.git
 
+# Configure Docker Repository
+sudo apt-get install ca-certificates curl gnupg lsb-release
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
 # Add repository for docker compose
 sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
 
