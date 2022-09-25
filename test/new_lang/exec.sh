@@ -90,3 +90,19 @@ select yn in "Yes" "No"; do
         No ) break;;
     esac
 done
+
+function run_go
+{
+  echo "Running Go program"
+  #  go mod init "test${LANG_TEST}/test_program.go"
+  go build X.go -o "test${LANG_TEST}/test_program.go"
+  go run test_program.go
+}
+
+echo "Do you wish to run the Go version?"
+select yn in "Yes" "No"; do
+    case $yn in
+        Yes ) run_go; break;;
+        No ) break;;
+    esac
+done
