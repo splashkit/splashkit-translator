@@ -19,7 +19,7 @@ module Translators
     #
     def render_templates
       {
-        'splashkit.rs' => read_template('splashkit.rs')
+        'splashkit.go' => read_template('splashkit.go')
       }
     end
 
