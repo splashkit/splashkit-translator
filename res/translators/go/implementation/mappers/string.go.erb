@@ -1,0 +1,13 @@
+<%#
+String mappers
+%>
+procedure __sklib__free__sklib_string(s: __sklib_string); cdecl; external;
+procedure __skadapter__free__sklib_string(s: __sklib_string);
+
+func Map(mapping func(rune) rune, s string) string
+{
+    ptr := C.malloc(C.sizeof_char * 1024)
+        defer C.free(unsafe.Pointer(ptr))
+        b := C.GoBytes(ptr, size)
+        fmt.Println(string(b))
+}
