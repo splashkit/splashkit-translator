@@ -9,34 +9,40 @@ Translates the SplashKit C++ source into another language.
 - [SplashKit Translator](#splashkit-translator)
 - [Contents](#contents)
 - [Running](#running)
-   - [Dependencies](#dependencies)
-   - [Validating](#validating)
-   - [Converting](#converting)
+  - [Docker](#docker)
+  - [Dependencies](#dependencies)
+  - [Known Issues](#known-issues)
+  - [Validating](#validating)
+  - [Converting](#converting)
 - [SplashKit Documentation Guidelines](#splashkit-documentation-guidelines)
-   - [Header File Docblocks](#header-file-docblocks)
-   - [Function Docblocks](#function-docblocks)
-   - [Enum Docblocks](#enum-docblocks)
-   - [Struct Docblocks](#struct-docblocks)
-   - [Typedef Docblocks](#typedef-docblocks)
-   - [Attributes](#attributes)
-      - [`class`](#class)
-         - [Usage in typedefs](#usage-in-typedefs)
-         - [Usage in functions](#usage-in-functions)
-      - [`static`](#static)
-      - [`method`](#method)
-      - [`constructor`](#constructor)
-      - [`destructor`](#destructor)
-      - [`self`](#self)
-      - [`suffix`](#suffix)
-      - [`getter`](#getter)
-      - [`setter`](#setter)
-      - [`group`](#group)
-      - [`note`](#note)
-   - [Summary Rules](#summary-rules)
+  - [Header File Docblocks](#header-file-docblocks)
+  - [Function Docblocks](#function-docblocks)
+  - [Enum Docblocks](#enum-docblocks)
+  - [Struct Docblocks](#struct-docblocks)
+  - [Typedef Docblocks](#typedef-docblocks)
+  - [Attributes](#attributes)
+    - [`class`](#class)
+      - [Usage in typedefs](#usage-in-typedefs)
+      - [Usage in functions](#usage-in-functions)
+    - [`static`](#static)
+    - [`method`](#method)
+    - [`constructor`](#constructor)
+    - [`destructor`](#destructor)
+    - [`self`](#self)
+    - [`suffix`](#suffix)
+    - [`getter`](#getter)
+    - [`setter`](#setter)
+    - [`group`](#group)
+    - [`note`](#note)
+  - [Summary Rules](#summary-rules)
 
 <!-- /MDTOC -->
 
 # Running
+
+## Docker
+
+This project can be setup on any platform through the use of Docker containers. A docker file can be found in the root of the repository, information on how to get setup and running with can be found in [Docker_README.md](https://github.com/thoth-tech/splashkit-translator/blob/master/Docker_README.md)
 
 ## Dependencies
 
@@ -49,10 +55,20 @@ Ensure you have HeaderDoc installed:
 Install dependencies using `bundle`:
 
 ```bash
-$ bundle install
+bundle install
 ```
 
 Then run using `translate`.
+
+## Known Issues
+
+- ### macOS Bundle Install error
+
+  If you get the following error when running `bundle install`:
+
+  `can't find gem bundler (>= 0.a) with executable bundle (Gem::GemNotFoundException)`
+
+  You need to use a [Ruby Version Manager](https://github.com/rbenv/rbenv) to install Ruby 2.7.5, rather than using the default version of Ruby that comes with macOS.
 
 ## Validating
 
@@ -60,7 +76,7 @@ To validate a single file or files, supply the `--validate` or `-v` switch and
 the `--input` or `-i` switch with the header file you wish to validate:
 
 ```bash
-$ ./translate --validate --input /path/to/splashkit/coresdk/src/coresdk/audio.h
+./translate --validate --input /path/to/splashkit/coresdk/src/coresdk/audio.h
 ```
 
 This will only _validate_ input that it can be correctly parsed, but will not
@@ -70,7 +86,7 @@ Alternatively, you can validate all header files by supplying just the
 SplashKit `coresdk/src/coresdk` directory instead:
 
 ```bash
-$ ./translate -v -i /path/to/splashkit/coresdk/src/coresdk
+./translate -v -i /path/to/splashkit/coresdk/src/coresdk
 ```
 
 ## Converting
@@ -81,7 +97,7 @@ comma-separated list under the `--generate` or `-g` switch and specifying the
 output directory using the `--output` or `-o` switch:
 
 ```bash
-$ ./translate -i /path/to/splashkit -o ~/Desktop/translated -g YAML,SKLIBC,CPP
+./translate -i /path/to/splashkit -o ~/Desktop/translated -g YAML,SKLIBC,CPP
 ```
 
 If no output directory is used, then it will default to an `out/translated`
@@ -139,18 +155,19 @@ A function docblock should consist of _at least_ a basic description of the
 functionality provided by the function in Markdown. Where applicable, it also
 must have:
 
-* `@param [name] [description]` - The name and description of a parameter.
+- `@param [name] [description]` - The name and description of a parameter.
   These should be listed in order of the function's signature. **All parameters
   must be listed and be consistent with the correct name(s) in the signature.**
-* `@returns [description]` - A basic description of what is returned from the
+- `@returns [description]` - A basic description of what is returned from the
   function. **Any non-void function must have an `@returns`**.
-* `@brief [description]` - A brief, one sentence description of what
+- `@brief [description]` - A brief, one sentence description of what
   functionality is added in this function.
 
 Each of the above should be separated with a newline and grouped together where
 applicable.
 
 Example, `load_sound_effect`:
+
 ```c
 /**
  * @brief Loads and returns a sound effect.
@@ -484,25 +501,25 @@ either:
 <a id="pr4-instance-getter"></a>
 <a id="pr2-static-getter"></a>
 
-* `class` and `self` to make an _instance_ getter on the an instance whose class
-   is specified by `class`, or
-* `static` to make a _static_ getter on the class specified `static`.
+- `class` and `self` to make an _instance_ getter on the an instance whose class
+  is specified by `class`, or
+- `static` to make a _static_ getter on the class specified `static`.
 
 Must be set on a function that:
 
 <a id="pr9-getter"></a>
 
-* has __exactly__ _zero_ or _one_ parameters, depending on if you are using
+- has **exactly** _zero_ or _one_ parameters, depending on if you are using
   `class` or `static`, and
-* is non-void.
+- is non-void.
 
 <a id="pr12-getter"></a>
-If you are writing a __`static`__ getter, then there must be no parameters.
+If you are writing a **`static`** getter, then there must be no parameters.
 
 <a id="pr6-getter"></a>
 <a id="pr10-getter"></a>
-If you are writing a __`class`__ setter, then you will need __exactly _one_
-parameter__, that being the parameter which will be used as `self`. You must
+If you are writing a **`class`** setter, then you will need **exactly _one_
+parameter**, that being the parameter which will be used as `self`. You must
 not specify that the function also a `method` (unless `static` is also supplied)
 or a `constructor` or `destructor`.
 
@@ -543,23 +560,22 @@ either:
 <a id="pr4-instance-setter"></a>
 <a id="pr2-static-setter"></a>
 
-* `class` and `self` to make an _instance_ setter on the an instance whose class
-   is specified by `class`, or
-* `static` to make a _static_ setter on the class specified `static`.
+- `class` and `self` to make an _instance_ setter on the an instance whose class
+  is specified by `class`, or
+- `static` to make a _static_ setter on the class specified `static`.
 
-
-Must be set on a function that has __exactly__ _one_ or _two_ parameters, which
+Must be set on a function that has **exactly** _one_ or _two_ parameters, which
 depends on if you are using `class` or `static`.
 
 <a id="pr13-setter"></a>
-If you are writing a __`static`__ setter, then you will need __exactly one
-parameter__, being the the second must the value that is to be set.
+If you are writing a **`static`** setter, then you will need **exactly one
+parameter**, being the second must the value that is to be set.
 
 <a id="pr11-setter"></a>
-If you are writing a __`class`__ setter, then you will need __exactly _two_
-parameters__, where:
+If you are writing a **`class`** setter, then you will need **exactly _two_
+parameters**, where:
 
-1. the first must be the the parameter which will be used as `self`, and
+1. the first must be the parameter which will be used as `self`, and
 2. the second must the value that is to be set.
 
 <a id="pr6-setter"></a>
@@ -600,9 +616,9 @@ Applicable only to header file HeaderDoc blocks. The value associated to group
 means that this particular header file is `group`ed under the group specified
 by this attribute. Related header files may be applicable to just the one, e.g.:
 
-* `audio.h`,
-* `sound_effect.h`, and
-* `music.h`
+- `audio.h`,
+- `sound_effect.h`, and
+- `music.h`
 
 could all be `group`ed under the `Audio` group.
 
@@ -658,9 +674,9 @@ for reference to this list.
    Attributes marked with `method`, `getter` or `setter` must be marked with
    either:
 
-    (i) **`class`** to make it an [instance method](#pr2-instance-method), [instance getter](#pr2-instance-getter) or [instance setter](#pr2-instance-setter) on _instance_ of that class, or
+   (i) **`class`** to make it an [instance method](#pr2-instance-method), [instance getter](#pr2-instance-getter) or [instance setter](#pr2-instance-setter) on _instance_ of that class, or
 
-    (ii) **`static`** to make it a [static method](#pr2-static-method), [static getter](#pr2-static-getter) or [static setter](#pr2-static-setter) on a class or module indicated by static.
+   (ii) **`static`** to make it a [static method](#pr2-static-method), [static getter](#pr2-static-getter) or [static setter](#pr2-static-setter) on a class or module indicated by static.
 
 3. <a id="rule-3"></a>
    There can never be both [`constructor`](#pr3-constructor) and
@@ -675,7 +691,7 @@ for reference to this list.
    destructor of that instance by the _one_ function.
 5. <a id="rule-5"></a>
    You cannot supply [`constructor`](#pr5-constructor) or
-   [`destructor`](#pr5-destructor)  and `method` unless
+   [`destructor`](#pr5-destructor) and `method` unless
    `static` is also supplied. This will make a static method on
    the class or module specified by static but a destructor/constructor on
    the class indicated by `class`.
