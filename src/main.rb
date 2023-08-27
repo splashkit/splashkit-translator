@@ -11,6 +11,7 @@ require_relative 'translators/pascal'
 require_relative 'translators/python'
 require_relative 'translators/csharp'
 require_relative 'translators/cpp'
+require_relative 'translators/dart'
 # require_relative 'translators/rust'
 require_relative 'translators/docs'
 
