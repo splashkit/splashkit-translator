@@ -8,4 +8,4 @@ services:
     tty: true
     entrypoint: /bin/bash /translator/translate_wrapper
     volumes:
-      - ../splashkit-core:/splashkit
+      - ../../:/splashkit

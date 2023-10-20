@@ -15,8 +15,8 @@ RUN yum update -y \
 WORKDIR /headerdoc_build
 
 RUN wget https://opensource.apple.com/tarballs/headerdoc/headerdoc-8.9.5.tar.gz -qO- | tar xzf -
-WORKDIR headerdoc-8.9.5
-RUN make all || true
+
+WORKDIR headerdoc-headerdoc-8.9.5
 RUN make realinstall
 
 COPY . /translator
