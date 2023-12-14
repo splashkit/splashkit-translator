@@ -7,6 +7,10 @@ translators="$1"
 echo "Translating SplashKit Core to ${translators}"
 
 ./src/main.rb \
+  --verbose \
+  --no-color \
   -i /splashkit/ \
   -o /splashkit/generated \
-  -g "$translators"
+  -g "$translators" \
+  -r /splashkit/translator_cache.json
+  
