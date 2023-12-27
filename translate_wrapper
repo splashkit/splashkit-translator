@@ -9,4 +9,7 @@ echo "Translating SplashKit Core to ${translators}"
 ./src/main.rb \
   -i /splashkit/ \
   -o /splashkit/generated \
-  -g "$translators"
+  -g "$translators" \
+  --logging --verbose \
+  --readcache /splashkit/generated/translator_cache.json \
+  --writecache /splashkit/generated/translator_cache.json

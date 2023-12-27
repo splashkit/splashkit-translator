@@ -179,7 +179,7 @@ def run_parser
     if RunOpts.src.end_with? '.h'
       [RunOpts.src]
     else
-      Dir["#{RunOpts.src}/#{SK_SRC_CORESDK}/*.h"]
+      Dir["#{RunOpts.src}/#{SK_SRC_CORESDK}/*.h"].sort
     end if RunOpts.src
   # Read cache contents if exists
   parsed =
@@ -201,8 +201,9 @@ def run_parser
             updated_since = last_modified_hash[from_cache[:path]] > from_cache[:parsed_at]
             updated_since ? [RunOpts.src] : []
           else
-            cache_data.select { |p| last_modified_hash[p[:path]] > p[:parsed_at] }
+            cache_data.select { |p| last_modified_hash.key?(p[:path]) && last_modified_hash[p[:path]] > p[:parsed_at] }
                       .map { |p| "#{RunOpts.src}/#{p[:path]}" }
+                      .sort
           end
         unless to_parse.empty?
           merge_data = run_parse_on_src(to_parse)
