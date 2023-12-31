@@ -12,4 +12,6 @@ echo "Translating SplashKit Core to ${translators}"
   -i /splashkit/ \
   -o /splashkit/generated \
   -g "$translators" \
-  
+  --logging \
+  --readcache /splashkit/generated/translator_cache.json \
+  --writecache /splashkit/generated/translator_cache.json

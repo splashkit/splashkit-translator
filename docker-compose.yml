@@ -9,3 +9,4 @@ services:
     entrypoint: /bin/bash /translator/translate_wrapper
     volumes:
       - ../../:/splashkit
+      - .:/translator
