@@ -6,11 +6,6 @@
    git clone https://github.com/thoth-tech/splashkit-core.git
    ```
 
-2. Clone the `splashkit-translator` repository
-
-   ```sh
-   git clone https://github.com/thoth-tech/splashkit-translator.git
-   ```
 
 # Install Docker
 
@@ -20,7 +15,8 @@ https://docs.docker.com/engine/install/
 
 ```sh
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
 ```
 
 ## macOS and Windows
@@ -28,8 +24,12 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io
 Please follow the instructions from the official [website](https://www.docker.com/products/docker-desktop/).
 
 # To Build
+1. Change directory to translator repo/folder.
+```sh
+cd tools/translator/
+```
+2. Run the following command in the `splashkit-translator` root directory
 
-Run the following command in the `splashkit-translator` root directory
 
 ```sh
 docker compose build
@@ -41,9 +41,21 @@ It is advisable to translate into a limited set of languages. Translating to all
 will take some time to complete.
 
 ```sh
-docker compose run --rm headerdoc python,csharp
+docker compose run --rm headerdoc cliv,cpp,pascal,python,csharp,docs
 
-Translating SplashKit Core to python,csharp
+Translating SplashKit Core to clib,cpp,pascal,python,csharp,docs
+Executing clib translator...
+Done!
+Output written!
+
+Executing cpp translator...
+Done!
+Output written!
+
+Executing pascal translator...
+Done!
+Output written!
+
 Executing python translator...
 Done!
 Output written!
@@ -51,15 +63,19 @@ Output written!
 Executing csharp translator...
 Done!
 Output written!
+
+Executing docs translator...
+Done!
+Output written!
+Place `api.json` in the `data` directory of the `splashkit.io` repo
 ```
 
-By default, this expects the `splaskit-core` folder is located under the same
-location as the `splashkit-translator` folder.
+By default, this expects the splashkit-core folder is located under the same location as the splashkit-translator folder.
 
 ```sh
 .
-├── splashkit-core
-└── splashkit-translator
+├── splashkit-core/tools/translator
+
 ```
 
-The translated code will be available under `splashkit-code/generated` folder on the host machine.
+The translated code will be available under splashkit-core/generated folder on the host machine.

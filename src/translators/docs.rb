@@ -55,9 +55,11 @@ module Translators
       run_for_each_adapter do |adpt|
         data[:functions].each do |function_data|
           function_data[:signatures] = {} if function_data[:signatures].nil?
-          signature = adpt.respond_to?(:docs_signature_for) ?
-                      adpt.docs_signature_for(function_data) :
+          signature = adpt.respond_to?(:docs_signatures_for) ?
+                      adpt.docs_signatures_for(function_data) :
                       adpt.sk_signature_for(function_data)
+
+
           function_data[:signatures][adpt.name] = signature
         end
       end
