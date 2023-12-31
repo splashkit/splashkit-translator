@@ -97,8 +97,12 @@ module Translators
                           header_data[:enums].pluck(:name)
           # Accepted if this header defines some of the dependent types
           # and not this header
+          puts "'#{header_name.inspect}'"
+          puts "'#{@header_name.inspect}'"
+          puts "#{header_name}" != @header_name
+          puts "---"
           !(types_defined & dependent_types).empty? &&
-            header_name != @header_name
+            header_name.to_s != @header_name
         end.keys
       end
     end
