@@ -26,7 +26,7 @@
       return result;
     }
 
-    [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_string", CharSet=CharSet.Ansi)]
+    [DllImport("SplashKit", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_string", CharSet=CharSet.Ansi)]
     private static extern void __sklib__free__sklib_string(__sklib_string s);
 
     private static void __skadapter__free__sklib_string(ref __sklib_string s)

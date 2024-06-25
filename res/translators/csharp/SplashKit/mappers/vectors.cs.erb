@@ -87,7 +87,7 @@
     function to free the library part of the vector mapping.
 %>
 
-    [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_vector_<%= type %>", CharSet=CharSet.Ansi)]
+    [DllImport("SplashKit", CallingConvention=CallingConvention.Cdecl, EntryPoint="__sklib__free__sklib_vector_<%= type %>", CharSet=CharSet.Ansi)]
     private static extern void __sklib__free__sklib_vector_<%= type %>(__sklib_vector_<%= type %> v);
 
 <%#

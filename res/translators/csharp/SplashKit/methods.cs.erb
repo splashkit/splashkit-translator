@@ -5,7 +5,7 @@
   @functions.each do |function|
 %>
 
-    [DllImport("splashkit.dll", CallingConvention=CallingConvention.Cdecl, EntryPoint="<%= lib_function_name_for(function) %>", CharSet=CharSet.Ansi)]
+    [DllImport("SplashKit", CallingConvention=CallingConvention.Cdecl, EntryPoint="<%= lib_function_name_for(function) %>", CharSet=CharSet.Ansi)]
     <%= lib_signature_for(function) %>;
 <%
   end # functions.each
