@@ -95,7 +95,7 @@
 %>
     private static void __skadapter__free__sklib_vector_<%= type %>(ref __sklib_vector_<%= type %> v)
     {
-      System.Console.WriteLine("Freeing data");
+      // System.Console.WriteLine("Freeing data");
       Marshal.FreeHGlobal(v._data_from_app);
     }
 <%#
