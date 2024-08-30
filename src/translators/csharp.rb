@@ -12,6 +12,15 @@ module Translators
       super(data, logging)
     end
 
+    def convert_headerdoc_to_xml(headerdoc)
+      xml_comments = headerdoc.split("\n").map do |line|
+        "/// #{line.strip}"
+      end.join("\n")
+      
+      xml_comments
+    end
+    
+
     def render_templates
       {
         'SplashKit.cs' => read_template('SplashKit.cs')
@@ -79,17 +88,22 @@ module Translators
     end
 
     def docs_signatures_for(function)
+      headerdoc_comments = function[:comments]
+      xml_comments = convert_headerdoc_to_xml(headerdoc_comments)
+    
       function_name = sk_function_name_for(function)
       parameter_list = sk_parameter_list_for(function)
       return_type = sk_return_type_for(function) || "void"
-
-      result = [ 
+    
+      result = [
+        xml_comments,
         "public static #{return_type} SplashKit.#{function_name}(#{parameter_list});"
       ]
-
-      if (! function[:attributes][:class].nil?) || (! function[:attributes][:static].nil? )
+    
+      
+      if (! function[:attributes][:class].nil?) || (! function[:attributes][:static].nil?)
         method_data = get_method_data(function)
-
+    
         if method_data[:is_constructor]
           result << "public #{method_data[:class_name]}(#{method_data[:params]});"
         elsif method_data[:is_property]
@@ -103,15 +117,16 @@ module Translators
             text = "set"
             property_name = function[:attributes][:setter]
           end
-
-          result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{property_name.to_pascal_case()} { #{text} }"
+    
+          result.unshift "#{xml_comments}\npublic #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{property_name.to_pascal_case()} { #{text} }"
         else
-          result.unshift "public #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
+          result.unshift "#{xml_comments}\npublic #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
         end
       end
-
+    
       result
     end
+    
   
 
     def get_method_data(fn)
