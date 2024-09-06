@@ -88,46 +88,40 @@ module Translators
     end
 
     def docs_signatures_for(function)
-      headerdoc_comments = function[:comments]
-      xml_comments = convert_headerdoc_to_xml(headerdoc_comments)
-    
       function_name = sk_function_name_for(function)
       parameter_list = sk_parameter_list_for(function)
       return_type = sk_return_type_for(function) || "void"
-    
-      result = [
-        xml_comments,
-        "public static #{return_type} SplashKit.#{function_name}(#{parameter_list});"
-      ]
-    
       
-      if (! function[:attributes][:class].nil?) || (! function[:attributes][:static].nil?)
-        method_data = get_method_data(function)
+      # Initialize the XML comment string
+      xml_comment = ""
     
-        if method_data[:is_constructor]
-          result << "public #{method_data[:class_name]}(#{method_data[:params]});"
-        elsif method_data[:is_property]
-          if function[:attributes][:getter] && function[:attributes][:setter]
-            text = "get; set"
-            property_name = function[:attributes][:getter]
-          elsif function[:attributes][:getter]
-            text = "get"
-            property_name = function[:attributes][:getter]
-          else
-            text = "set"
-            property_name = function[:attributes][:setter]
-          end
-    
-          result.unshift "#{xml_comments}\npublic #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{property_name.to_pascal_case()} { #{text} }"
-        else
-          result.unshift "#{xml_comments}\npublic #{method_data[:static]}#{method_data[:return_type]} #{method_data[:class_name]}.#{method_data[:method_name]}(#{method_data[:params]});"
-        end
+      if function[:description]
+        xml_comment += "/// <summary>\n"
+        xml_comment += "/// #{function[:description]}\n"
+        xml_comment += "/// </summary>\n"
+      else
+        xml_comment += "/// <summary>No description available</summary>\n"
       end
     
-      result
-    end
+      # Add parameter documentation for each parameter in the function
+      function[:parameters].each do |param_name, param_data|
+        param_description = param_data[:description] || "No description available"
+        xml_comment += "/// <param name=\"#{param_name}\">#{param_description}</param>\n"
+      end
     
-  
+      # Add a return type comment if the function returns a value
+      if return_type != "void"
+        return_description = function[:return_description] || "No description available"
+        xml_comment += "/// <returns>#{return_description}</returns>\n"
+      end
+    
+      # Generate the actual method signature after the XML comments
+      method_signature = "public static #{return_type} SplashKit.#{function_name}(#{parameter_list});"
+    
+      # Combine the XML comment and method signature
+      [xml_comment, method_signature]
+    end    
+    
 
     def get_method_data(fn)
       {
