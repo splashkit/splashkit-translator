@@ -16,8 +16,17 @@
 %>
 <%
   @functions.each do |function|
-    is_constructor = ! function[:attributes][:constructor].nil?
+    is_constructor = !function[:attributes][:constructor].nil?
 %>
+    /// <summary>
+    /// Calls the <%= function[:name].to_s.to_pascal_case %> method in SplashKit.
+    /// </summary>
+    <% function[:parameters].each do |param_name, param_data| %>
+    /// <param name="<%= param_name %>">A parameter of type <%= lib_type_for(param_data) %>.</param>
+    <% end %>
+    <% if is_func?(function) %>
+    /// <returns>The result of the function of type <%= sk_type_for(function[:return]) %>.</returns>
+    <% end %>
     <%= sk_signature_for(function) %>
 
     {
@@ -74,17 +83,17 @@
 %>
       <%= param_name.variable_case %> = <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
 <%
-      end # end if is non const ref
+      end # end if is non-const ref
     end # end parameters.each
 %>
 <%#
     4. Free any string or vector parameters
 %>
 <%
-    params_to_free = function[:parameters].select do | _, param_data |
+    params_to_free = function[:parameters].select do |_, param_data|
       param_data[:type] == 'string' || param_data[:is_vector]
     end # end select
-    params_to_free.each do | param_name, param_data |
+    params_to_free.each do |param_name, param_data|
       type_name = lib_type_for(param_data)
 %>
     __skadapter__free<%=type_name%>(ref __skparam__<%=param_name%>);
