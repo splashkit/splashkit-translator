@@ -41,7 +41,7 @@ It is advisable to translate into a limited set of languages. Translating to all
 will take some time to complete.
 
 ```sh
-docker compose run --rm headerdoc cliv,cpp,pascal,python,csharp,docs
+docker compose run --rm headerdoc clib,cpp,pascal,python,csharp,docs
 
 Translating SplashKit Core to clib,cpp,pascal,python,csharp,docs
 Executing clib translator...
