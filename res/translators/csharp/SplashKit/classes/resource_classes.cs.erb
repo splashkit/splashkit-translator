@@ -3,15 +3,23 @@
 %>
 
 <%
-  @classes.select{ |k, c| ! c[:is_struct] }.each do | class_id, the_class |
+  @classes.select{ |k, c| !c[:is_struct] }.each do |class_id, the_class|
     class_name = class_id.to_s.to_pascal_case
 
     if the_class[:is_alias]
 %>
+/// <summary>
+/// This class represents <%= class_name %>, which wraps a pointer to SplashKit resources.
+/// </summary>
 public class <%= class_name %> : PointerWrapper
 {
   private <%= class_name %>(IntPtr ptr) : base(ptr, true) {}
 
+  /// <summary>
+  /// Fetches or creates an instance of <%= class_name %> from the given pointer.
+  /// </summary>
+  /// <param name="ptr">The pointer to the SplashKit resource.</param>
+  /// <returns>An instance of <%= class_name %>.</returns>
   internal static <%= class_name %> FetchOrCreate(IntPtr ptr)
   {
     #pragma warning disable CS8603
@@ -21,7 +29,11 @@ public class <%= class_name %> : PointerWrapper
     #pragma warning restore CS8603
     return new <%= class_name %>(ptr);
   }
+
 <% else %>
+/// <summary>
+/// Static methods for working with <%= class_name %> in the SplashKit framework.
+/// </summary>
 public static class <%= class_name %>
 {
 <%
@@ -40,39 +52,49 @@ public static class <%= class_name %>
     the_class[:constructors].each do |fn|
       method_data = get_method_data(fn)
 %>
-
-    public <%= class_name %>(<%= method_data[:params] %>) : base ( SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>), false )
+    /// <summary>
+    /// Creates a new instance of <%= class_name %> using the provided parameters.
+    /// </summary>
+    /// <param name="<%= method_data[:params] %>">Constructor parameters for <%= class_name %>.</param>
+    public <%= class_name %>(<%= method_data[:params] %>) : base(SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>), false)
     { }
 <%
     end # constructors each
 
-    # Add constructors
     if the_class[:destructor]
       fn = the_class[:destructor]
       method_data = get_method_data(fn)
 %>
+    /// <summary>
+    /// Frees the resources held by this instance of <%= class_name %>.
+    /// </summary>
     protected internal override void DoFree()
     {
-        // System.Console.WriteLine("TODO: Free!");
         SplashKit.<%= fn[:name].function_case %>(this);
     }
 <%
     elsif the_class[:no_destructor]
     %>
-        protected internal override void DoFree()
-        {}
+    protected internal override void DoFree()
+    {}
     <%
-    end #destructor
+    end # destructor
 
     # Add methods
     the_class[:methods].each do |fn|
       method_data = get_method_data(fn)
       return_type = is_func?(fn) ? sk_type_for(fn[:return]) : 'void'
 %>
-
+    /// <summary>
+    /// Calls the <%= fn[:name].to_s.to_pascal_case %> method for <%= class_name %>.
+    /// </summary>
+    <% method_data[:params].split(', ').each do |param| %>
+    /// <param name="<%= param.split.first %>">A parameter of type <%= param.split.first %>.</param>
+    <% end %>
+    /// <returns>The result of the method, if applicable.</returns>
     public <%= method_data[:static] %><%= return_type %> <%= fn[:attributes][:method].function_case %>(<%= method_data[:params] %>)
     {
-<%      if is_func? fn %>
+<%      if is_func?(fn) %>
         return SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
 <%      else %>
         SplashKit.<%= fn[:name].function_case %>(<%= method_data[:args] %>);
@@ -82,7 +104,7 @@ public static class <%= class_name %>
 <%
     end # methods
 
-    the_class[:properties].each do | property_name, property |
+    the_class[:properties].each do |property_name, property|
       if property[:getter]
         property_type = sk_type_for(property[:getter][:return])
         method_data = get_method_data(property[:getter])
@@ -92,8 +114,10 @@ public static class <%= class_name %>
       end
 
 %>
+    /// <summary>
+    /// Gets or sets the <%= property_name.to_s.to_pascal_case %> property of the <%= class_name %>.
+    /// </summary>
     public <%= method_data[:static] %><%= property_type %> <%= property_name.to_s.to_pascal_case %>
-
     {
 <%
       if property[:getter]
@@ -112,9 +136,9 @@ public static class <%= class_name %>
         method_data = get_method_data(fn)
         if method_data[:static].nil?
 %>
-          set { SplashKit.<%= fn[:name].function_case %>(this, value); }
+        set { SplashKit.<%= fn[:name].function_case %>(this, value); }
 <%      else %>
-          set { SplashKit.<%= fn[:name].function_case %>(value); }
+        set { SplashKit.<%= fn[:name].function_case %>(value); }
 <%
         end
       end
