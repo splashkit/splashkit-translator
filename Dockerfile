@@ -29,9 +29,7 @@ RUN wget https://opensource.apple.com/tarballs/headerdoc/headerdoc-8.9.31.tar.gz
 WORKDIR headerdoc-headerdoc-8.9.31
 
 WORKDIR xmlman
-RUN sed -i 's/^xml2man: xml2man.o \(.*\)$/xml2man: xml2man.o \1\n\t$(CC) -o $@ $^ $(LDFLAGS)/' Makefile && \
-    sed -i 's/^hdxml2manxml: hdxml2manxml.o \(.*\)$/hdxml2manxml: hdxml2manxml.o \1\n\t$(CC) -o $@ $^ $(LDFLAGS)/' Makefile && \
-    sed -i 's/^resolveLinks: resolveLinks.o \(.*\)$/resolveLinks: resolveLinks.o \1\n\t$(CC) -o $@ $^ $(LDFLAGS)/' Makefile
+RUN sed -i 's/^xml2man: xml2man.o \(.*\)$/xml2man: xml2man.o \1\n\t$(CC) -o $@ $^ $(LDFLAGS)/' Makefile 
 
 WORKDIR ..
 RUN make realinstall
