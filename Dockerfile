@@ -2,25 +2,24 @@ FROM almalinux:9
 
 USER 0
 
-RUN yum update -y \
-    # epel-release contains most of the required perl dependencies
-    # The duplicate commands, such as perl-FreezeThaw, are kept so that we have a record of the specific libraries needed. 
-    && yum install -y epel-release \
-    && yum install -y \
+RUN dnf update -y \
+    && dnf install -y \
     make \
     gcc \
     which \
     libxml2-devel \
     perl-core \
     perl-Devel-Peek \
-    perl-FreezeThaw \
     perl-HTML-Parser \
     perl-libwww-perl \
     wget \
     ruby \
     ruby-devel \
     rubygems \
-    && yum clean all
+    cpan \ 
+    && dnf clean all
+
+RUN cpan -i FreezeThaw
 
 RUN gem install bundler
 
