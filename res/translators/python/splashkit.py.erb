@@ -1,19 +1,20 @@
 from ctypes import *
 from enum import Enum
 from platform import system
+import os
 
 if system() == 'Darwin':
   # macOS uses .dylib extension
-  cdll.LoadLibrary("libSplashKit.dylib")
-  sklib = CDLL("libsplashkit.dylib")
+  cdll.LoadLibrary("/usr/local/lib/libSplashKit.dylib")
+  sklib = CDLL("/usr/local/lib/libSplashKit.dylib")
 elif system() == 'Linux':
   # Linux uses .so extension
   cdll.LoadLibrary("libSplashKit.so")
   sklib = CDLL("libSplashKit.so")
 else:
   # Windows uses .dll extension:
-  cdll.LoadLibrary("libSplashKit.dll")
-  sklib = CDLL("libsplashkit.dll")
+  cdll.LoadLibrary("C:\msys64\home\\" + os.getlogin() + "\.splashkit\lib\win64\SplashKit.dll")
+  sklib = CDLL("splashkit.dll")
 
 <%= read_template 'ctypes/types' %>
 
