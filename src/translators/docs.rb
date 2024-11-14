@@ -62,12 +62,19 @@ module Translators
           function_data[:signatures][adpt.name] = signature
         end
     
+        # Debugging the input data for enum mapping
+        puts "Input data for enums: #{data[:enums].inspect}"
+    
         # Map enum signatures
         data[:enums].each do |enum_data|
           enum_data[:signatures] ||= {}
           enum_values = enum_data[:constants].map do |const_name, const_details|
-            { name: const_name, description: const_details[:description], value: const_details[:value] }
+            { name: const_name, description: const_details[:description], value: const_details[:number] }
           end
+    
+          # Debugging enum values before calling enum_signature_syntax
+          puts "Enum values before mapping: #{enum_values.inspect}"
+    
           if adpt.respond_to?(:enum_signature_syntax)
             enum_signature = adpt.enum_signature_syntax(enum_data[:name], enum_values)
             enum_data[:signatures][adpt.name] = enum_signature

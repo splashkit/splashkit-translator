@@ -42,10 +42,10 @@ module Translators
     # ---------------------------------------------------------------------------
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      return "enum class #{enum_name} { };" unless enum_values && !enum_values.empty?
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
-      "enum class #{enum_name} {#{values}};"
+      "class #{enum_name}{#{values}};"
     end
+
 
     def is_color_function(fn)
       sk_type_for(fn[:return]) == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")

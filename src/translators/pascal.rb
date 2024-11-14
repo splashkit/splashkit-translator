@@ -84,11 +84,10 @@ module Translators
     # ---------------------------------------------------------------------------
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      return "type #{enum_name} = ();" unless enum_values && !enum_values.empty?
-      values = enum_values.map { |value| "#{value[:name]}" }.join(', ')
-      "type #{enum_name} = (\n  #{values}\n);"
+      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
+      "type #{enum_name} = {#{values}};"
     end
-  
+
     #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use

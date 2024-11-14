@@ -66,7 +66,7 @@ module Translators
       "#{return_type} #{name}(#{parameter_list})"
     end
 
-    
+
     # ---------------------------------------------------------------------------
     #
     #
@@ -74,10 +74,11 @@ module Translators
     # ---------------------------------------------------------------------------
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      return "typedef enum { } #{enum_name};" unless enum_values && !enum_values.empty?
+      return "typedef enum { } #{enum_name};" if enum_values.empty?
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
       "typedef enum { #{values} } #{enum_name};"
     end
+
     
     #
     # Convert a list of parameters to a C-library parameter list

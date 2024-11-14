@@ -121,11 +121,11 @@ module Translators
     # ---------------------------------------------------------------------------
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      return "public enum #{enum_name} { }" unless enum_values && !enum_values.empty?
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
-      "public enum #{enum_name} {#{values}}"
-    end    
-
+      "enum #{enum_name}{#{values}};"
+    end
+    
+    
     def get_method_data(fn)
       {
         method_name: fn[:name].to_s.to_pascal_case,
