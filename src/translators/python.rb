@@ -101,15 +101,19 @@ module Translators
       "def #{name}(#{parameter_list}):"
     end
 
+    # ---------------------------------------------------------------------------
     #
-    # Generate a Python type signature for an enum
     #
+    #
+    # ---------------------------------------------------------------------------
+    # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      if enum_values.nil? || enum_values.empty?
-        return "from enum import Enum\nclass #{enum_name}(Enum):\n    pass"
+      if enum_values.empty?
+        "from enum import Enum\nclass #{enum_name}(Enum):\n    pass"
+      else
+        values = enum_values.map { |value| "    #{value[:name]} = #{value[:value]}" }.join("\n")
+        "from enum import Enum\nclass #{enum_name}(Enum):\n#{values}"
       end
-      values = enum_values.map { |value| "    #{value[:name]} = #{value[:value]}" }.join("\n")
-      "from enum import Enum\nclass #{enum_name}(Enum):\n#{values}"
     end
     
 

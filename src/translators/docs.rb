@@ -53,6 +53,7 @@ module Translators
 
     def map_signatures(data)
       run_for_each_adapter do |adpt|
+        # Map function signatures
         data[:functions].each do |function_data|
           function_data[:signatures] ||= {}
           signature = adpt.respond_to?(:docs_signatures_for) ?
@@ -61,10 +62,11 @@ module Translators
           function_data[:signatures][adpt.name] = signature
         end
     
+        # Map enum signatures
         data[:enums].each do |enum_data|
           enum_data[:signatures] ||= {}
           enum_values = enum_data[:constants].map do |const_name, const_details|
-            { name: const_name, value: const_details[:value] } # Ensure you have value or similar attribute
+            { name: const_name, description: const_details[:description], value: const_details[:value] }
           end
           if adpt.respond_to?(:enum_signature_syntax)
             enum_signature = adpt.enum_signature_syntax(enum_data[:name], enum_values)
@@ -73,6 +75,7 @@ module Translators
         end
       end
     end
+    
     
        
 

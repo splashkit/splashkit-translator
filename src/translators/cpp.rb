@@ -35,7 +35,12 @@ module Translators
       "#{return_type} #{name}(#{parameter_list})"
     end
 
-    # New funtion for defining the signature of an enum
+    # ---------------------------------------------------------------------------
+    #
+    #
+    #
+    # ---------------------------------------------------------------------------
+    # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
       return "enum class #{enum_name} { };" unless enum_values && !enum_values.empty?
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")

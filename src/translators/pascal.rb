@@ -23,6 +23,7 @@ module Translators
     PASCAL_IDENTIFIER_CASES = {
       types:      :pascal_case,
       functions:  :pascal_case,
+      enums:      :pascal_case,
       variables:  :camel_case,
       fields:     :camel_case,
       constants:  :upper_case
@@ -76,16 +77,18 @@ module Translators
       "#{declaration} #{function_name}(#{parameter_list})#{func_suffix}"
     end
 
+    # ---------------------------------------------------------------------------
     #
-    # Generate a Pascal enum signature
     #
+    #
+    # ---------------------------------------------------------------------------
+    # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
       return "type #{enum_name} = ();" unless enum_values && !enum_values.empty?
-      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join('; ')
+      values = enum_values.map { |value| "#{value[:name]}" }.join(', ')
       "type #{enum_name} = (\n  #{values}\n);"
     end
-    
-
+  
     #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use

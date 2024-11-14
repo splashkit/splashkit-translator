@@ -113,6 +113,13 @@ module Translators
       result
     end
   
+
+    # ---------------------------------------------------------------------------
+    #
+    #
+    #
+    # ---------------------------------------------------------------------------
+    # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
       return "public enum #{enum_name} { }" unless enum_values && !enum_values.empty?
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
