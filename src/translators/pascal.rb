@@ -77,6 +77,16 @@ module Translators
     end
 
     #
+    # Generate a Pascal enum signature
+    #
+    def enum_signature_syntax(enum_name, enum_values)
+      return "type #{enum_name} = ();" unless enum_values && !enum_values.empty?
+      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join('; ')
+      "type #{enum_name} = (\n  #{values}\n);"
+    end
+    
+
+    #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use
     # as this function is used to for both Library and Front-End code

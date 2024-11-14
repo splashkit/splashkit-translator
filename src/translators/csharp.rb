@@ -113,6 +113,11 @@ module Translators
       result
     end
   
+    def enum_signature_syntax(enum_name, enum_values)
+      return "public enum #{enum_name} { }" unless enum_values && !enum_values.empty?
+      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
+      "public enum #{enum_name} {#{values}}"
+    end    
 
     def get_method_data(fn)
       {

@@ -54,16 +54,27 @@ module Translators
     def map_signatures(data)
       run_for_each_adapter do |adpt|
         data[:functions].each do |function_data|
-          function_data[:signatures] = {} if function_data[:signatures].nil?
+          function_data[:signatures] ||= {}
           signature = adpt.respond_to?(:docs_signatures_for) ?
                       adpt.docs_signatures_for(function_data) :
                       adpt.sk_signature_for(function_data)
-
-
           function_data[:signatures][adpt.name] = signature
+        end
+    
+        data[:enums].each do |enum_data|
+          enum_data[:signatures] ||= {}
+          enum_values = enum_data[:constants].map do |const_name, const_details|
+            { name: const_name, value: const_details[:value] } # Ensure you have value or similar attribute
+          end
+          if adpt.respond_to?(:enum_signature_syntax)
+            enum_signature = adpt.enum_signature_syntax(enum_data[:name], enum_values)
+            enum_data[:signatures][adpt.name] = enum_signature
+          end
         end
       end
     end
+    
+       
 
     def post_execute
       puts 'Place `api.json` in the `data` directory of the `splashkit.io` repo'
