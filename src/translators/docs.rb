@@ -63,7 +63,7 @@ module Translators
         end
     
         # Debugging the input data for enum mapping
-        puts "Input data for enums: #{data[:enums].inspect}"
+     #   puts "Input data for enums: #{data[:enums].inspect}"
     
         # Map enum signatures
         data[:enums].each do |enum_data|
@@ -73,7 +73,7 @@ module Translators
           end
     
           # Debugging enum values before calling enum_signature_syntax
-          puts "Enum values before mapping: #{enum_values.inspect}"
+      #    puts "Enum values before mapping: #{enum_values.inspect}"
     
           if adpt.respond_to?(:enum_signature_syntax)
             enum_signature = adpt.enum_signature_syntax(enum_data[:name], enum_values)

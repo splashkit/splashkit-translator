@@ -122,9 +122,23 @@ module Translators
     # ---------------------------------------------------------------------------
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
-      "enum #{enum_name}{#{values}};"
+      # Convert the enum name to PascalCase
+      formatted_enum_name = enum_name.type_case
+    
+      # Format each enum value with the category prefix
+      formatted_values = enum_values.map do |value|
+        value_name = value[:name].type_case                
+        value_number = value[:value]               
+        "#{formatted_enum_name}.#{value_name} = #{value_number}" 
+      end.join(",")
+    
+      # Return the formatted enum in C# syntax
+      "public enum {#{formatted_values}}"
     end
+    
+    
+    
+    
     
     
     def get_method_data(fn)
