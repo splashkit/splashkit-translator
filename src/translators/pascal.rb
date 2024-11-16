@@ -84,10 +84,20 @@ module Translators
     # ---------------------------------------------------------------------------
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
-      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
-      "type #{enum_name} = {#{values}};"
+      # Convert the enum name to PascalCase
+      formatted_enum_name = enum_name.to_s.to_snake_case
+    
+      # Format each enum value with the category prefix
+      formatted_values = enum_values.map do |value|
+        value_name = value[:name].to_s.to_snake_case                 
+        value_number = value[:value]               
+        "#{formatted_enum_name}.#{value_name} = #{value_number}" 
+      end.join(", ")
+    
+      # Return the formatted enum in Pascal Case syntax
+      "public enum {#{formatted_values}}"
     end
-
+    
     #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use
@@ -133,3 +143,4 @@ module Translators
     end
   end
 end
+
