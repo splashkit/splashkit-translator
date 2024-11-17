@@ -56,28 +56,44 @@ module Translators
         # Map function signatures
         data[:functions].each do |function_data|
           function_data[:signatures] ||= {}
-          signature = adpt.respond_to?(:docs_signatures_for) ?
-                      adpt.docs_signatures_for(function_data) :
-                      adpt.sk_signature_for(function_data)
+          signature = if adpt.respond_to?(:docs_signatures_for)
+                        adpt.docs_signatures_for(function_data)
+                      else
+                        adpt.sk_signature_for(function_data)
+                      end
           function_data[:signatures][adpt.name] = signature
         end
     
+        # ============================================================================================================
+        # ============================================================================================================
+        # ============================================================================================================
+        # ============================================================================================================
+        # ============================================================================================================
         # Map enum signatures
-        # ============================================================================================
-        # This is the new code that maps the enum signatures, it accounts for the new enum_signature_syntax
         data[:enums].each do |enum_data|
           enum_data[:signatures] ||= {}
+          
+          # Prepare enum values: name, description, and value
           enum_values = enum_data[:constants].map do |const_name, const_details|
-            { name: const_name, description: const_details[:description], value: const_details[:number] }
+            {
+              name: const_name.to_s,  # Ensure the name is a string
+              description: const_details[:description] || '',  # Handle missing descriptions
+              value: const_details[:number] || 0               # Default value to 0 if none is provided
+            }
           end
-
+    
+          # Generate the enum signature using the adapter
           if adpt.respond_to?(:enum_signature_syntax)
             enum_signature = adpt.enum_signature_syntax(enum_data[:name], enum_values)
             enum_data[:signatures][adpt.name] = enum_signature
+          else
+            # Provide a fallback if the adapter does not support enum signature syntax
+            enum_data[:signatures][adpt.name] = "Enum mapping not supported for #{adpt.name}"
           end
         end
       end
     end
+    
 
     def post_execute
       puts 'Place `api.json` in the `data` directory of the `splashkit.io` repo'
