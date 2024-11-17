@@ -116,7 +116,7 @@ module Translators
         value_name = value[:name].to_s.to_snake_case                 
         value_number = value[:value]               
         "#{formatted_enum_name}.#{value_name} = #{value_number}" 
-      end.join(",")
+      end.join(", ")
     
       # Return the formatted enum in C# syntax
       "public enum {#{formatted_values}}"

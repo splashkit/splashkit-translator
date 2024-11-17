@@ -43,7 +43,7 @@ module Translators
     # New function for defining the signature of an enum
     def enum_signature_syntax(enum_name, enum_values)
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
-      "class #{enum_name}{#{values}};"
+      "class #{enum_name} {#{values}};"
     end
 
 
