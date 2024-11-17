@@ -94,7 +94,7 @@ module Translators
         "#{formatted_enum_name}.#{value_name} = #{value_number}" 
       end.join(", ")
     
-      # Return the formatted enum in C# syntax
+      # Return the formatted enum in Pascal syntax
       "public enum {#{formatted_values}}"
     end
     
