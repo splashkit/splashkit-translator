@@ -52,8 +52,10 @@ module Translators
     end
 
     # Maps function and enum signatures for each adapter
+    #
     # The signatures are stored in the `:signatures` key of the function or enum data
     # These are used for displaying each language's function or enum signatures in the SplashKit website
+    #
     def map_signatures(data)
       # Function Signature Mapping
       run_for_each_adapter do |adpt|
