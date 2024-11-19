@@ -55,13 +55,10 @@ module Translators
       run_for_each_adapter do |adpt|
         # Map function signatures
         data[:functions].each do |function_data|
-          function_data[:signatures] ||= {}
-          signature = if adpt.respond_to?(:docs_signatures_for)
-                        adpt.docs_signatures_for(function_data)
-                      else
-                        adpt.sk_signature_for(function_data)
-                      end
-          function_data[:signatures][adpt.name] = signature
+          function_data[:signatures] = {} if function_data[:signatures].nil?
+          signature = adpt.respond_to?(:docs_signatures_for) ?
+                      adpt.docs_signatures_for(function_data) :
+                      adpt.sk_signature_for(function_data)
         end
     
         # Enum Signature Mapping
