@@ -77,19 +77,19 @@ module Translators
       "#{declaration} #{function_name}(#{parameter_list})#{func_suffix}"
     end
 
-    # ============================================================================================================
-    # ============================================================================================================
-    # ============================================================================================================
-    # ============================================================================================================
-    # ============================================================================================================
-    # New function for defining the signature of an enum
+    #
+    # Generate the enums for Pascal code.
+    # Formats with the structure of:
+    # public enum EnumName {EnumName.EnumValue1 = value1, EnumName.EnumValue2 = value2, ...}
+    # This ensures that the enum names and values are in PascalCase, with each enum separated by a comma.
+    #
     def enum_signature_syntax(enum_name, enum_values)
       # Convert the enum name to PascalCase
-      formatted_enum_name = enum_name.type_case
+      formatted_enum_name = enum_name.to_pascal_case
     
-      # Format each enum value with the category prefix
+      # Format each enum value with the category prefix, and join them with a comma
       formatted_values = enum_values.map do |value|
-        value_name = value[:name].type_case                
+        value_name = value[:name].to_pascal_case             
         value_number = value[:value]               
         "#{formatted_enum_name}.#{value_name} = #{value_number}" 
       end.join(", ")

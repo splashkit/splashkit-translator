@@ -35,17 +35,17 @@ module Translators
       "#{return_type} #{name}(#{parameter_list})"
     end
 
-    # ============================================================================================================
-    # ============================================================================================================
-    # ============================================================================================================
-    # ============================================================================================================
-    # ============================================================================================================
-    # New function for defining the signature of an enum
+    #
+    # Generate the enums for C++ code.
+    # Formats with the structure of:
+    # class EnumName {EnumValue1 = value1, EnumValue2 = value2, ...};
+    # The c++ enums are the default enum syntax thats used in the api.json file.
+    # This function just joins them together with a comma for putting into the api.json file.
+    #
     def enum_signature_syntax(enum_name, enum_values)
       values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
       "class #{enum_name} {#{values}};"
     end
-
 
     def is_color_function(fn)
       sk_type_for(fn[:return]) == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")

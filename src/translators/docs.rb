@@ -64,12 +64,16 @@ module Translators
           function_data[:signatures][adpt.name] = signature
         end
     
-        # ============================================================================================================
-        # ============================================================================================================
-        # ============================================================================================================
-        # ============================================================================================================
-        # ============================================================================================================
-        # Map enum signatures
+        # Enum Signature Mapping
+        #
+        # Generates and maps enum signatures for each adapter.
+        # - Uses `enum_signature_syntax` if available, otherwise provides a fallback message.
+        # - Each enum constant includes a name (string), description (default: ''), and value (default: 0).
+        # - Signatures are stored in the `:signatures` key of the enum data, associated with the adapter's name.
+        # 
+        # This set of signatures is used in the api.json file, then subsequently in the SplashKit website
+        # for displaying a table of each enum's values and descriptions per language.
+        #
         data[:enums].each do |enum_data|
           enum_data[:signatures] ||= {}
           
@@ -94,7 +98,6 @@ module Translators
       end
     end
     
-
     def post_execute
       puts 'Place `api.json` in the `data` directory of the `splashkit.io` repo'
     end
