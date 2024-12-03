@@ -14,6 +14,8 @@
 
 ### [Thoth Tech](https://github.com/thoth-tech/splashkit-translator) Stats
 
+Thoth Tech is a people-focused educational technology company dedicated to empowering students and educators through innovative tools. As a capstone company in Deakin University's capstone subjects, Thoth Tech provides real-world learning opportunities and contributes significantly to projects like SplashKit, enhancing its capabilities and resources.
+
 [![GitHub contributors](https://img.shields.io/github/contributors/thoth-tech/splashkit-translator?label=Contributors&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/graphs/contributors)
 [![GitHub issues](https://img.shields.io/github/issues/thoth-tech/splashkit-translator?label=Issues&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/issues)
 [![GitHub pull requests](https://img.shields.io/github/issues-pr/thoth-tech/splashkit-translator?label=Pull%20Requests&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/pulls)
