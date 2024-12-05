@@ -1,10 +1,10 @@
 # SplashKit Translator
 
-<p align="left">
-    <img width="150px" src="https://github.com/thoth-tech/.github/blob/main/images/splashkit.png"/>
-</p>
+<img width="150px" align="right" src="https://github.com/thoth-tech/.github/blob/main/images/splashkit.png" alt="SplashKit Logo"/>
 
-### [Splashkit](https://github.com/splashkit/splashkit-translator) Stats
+The **SplashKit Translator** is a tool designed to convert the **SplashKit Core** C++ library into multiple programming languages, creating the necessary files and structures to make SplashKit accessible across different languages. This tool also generates the `api.json` file, which is used by **SKM (SplashKit Manager)** and the **SplashKit website** to provide API documentation and assist with managing the SDK.
+
+[splashkit/splashkit-translator](https://github.com/splashkit/splashkit-translator):
 
 [![GitHub contributors](https://img.shields.io/github/contributors/splashkit/splashkit-translator?label=Contributors&color=F5A623)](https://github.com/splashkit/splashkit-translator/graphs/contributors)
 [![GitHub issues](https://img.shields.io/github/issues/splashkit/splashkit-translator?label=Issues&color=F5A623)](https://github.com/splashkit/splashkit-translator/issues)
@@ -12,9 +12,7 @@
 [![Forks](https://img.shields.io/github/forks/splashkit/splashkit-translator?label=Forks&color=F5A623)](https://github.com/splashkit/splashkit-translator/network/members)
 [![Stars](https://img.shields.io/github/stars/splashkit/splashkit-translator?label=Stars&color=F5A623)](https://github.com/splashkit/splashkit-translator/stargazers)
 
-### [Thoth Tech](https://github.com/thoth-tech/splashkit-translator) Stats
-
-Thoth Tech is a people-focused educational technology company dedicated to empowering students and educators through innovative tools. As a capstone company in Deakin University's capstone subjects, Thoth Tech provides real-world learning opportunities and contributes significantly to projects like SplashKit, enhancing its capabilities and resources.
+[thoth-tech/splashkit-translator](https://github.com/thoth-tech/splashkit-translator) *
 
 [![GitHub contributors](https://img.shields.io/github/contributors/thoth-tech/splashkit-translator?label=Contributors&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/graphs/contributors)
 [![GitHub issues](https://img.shields.io/github/issues/thoth-tech/splashkit-translator?label=Issues&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/issues)
@@ -22,7 +20,9 @@ Thoth Tech is a people-focused educational technology company dedicated to empow
 [![Forks](https://img.shields.io/github/forks/thoth-tech/splashkit-translator?label=Forks&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/network/members)
 [![Stars](https://img.shields.io/github/stars/thoth-tech/splashkit-translator?label=Stars&color=F5A623)](https://github.com/thoth-tech/splashkit-translator/stargazers)
 
-The **SplashKit Translator** is a tool designed to convert the **SplashKit Core** C++ library into multiple programming languages, creating the necessary files and structures to make SplashKit accessible across different languages. This tool also generates the `api.json` file, which is used by **SKM (SplashKit Manager)** and the **SplashKit website** to provide API documentation and assist with managing the SDK.
+**\* SplashKit Development in Thoth Tech**
+
+Thoth Tech is a people-focused educational technology company within Deakin University's capstone program which provides real-world learning opportunities and allows students to contribute significantly to projects like SplashKit, enhancing its capabilities and resources.
 
 ## About
 
