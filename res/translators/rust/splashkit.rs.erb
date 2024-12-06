@@ -1,73 +1,16 @@
-<%#
-  Define Rust - SplashKit interface
-%>
 #![allow(non_snake_case)]
-#[link(name = "SplashKit")]
-extern "C" {
-<%
-  @functions.each do |function|
-%>
-  <%= lib_signature_for(function) %>;
+#![allow(dead_code)]
+#![allow(non_camel_case_types)]
+use std::{
+    ffi::{CStr, CString, c_void},
+    mem::{forget, zeroed, MaybeUninit},
+    os::raw::{c_char, c_int},
+    ptr::{null_mut},
+    sync::{OnceLock},
+};
 
-<%
-  end # functions.each
-%>
-}
+type __sklib_ptr = *mut c_void;
 
-// ---------
-
+<%= read_template 'implementation/types' %>
 <%= read_template 'implementation/mappers' %>
-
-// ---------
-<%#
-  Implement Rust functions -- Rust --> this code --> Interface --> C/C++
-%>
-<%
-  @functions.each do |function|
-    lib_fn_name = lib_function_name_for(function)
-    param_list  = lib_argument_list_for(function)
-    return_val  = "__skreturn = " if is_func?(function)
-    func_call   = "#{return_val}#{lib_fn_name}(#{param_list})"
-%>
-pub <%= sk_signature_for(function) %> {
-<%
-    # Declare each parameter prefixed with __skparam
-    function[:parameters].each do |param_name, param_data|
-      ptr = '*' if param_data[:is_reference]
-      mut = 'mut ' if param_data[:is_reference]
-%>
-  let <%= mut%>__skparam__<%= param_name %>: <%= lib_type_for(param_data) %> = <%= lib_mapper_fn_for param_data %>(<%= ptr%> <%= param_name.variable_case %>);
-<%
-    end # end parameters.each
-
-    # if it is a function... then add a mutable return variable
-    if is_func?(function)
-%>
-  let mut __skreturn: <%= sk_type_for(function[:return], is_lib: true) %>;
-<%
-    end # end if func
-%>
-  unsafe {
-    <%= func_call %>;
-  }
-
-<%
-    # Declare each parameter prefixed with __skparam
-    function[:parameters].each do |param_name, param_data|
-      next unless param_data[:is_reference]
-%>
-  *<%= param_name.variable_case %> = <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
-<%
-    end # end parameters.each
-
-    # if it is a function... then return value...
-    if is_func?(function)
-%>
-  return <%= sk_mapper_fn_for function[:return] %>(__skreturn);
-<%
-    end # end if function
-%>
-}
-<%
-  end # functions.each
-%>
+<%= read_template 'implementation/functions' %>

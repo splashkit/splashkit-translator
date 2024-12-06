@@ -1,0 +1,33 @@
+<%#
+  Enum declarations
+%>
+<%
+  @enums.each do |enum|
+%>
+#[repr(i32)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum <%= enum[:name].to_pascal_case %> {
+<%
+    seen_numbers = {}
+    enum[:constants].each do |constant_key, constant_data|
+      has_numb = constant_data[:number].is_a? Integer
+      
+      next if has_numb && seen_numbers[constant_data[:number]]
+      seen_numbers[constant_data[:number]] = true if has_numb
+
+      if has_numb
+        value = " = #{constant_data[:number]}"
+      else
+        value = ""
+      end
+
+      constant_decl = "    #{constant_key.to_s.to_pascal_case}#{value},"
+%>
+<%= constant_decl %>
+<%
+    end # end constants.each
+%>
+}
+<%
+  end # end enums.each
+%>

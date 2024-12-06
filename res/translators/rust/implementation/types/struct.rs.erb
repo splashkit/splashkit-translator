@@ -1,0 +1,44 @@
+<%#
+  Struct declarations
+%>
+<%
+  @structs.each do |struct|
+%>
+#[repr(C)]
+#[derive(Debug, Clone, Copy)]
+pub struct __sklib_<%= struct[:name] %> {
+<%
+    struct[:fields].each do |field_name, field_data|
+      field_name = field_name.to_s.to_snake_case
+%>
+    <%= lib_struct_field_for(field_name, field_data) %>,
+<%
+    end
+%>
+}
+impl __sklib_<%= struct[:name] %> {
+    pub fn new() -> Self {
+        let uninit = MaybeUninit::zeroed();
+        unsafe { uninit.assume_init() }
+    }
+}
+#[derive(Debug, Clone, Copy)]
+pub struct <%= struct[:name].to_pascal_case %> {
+<%
+    struct[:fields].each do |field_name, field_data|
+      field_name = field_name.to_s.to_snake_case
+%>
+    <%= sk_struct_field_for(field_name, field_data) %>,
+<%
+    end
+%>
+}
+impl <%= struct[:name].to_pascal_case %> {
+    pub fn new() -> Self {
+        let uninit = MaybeUninit::zeroed();
+        unsafe { uninit.assume_init() }
+    }
+}
+<%
+  end # structs.each
+%>

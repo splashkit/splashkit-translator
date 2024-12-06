@@ -1,0 +1,84 @@
+<%#
+  Vector adapter functions mapping all fields to/from their __sklib type
+%>
+<%
+  @vector_types.each do |type|
+    sk_type = sk_type_for(type)
+    lib_type = lib_type_for(type)
+%>
+#[repr(C)]
+pub(crate) struct __sklib_vector_<%= type %> {
+    data_from_app: *mut <%= lib_type %>,
+    size_from_app: usize,
+    data_from_lib: *mut <%= lib_type %>,
+    size_from_lib: usize,
+}
+
+impl __sklib_vector_<%= type %> {
+    pub fn new(size: usize) -> Self {
+        let mut vec = Vec::with_capacity(size);
+        vec.resize(size, unsafe { zeroed() });
+        let ptr = vec.as_mut_ptr();
+        forget(vec);
+        Self {
+            data_from_app: ptr,
+            size_from_app: size,
+            data_from_lib: null_mut(),
+            size_from_lib: 0,
+        }
+    }
+}
+
+extern "C" {
+    fn __sklib__free__sklib_vector_<%= type %>(v: __sklib_vector_<%= type %>);
+}
+
+pub(crate) fn __skadapter__free__sklib_vector_<%= type %>(v: &mut __sklib_vector_<%= type %>) {
+    if !v.data_from_app.is_null() {
+        unsafe {
+<% if type == "string" %>
+            for i in 0..v.size_from_app {
+                __skadapter__free__sklib_string(*v.data_from_app.add(i));
+            }
+<% end %>
+            Vec::from_raw_parts(v.data_from_app, v.size_from_app, v.size_from_app);
+        }
+        v.data_from_app = null_mut();
+    }
+}
+
+pub(crate) fn __skadapter__to_sklib_vector_<%= type %>(v: Vec<<%= sk_type %>>) -> __sklib_vector_<%= type %> {
+    let result = __sklib_vector_<%= type %>::new(v.len());
+    for (i, item) in v.iter().enumerate() {
+        unsafe {
+            *result.data_from_app.add(i) = __skadapter__to_sklib_<%= type %>(item.clone());
+        }
+    }
+    result
+}
+
+pub(crate) fn __skadapter__to_vector_<%= type %>(v: __sklib_vector_<%= type %>) -> Vec<<%= sk_type %>> {
+    let mut result = Vec::with_capacity(v.size_from_lib);
+    unsafe {
+        for i in 0..v.size_from_lib {
+            let item = (*v.data_from_lib.add(i)).clone();
+            result.push(__skadapter__to_<%= type %>(item));
+        }
+        __sklib__free__sklib_vector_<%= type %>(v);
+    }
+    result
+}
+
+pub(crate) fn __skadapter__update_from_vector_<%= type %>(v: __sklib_vector_<%= type %>, result: &mut Vec<<%= sk_type %>>) {
+    result.clear();
+    unsafe {
+        for i in 0..v.size_from_lib {
+            let item = (*v.data_from_lib.add(i)).clone();
+            result.push(__skadapter__to_<%= type %>(item));
+        }
+        __sklib__free__sklib_vector_<%= type %>(v);
+    }
+}
+<%
+  end # vector_types.each
+%>

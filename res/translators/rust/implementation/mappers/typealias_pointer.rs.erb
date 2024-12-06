@@ -1,0 +1,28 @@
+<%#
+  Typealias pointer mappers map:
+    __sklib_ptr to RustType
+    RustType to __sklib_ptr
+%>
+#[inline]
+pub(crate) fn __skadapter__to_sklib_ptr(v: __sklib_ptr) -> __sklib_ptr {
+    v
+}
+
+#[inline]
+pub(crate) fn __skadapter__to_ptr(v: __sklib_ptr) -> __sklib_ptr {
+    v
+}
+<%
+  @typealiases.pluck(:name).each do |typealias|
+%>
+#[inline]
+pub(crate) fn __skadapter__to_<%= typealias %>(v: __sklib_ptr) -> <%= typealias.type_case %> {
+    <%= typealias.type_case %> { ptr: v }
+}
+#[inline]
+pub(crate) fn __skadapter__to_sklib_<%= typealias %>(v: <%= typealias.type_case %>) -> __sklib_ptr {
+    v.ptr
+}
+<%
+  end # typealiases.each
+%>

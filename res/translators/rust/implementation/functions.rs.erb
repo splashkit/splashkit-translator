@@ -1,0 +1,42 @@
+<%#
+  Create the SplashKit functions that wrap the sklib FFI calls
+%>
+<%
+  @functions.each do |function|
+%>
+<%= sk_signature_for(function) %> {
+<%
+    # Convert parameters to C types for FFI using existing mappers
+    function[:parameters].each do |param_name, param_data|
+      param_var = param_name.to_s.to_snake_case
+      # Escape 'fn' keyword if needed
+      param_var = "r##{param_var}" if param_var == 'fn'
+%>
+    let __skparam__<%= param_name %> = <%= lib_mapper_fn_for param_data %>(<%= param_var %>);
+<%
+    end
+%>
+    unsafe {
+<%
+    if is_func?(function)
+      return_type = function[:return][:type]
+      rust_return_type = sk_type_for(function[:return])
+%>
+        let __skreturn = <%= lib_function_name_for function %>(<%= 
+        lib_argument_list_for(function)
+        %>);
+        <%= sk_mapper_fn_for function[:return] %>(__skreturn)
+<%
+    else
+%>
+        <%= lib_function_name_for function %>(<%= 
+        lib_argument_list_for(function)
+        %>)
+<%
+    end
+%>
+    }
+}
+<%
+  end # functions.each
+%>

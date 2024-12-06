@@ -1,0 +1,15 @@
+<%#
+  Function declarations
+%>
+<%
+  @functions.each do |function|
+    params = lib_parameter_list_for(function)
+%>
+extern "C" {
+    #[link_name = "<%= lib_function_name_for(function) %>"]
+    fn <%= lib_function_name_for(function) %>(<%= params %><% if is_func?(function) %>) 
+        -> <%= lib_type_for(function[:return]) %><% else %>)<% end %>;
+}
+<%
+  end # functions.each
+%>

@@ -1,16 +1,12 @@
 <%#
   Mappers from `bool` <-> `i32`
+  Based on bindgen's actual implementation
 %>
-fn __skadapter__to_sklib_bool(v: bool) -> i32
-{
-  if v {
-    return -1;
-  } else {
-    return 0;
-  }
+#[inline]
+pub(crate) fn __skadapter__to_sklib_bool(v: bool) -> i32 {
+    if v { 1 } else { 0 }
 }
-
-fn __skadapter__to_bool(v: i32) -> bool
-{
-  return v != 0;
+#[inline]
+pub(crate) fn __skadapter__to_bool(v: i32) -> bool {
+    v != 0
 }

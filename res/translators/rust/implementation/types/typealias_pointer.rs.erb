@@ -1,0 +1,22 @@
+<%#
+  Typealias struct pointer declarations
+%>
+<%
+  @typealiases.pluck(:name).each do |typealias|
+%>
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct <%= typealias.type_case %> {
+    ptr: __sklib_ptr,
+}
+impl <%= typealias.type_case %> {
+    fn new(ptr: __sklib_ptr) -> Self {
+        Self { ptr }
+    }
+
+    fn as_ptr(&self) -> __sklib_ptr {
+        self.ptr
+    }
+}
+<%
+  end # typealiases.each
+%>

@@ -1,0 +1,70 @@
+<%#
+    Callback wrapper implementations
+%>
+<%
+  @function_pointers.each do |fp|
+    if is_func?(fp)
+      return_type = sk_type_for(fp[:return])
+    else
+      return_type = "()"
+    end
+
+    # Only include types, not parameter names in the Fn signature
+    param_types = fp[:parameters].map do |_, param_data|
+      sk_type_for(param_data)
+    end.join(", ")
+%>
+
+static <%= fp[:name].type_case.upcase %>_WRAPPER: OnceLock<Box<dyn Fn(<%= param_types %>) -> <%= return_type %> + Send + Sync>> = OnceLock::new();
+
+pub struct <%= fp[:name].type_case %>Wrapper {
+    callback: Box<dyn Fn(<%= param_types %>) -> <%= return_type %> + Send + Sync>
+}
+
+impl <%= fp[:name].type_case %>Wrapper {
+    pub fn new<F>(callback: F) -> <%= fp[:name].type_case %>
+    where
+        F: Fn(<%= param_types %>) -> <%= return_type %> + Send + Sync + 'static
+    {
+        let boxed_callback = Box::new(callback);
+        <%= fp[:name].type_case.upcase %>_WRAPPER.get_or_init(|| boxed_callback);
+        
+        extern "C" fn wrapper_fn(
+<%
+    fp[:parameters].each do |param_name, param_data|
+%>
+            <%= param_name.to_s.to_snake_case %>: <%= lib_type_for(param_data) %>,
+<%
+    end
+%>
+        ) -> <%= return_type %> {
+            if let Some(callback) = <%= fp[:name].type_case.upcase %>_WRAPPER.get() {
+                callback(
+<%
+    fp[:parameters].each_with_index do |(param_name, param_data), index|
+      comma = index < fp[:parameters].length - 1 ? "," : ""
+      if void_pointer?(param_data)
+%>
+                    <%= param_name.to_s.to_snake_case %><%= comma %>
+<%
+      else
+%>
+                    __skadapter__to_<%= param_data[:type] %>(<%= param_name.to_s.to_snake_case %>)<%= comma %>
+<%
+      end
+%>
+<%
+    end
+%>
+                )
+            } else {
+                Default::default()
+            }
+        }
+        wrapper_fn
+    }
+}
+
+<%
+  end # end function_pointers.each
+%>

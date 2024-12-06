@@ -1,0 +1,50 @@
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct __sklib_string {
+    pub str: *mut c_char,
+    pub size: c_int,
+    pub ptr: __sklib_ptr,
+}
+impl __sklib_string {
+    pub fn new() -> Self {
+        Self {
+            str: null_mut(),
+            size: 0,
+            ptr: null_mut(),
+        }
+    }
+}
+pub(crate) fn __skadapter__to_sklib_string<S: AsRef<str>>(s: S) -> __sklib_string {
+    let s = s.as_ref();
+    let c_string = CString::new(s).expect("Failed to create CString");
+    let ptr = c_string.into_raw();
+    let size = s.len() as c_int;
+    
+    __sklib_string {
+        str: ptr,
+        size,
+        ptr: null_mut(),
+    }
+}
+
+pub(crate) fn __skadapter__to_string(v: __sklib_string) -> String {
+    unsafe {
+        let result = if v.str.is_null() {
+            String::new()
+        } else {
+            CStr::from_ptr(v.str)
+                .to_string_lossy()
+                .into_owned()
+        };
+        
+        if !v.str.is_null() {
+            let _ = CString::from_raw(v.str);
+        }
+        
+        result
+    }
+}
+
+pub(crate) fn __skadapter__free__sklib_string(_s: __sklib_string) {
+    // The actual freeing is handled by the C library
+}

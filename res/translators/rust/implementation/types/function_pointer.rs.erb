@@ -1,0 +1,20 @@
+<%#
+    Function pointer type definitions
+%>
+<%
+  @function_pointers.each do |fp|
+    return_type = if is_func?(fp)
+      sk_type_for(fp[:return])
+    else
+      "()"
+    end
+
+    params = fp[:parameters].map do |param_name, param_data|
+      type = sk_type_for(param_data)
+      type
+    end.join(", ")
+%>
+pub type <%= fp[:name].type_case %> = extern "C" fn(<%= params %>) -> <%= return_type %>;
+<%
+  end # end function_pointers.each
+%>

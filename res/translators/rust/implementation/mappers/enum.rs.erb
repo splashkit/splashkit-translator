@@ -1,0 +1,32 @@
+<%#
+  Enum mapper from Rust enum <-> C int
+%>
+<% @enums.each do |enum| %>
+<%
+  # Track seen numbers to only use first instance
+  seen_numbers = {}
+  # Counter for non-numbered enums
+  counter = 0
+%>
+pub(crate) fn __skadapter__to_<%= enum[:name] %>(v: i32) -> <%= enum[:name].to_pascal_case %> {
+    match v {
+<% enum[:constants].each do |name, data| %>
+<%   if data[:number] %>
+<%     if !seen_numbers[data[:number]] %>
+<%       seen_numbers[data[:number]] = true %>
+        <%= data[:number] %> => <%= enum[:name].to_pascal_case %>::<%= name.to_s.to_pascal_case %>,
+<%     end %>
+<%   else %>
+        <%= counter %> => <%= enum[:name].to_pascal_case %>::<%= name.to_s.to_pascal_case %>,
+<%     counter += 1 %>
+<%   end %>
+<% end %>
+        _ => panic!("Invalid <%= enum[:name].to_pascal_case %> value: {}", v)
+    }
+}
+#[inline]
+pub(crate) fn __skadapter__to_sklib_<%= enum[:name] %>(v: <%= enum[:name].to_pascal_case %>) -> i32 {
+    v as i32
+}
+
+<% end # enums.each %>

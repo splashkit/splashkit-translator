@@ -1,17 +1,9 @@
-fn __skadapter__to_sklib_char(v: char) -> u8 {
-  return v as u8;
+#[inline]
+pub(crate) fn __skadapter__to_sklib_char(v: char) -> i8 {
+  return v as i8;
 }
-
-fn __skadapter__to_char(v: u8) -> char 
+#[inline]
+pub(crate) fn __skadapter__to_char(v: i8) -> char 
 {
-  return v as char;
-}
-fn __skadapter__to_sklib_unsigned_char(v: char) -> u8 
-{
-  return v as u8;
-}
-
-fn __skadapter__to_unsigned_char(v: u8) -> char 
-{
-  return v as char;
+  return v as u8 as char;
 }

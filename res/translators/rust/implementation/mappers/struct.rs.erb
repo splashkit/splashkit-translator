@@ -1,0 +1,30 @@
+<% @structs.each do |struct| %>
+pub(crate) fn __skadapter__to_sklib_<%= struct[:name] %>(v: <%= struct[:name].type_case %>) -> __sklib_<%= struct[:name] %> {
+    let mut result = __sklib_<%= struct[:name] %>::new();
+<% struct[:fields].each do |field_name, field_data| 
+    field_name = field_name
+    if field_data[:is_array] 
+        array_size_as_one_dimensional(field_data).times do |i| %>
+    result.<%= field_name %>[<%= i %>] = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %><%= array_mapper_index_for(field_data, i) %>);
+<% end 
+    else %>
+    result.<%= field_name %> = <%= lib_mapper_fn_for field_data %>(v.<%= field_name %>);
+<% end 
+end %>
+    result
+}
+pub(crate) fn __skadapter__to_<%= struct[:name] %>(v: __sklib_<%= struct[:name] %>) -> <%= struct[:name].type_case %> {
+    let mut result = <%= struct[:name].type_case %>::new();
+<% struct[:fields].each do |field_name, field_data|
+    field_name = field_name.to_s.to_snake_case
+    if field_data[:is_array]
+        array_size_as_one_dimensional(field_data).times do |i| %>
+    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+<% end
+    else %>
+    result.<%= field_name %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>);
+<% end
+end %>
+    result
+}
+<% end %>

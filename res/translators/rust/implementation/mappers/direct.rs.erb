@@ -1,20 +1,19 @@
 <%#
-  Direct type mappers have no change between the C- and rust-types and
+  Direct type mappers have no change between the C and Rust types and
   can therefore directly translate one to the other by just returning the
   value
 %>
 <%
-  direct_types.each do |c_type, rs_type|
+  direct_types.each do |c_type, rust_type|
     c_type = c_type.tr("\s", "_")
 %>
-fn __skadapter__to_sklib_<%= c_type %>(v: <%= rs_type %>) -> <%= rs_type %> 
-{
-  return v;
+#[inline]
+pub(crate) fn __skadapter__to_sklib_<%= c_type %>(v: <%= rust_type %>) -> <%= rust_type %> {
+    v
 }
-
-fn __skadapter__to_<%= c_type %>(v: <%= rs_type %>) -> <%= rs_type %> 
-{
-  return v;
+#[inline]
+pub(crate) fn __skadapter__to_<%= c_type %>(v: <%= rust_type %>) -> <%= rust_type %> {
+    v
 }
 <%
   end
