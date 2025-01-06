@@ -51,20 +51,56 @@ module Translators
       end
     end
 
+    # Maps function and enum signatures for each adapter
+    #
+    # The signatures are stored in the `:signatures` key of the function or enum data
+    # These are used for displaying each language's function or enum signatures in the SplashKit website
+    #
     def map_signatures(data)
+      # Function Signature Mapping
       run_for_each_adapter do |adpt|
         data[:functions].each do |function_data|
           function_data[:signatures] = {} if function_data[:signatures].nil?
           signature = adpt.respond_to?(:docs_signatures_for) ?
                       adpt.docs_signatures_for(function_data) :
                       adpt.sk_signature_for(function_data)
-
-
           function_data[:signatures][adpt.name] = signature
+        end
+    
+        # Enum Signature Mapping
+        #
+        # Generates and maps enum signatures for each adapter.
+        # - Uses `enum_signature_syntax` if available, otherwise provides a fallback message.
+        # - Each enum constant includes a name (string), description (default: ''), and value (default: 0).
+        # - Signatures are stored in the `:signatures` key of the enum data, associated with the adapter's name.
+        # 
+        # This set of signatures is used in the api.json file, then subsequently in the SplashKit website
+        # for displaying a table of each enum's values and descriptions per language.
+        #
+        data[:enums].each do |enum_data|
+          enum_data[:signatures] ||= {}
+          
+          # Prepare enum values: name, description, and value
+          enum_values = enum_data[:constants].map do |const_name, const_details|
+            {
+              name: const_name.to_s,  # Ensure the name is a string
+              description: const_details[:description] || '',  # Handle missing descriptions
+              value: const_details[:number] || 0               # Default value to 0 if none is provided
+            }
+          end
+    
+          # Generate the enum signature using the adapter
+          if adpt.respond_to?(:enum_signature_syntax)
+            enum_signature = adpt.enum_signature_syntax(enum_data[:name], enum_values)
+            enum_data[:signatures][adpt.name] = enum_signature
+          else
+            # Provide a fallback if the adapter does not support enum signature syntax
+            enum_data[:signatures][adpt.name] = "Enum mapping not supported for #{adpt.name}"
+          end
         end
       end
     end
-
+    
     def post_execute
       puts 'Place `api.json` in the `data` directory of the `splashkit.io` repo'
     end

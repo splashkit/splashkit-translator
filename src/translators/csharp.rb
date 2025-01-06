@@ -112,8 +112,28 @@ module Translators
 
       result
     end
-  
 
+    #
+    # Generate the enums for C# code.
+    # Formats with the structure of:
+    # public enum EnumName {EnumValue1 = value1, EnumValue2 = value2, ...}
+    # This ensures that the enum names and values are in PascalCase, with each enum separated by a comma.
+    #
+    def enum_signature_syntax(enum_name, enum_values)
+      # Convert the enum name to PascalCase
+      formatted_enum_name = enum_name.to_pascal_case
+
+      # Format each enum value with the category prefix, and join them with a comma
+      formatted_values = enum_values.map do |value|
+        value_name = value[:name].to_pascal_case                
+        value_number = value[:value]               
+        "#{formatted_enum_name}.#{value_name} = #{value_number}" 
+      end.join(", ")
+    
+      # Return the formatted enum in Pascal Case
+      "public enum {#{formatted_values}}"
+    end
+    
     def get_method_data(fn)
       {
         method_name: fn[:name].to_s.to_pascal_case,

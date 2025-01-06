@@ -23,6 +23,7 @@ module Translators
     PASCAL_IDENTIFIER_CASES = {
       types:      :pascal_case,
       functions:  :pascal_case,
+      enums:      :pascal_case,
       variables:  :camel_case,
       fields:     :camel_case,
       constants:  :upper_case
@@ -77,6 +78,27 @@ module Translators
     end
 
     #
+    # Generate the enums for Pascal code.
+    # Formats with the structure of:
+    # public enum EnumName {EnumName.EnumValue1 = value1, EnumName.EnumValue2 = value2, ...}
+    # This ensures that the enum names and values are in PascalCase, with each enum separated by a comma.
+    #
+    def enum_signature_syntax(enum_name, enum_values)
+      # Convert the enum name to PascalCase
+      formatted_enum_name = enum_name.to_pascal_case
+    
+      # Format each enum value with the category prefix, and join them with a comma
+      formatted_values = enum_values.map do |value|
+        value_name = value[:name].to_pascal_case             
+        value_number = value[:value]               
+        "#{formatted_enum_name}.#{value_name} = #{value_number}" 
+      end.join(", ")
+    
+      # Return the formatted enum in Pascal syntax
+      "public enum {#{formatted_values}}"
+    end
+    
+    #
     # Convert a list of parameters to a Pascal parameter list
     # Use the type conversion function to get which type to use
     # as this function is used to for both Library and Front-End code
@@ -121,3 +143,4 @@ module Translators
     end
   end
 end
+

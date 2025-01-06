@@ -67,6 +67,18 @@ module Translators
     end
 
     #
+    # Generate the enums for C++ code.
+    # Formats with the structure of:
+    # class EnumName {EnumValue1 = value1, EnumValue2 = value2, ...};
+    # The c++ enums are the default enum syntax thats used in the api.json file.
+    # This function just joins them together with a comma for putting into the api.json file.
+    #
+    def enum_signature_syntax(enum_name, enum_values)
+      values = enum_values.map { |value| "#{value[:name]} = #{value[:value]}" }.join(", ")
+      "class #{enum_name} {#{values}};"
+    end
+    
+    #
     # Convert a list of parameters to a C-library parameter list
     #
     def lib_parameter_list_for(function)
