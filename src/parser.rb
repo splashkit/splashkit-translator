@@ -789,15 +789,20 @@ class Parser::HeaderFileParser
           next_el = result[i+1]
           next unless next_el
           if next_el.name == 'declaration_number'
+            # Is the constant negative?
+            # If it is negative next_sibling's last char will be '-'
             # This number matches the constant
-            constants[constant_name][:number] = next_el.text.to_i
+            if parsed.next_sibling.text.strip[-1] == '-'
+              constants[constant_name][:number] = next_el.text.to_i * -1 
+            else
+              constants[constant_name][:number] = next_el.text.to_i
+            end
           end
         end
       end
     end
     constants
   end
-
   #
   # Parse a single enum constant data
   #
