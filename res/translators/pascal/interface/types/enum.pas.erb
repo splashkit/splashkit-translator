@@ -6,8 +6,23 @@
 %>
 type <%= enum[:name].type_case %> = (
 <%
-    enum[:constants].each do |constant_key, constant_data|
-      is_last = constant_key == enum[:constants].keys.last
+    # Sort constants by their numeric value
+    seen_numbers = {}
+    sorted_constants = enum[:constants].sort_by do |_, constant_data|
+      constant_data[:number].is_a?(Integer) ? constant_data[:number] : -1
+    end
+    
+    # Filter out duplicates and track valid entries
+    valid_constants = []
+    sorted_constants.each do |constant_key, constant_data|
+      has_numb = constant_data[:number].is_a? Integer
+      next if has_numb && seen_numbers[constant_data[:number]]
+      seen_numbers[constant_data[:number]] = true if has_numb
+      valid_constants << [constant_key, constant_data]
+    end
+
+    valid_constants.each_with_index do |(constant_key, constant_data), index|
+      is_last = index == valid_constants.length - 1
       has_numb = constant_data[:number].is_a? Integer
       numb = " = #{constant_data[:number]}" if has_numb
       last = ',' unless is_last
@@ -16,7 +31,7 @@ type <%= enum[:name].type_case %> = (
   <%= constant_decl %>
 
 <%
-    end # end enums.each
+    end # end valid_constants.each
 %>
 );
 <%

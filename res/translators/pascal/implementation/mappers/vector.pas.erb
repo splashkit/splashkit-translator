@@ -69,6 +69,7 @@ function __skadapter__to_vector_<%= type %>(const v: __sklib_vector_<%= type %>)
 var
   i: Integer;
 begin
+  result := nil;
   SetLength(result, v.size_from_lib);
   for i := 0 to v.size_from_lib - 1 do
   begin
@@ -90,6 +91,7 @@ procedure __skadapter__update_from_vector_<%= type %>(var v: __sklib_vector_<%= 
 var
   i: Integer;
 begin
+  __skreturn := nil;
   SetLength(__skreturn, v.size_from_lib);
   for i := 0 to v.size_from_lib - 1 do
   begin
