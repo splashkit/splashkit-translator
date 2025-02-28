@@ -16,8 +16,18 @@
 %>
 <%
   @functions.each do |function|
-    is_constructor = ! function[:attributes][:constructor].nil?
+    is_constructor = !function[:attributes][:constructor].nil?
 %>
+    /// <summary>
+    /// <%= (function[:description] || "").gsub("\n", " ") %>
+
+    /// </summary>
+<% function[:parameters].each do |param_name, param_data| %>
+    /// <param name="<%= param_name.variable_case %>"> <%= (param_data[:description] || "").gsub("\n", " ") %></param>
+<% end %>
+<% if is_func?(function) %>
+    /// <returns><%= (function[:return][:description] || "").gsub("\n", " ") %></returns>
+<% end %>
     <%= sk_signature_for(function) %>
 
     {
@@ -74,17 +84,17 @@
 %>
       <%= param_name.variable_case %> = <%= sk_mapper_fn_for param_data %>(__skparam__<%= param_name %>);
 <%
-      end # end if is non const ref
+      end # end if is non-const ref
     end # end parameters.each
 %>
 <%#
     4. Free any string or vector parameters
 %>
 <%
-    params_to_free = function[:parameters].select do | _, param_data |
+    params_to_free = function[:parameters].select do |_, param_data|
       param_data[:type] == 'string' || param_data[:is_vector]
     end # end select
-    params_to_free.each do | param_name, param_data |
+    params_to_free.each do |param_name, param_data|
       type_name = lib_type_for(param_data)
 %>
     __skadapter__free<%=type_name%>(ref __skparam__<%=param_name%>);
