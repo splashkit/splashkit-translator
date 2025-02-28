@@ -47,6 +47,37 @@
 <%
     end # end fields.each
 
+    # Add equality operators for color struct only
+    if struct[:name] == "color"
+%>
+
+    public static bool operator ==(<%=struct[:name].to_pascal_case()%> lhs, <%=struct[:name].to_pascal_case()%> rhs)
+    {
+        return Math.Abs(lhs.R - rhs.R) < 0.004 &&
+               Math.Abs(lhs.G - rhs.G) < 0.004 &&
+               Math.Abs(lhs.B - rhs.B) < 0.004 &&
+               Math.Abs(lhs.A - rhs.A) < 0.004;
+    }
+
+    public static bool operator !=(<%=struct[:name].to_pascal_case()%> lhs, <%=struct[:name].to_pascal_case()%> rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is <%=struct[:name].to_pascal_case()%>)
+            return this == (<%=struct[:name].to_pascal_case()%>)obj;
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(R, G, B, A);
+    }
+<%
+    end # end color equality check
+
     def get_method_data(fn)
       {
         method_name: fn[:name].to_s.to_pascal_case,

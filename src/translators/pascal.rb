@@ -141,6 +141,14 @@ module Translators
         "[#{idx1},#{idx2}]"
       end
     end
+
+    def comparison_statement(field_name, is_last)
+      if %w[r g b a].include?(field_name.downcase)
+        "(abs(left.#{field_name} - right.#{field_name}) < 0.004)#{is_last ? ';' : ' and'}"
+      else
+        "(left.#{field_name} = right.#{field_name})#{is_last ? ';' : ' and'}"
+      end
+    end
   end
 end
 

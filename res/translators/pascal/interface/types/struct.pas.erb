@@ -14,6 +14,9 @@ type <%= struct[:name].type_case %> = record
     end # end fields.each
 %>
 end;
+
+operator = (const left, right: <%= struct[:name].type_case %>): Boolean;
+operator <> (const left, right: <%= struct[:name].type_case %>): Boolean;
 <%
   end # end structs.each
 %>

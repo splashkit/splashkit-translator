@@ -57,6 +57,22 @@ class <%= sklib_prefix() %>_<%= struct[:name].variable_case %>(Structure):
 %>
       super().__init__()
 
+    def __eq__(self, other):
+        if not isinstance(other, self.__class__):
+            return False
+        return (
+<%  struct[:fields].each_with_index do |(field_name, field_data), idx|
+      is_last = idx == struct[:fields].length - 1
+      field_name = field_name.field_case
+      sk_comparison_for(field_name, field_data, is_last).each do |comparison| %>
+            <%= comparison %><%= "\n" %>
+<%    end %>
+<%  end %>
+        )
+
+    def __ne__(self, other):
+        return not (self == other)
+
 <%
     struct[:fields].each do |field_name, field_data|
       # Ensure field name is in correct case for language

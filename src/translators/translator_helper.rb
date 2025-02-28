@@ -391,4 +391,48 @@ module Translators::TranslatorHelper
     (!sk_return_type_for(fn).nil?) && sk_return_type_for(fn).to_snake_case() == "color" && fn[:parameters].length == 0 && fn[:name].start_with?("color")
   end
 
+  def sk_comparison_for(field_name, field_data, is_last)
+    if field_data[:is_array]
+      sk_array_comparison_for(field_name, field_data)
+    else
+      [comparison_statement(field_name, is_last)]
+    end
+  end
+
+  def sk_array_comparison_for(field_name, field_data)
+    if array_is_2d?(field_data)
+      compare_2d_array(field_name, field_data)
+    else
+      compare_1d_array(field_name, field_data)
+    end
+  end
+
+  def compare_2d_array(field_name, field_data)
+    dims = field_data[:array_dimension_sizes]
+    result = []
+    dims[0].times do |i|
+      dims[1].times do |j|
+        is_last_element = (i == dims[0] - 1) && (j == dims[1] - 1)
+        idx = array_at_index_syntax(i, j)
+        result << comparison_statement("#{field_name}#{idx}", is_last_element)
+      end
+    end
+    result
+  end
+
+  def compare_1d_array(field_name, field_data)
+    array_size = array_size_as_one_dimensional(field_data)
+    (0...array_size).map do |i|
+      is_last_element = (i == array_size - 1)
+      idx = array_mapper_index_for(field_data, i)
+      comparison_statement("#{field_name}#{idx}", is_last_element)
+    end
+  end
+
+  # These methods should be overridden by each language translator
+  def comparison_statement(field_name, is_last)
+    raise '`comparison_statement` not yet implemented! Use this function to '\
+          'define how to compare fields in the target language, returning a '\
+          'string with the comparison syntax.'
+  end
 end

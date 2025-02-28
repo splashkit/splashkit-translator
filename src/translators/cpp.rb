@@ -1,10 +1,12 @@
 require_relative 'abstract_translator'
+require_relative 'translator_helper'
 
 module Translators
   #
   # C++ Front-End Translator
   #
   class CPP < AbstractTranslator
+    include TranslatorHelper
     def initialize(data, logging = false)
       super(data, logging)
       @clib = ReusableCAdapter.new(data, @logging)
@@ -177,6 +179,22 @@ module Translators
     def sk_update_fn_for(function)
       # Just use clib SK adapter -- it's the same thing
       @clib.sk_update_fn_for(function)
+    end
+
+    def array_at_index_syntax(idx1, idx2 = nil)
+      if idx2.nil?
+        "[#{idx1}]"
+      else
+        "[#{idx1}][#{idx2}]"
+      end
+    end
+
+    def comparison_statement(field_name, is_last)
+      if %w[r g b a].include?(field_name)
+        "std::abs(lhs.#{field_name} - rhs.#{field_name}) < 0.004#{is_last ? ';' : ' &&'}"
+      else
+        "lhs.#{field_name} == rhs.#{field_name}#{is_last ? ';' : ' &&'}"
+      end
     end
   end
 end
