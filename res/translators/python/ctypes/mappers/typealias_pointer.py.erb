@@ -30,9 +30,21 @@ def __skadapter__to_ptr(v):
 def __skadapter__to_<%= typealias %>(v):
     return _find_pointer_resource(v, "<%= typealias.type_case %>")
 
+<%
+    if typealias == "json"
+%>
+def __skadapter__to_sklib_<%= typealias %>(v):
+    if isinstance(v, c_void_p):
+        return v
+    return cast(v, c_void_p)
+
+<%
+    else
+%>
 def __skadapter__to_sklib_<%= typealias %>(v):
     return v
 
 <%
+    end
   end # typealiases.each
 %>

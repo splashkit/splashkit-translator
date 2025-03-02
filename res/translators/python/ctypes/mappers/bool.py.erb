@@ -2,15 +2,11 @@
   Mappers from `Boolean` <-> `LongInt`
 %>
 def __skadapter__to_sklib_bool(v):
-    if isinstance(v, c_bool):
+    if isinstance(v, c_int32):  
         return v
-
-    if v:
-        return -1
-    else:
-        return 0
+    return c_int32(1) if v else c_int32(0)
 
 def __skadapter__to_bool(v):
-    if isinstance(v, c_bool):
+    if isinstance(v, bool):
         return v
-    return v != 0;
+    return bool(v)  

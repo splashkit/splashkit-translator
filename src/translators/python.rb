@@ -46,7 +46,7 @@ module Translators
     }
     SK_TYPES_TO_LIB_TYPES = {
       'string'    => '_sklib_string',
-      'bool'      => 'c_bool',
+      'bool'      => 'c_int32',
       'char'      => 'c_char',
       'enum'      => 'c_int',
       'unsigned char'   => 'c_ubyte',

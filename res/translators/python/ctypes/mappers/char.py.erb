@@ -3,7 +3,7 @@ def __skadapter__to_sklib_char(v):
         return c_char(str.encode(v)[0])
     if isinstance(v, c_char):
         return v
-    return c_char(v);
+    return c_char(v)
 
 def __skadapter__to_char(v):
     if isinstance(v, bytes):
@@ -15,7 +15,7 @@ def __skadapter__to_sklib_unsigned_char(v):
         return v
     if isinstance(v, str):
         return c_ubyte(ord(v[0]))
-    return c_ubyte(ord(v));
+    return c_ubyte(ord(v))
 
 def __skadapter__to_unsigned_char(v):
     if isinstance(v, c_ubyte):

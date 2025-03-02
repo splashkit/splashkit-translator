@@ -53,7 +53,7 @@ def __skadapter__to_<%= struct[:name] %>(v):
       if field_data[:is_array]
         array_size_as_one_dimensional(field_data).times do |i|
 %>
-    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>]);
+    result.<%= field_name %><%= array_mapper_index_for(field_data, i) %> = <%= sk_mapper_fn_for field_data %>(v.<%= field_name %>[<%= i %>])
 <%
         end # end times
       else # else standard copy converted as SK type using SK type mapper

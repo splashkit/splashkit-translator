@@ -30,9 +30,7 @@ class <%= sklib_prefix() %>_<%= struct[:name].variable_case %>(Structure):
 <%
     # Convert each field type into Python type
     struct[:fields].each do |field_name, field_data|
-      if field_data[:is_array] || enum_type = @enums.select { |e| e[:name] == field_data[:type]}.first
-        field_name = "_#{field_name}"
-      end
+      field_name = field_name_for(field_name, field_data)
 %>
         ("<%= field_name.variable_case %>", <%= lib_type_for(field_data) %>),
 <%
@@ -41,21 +39,7 @@ class <%= sklib_prefix() %>_<%= struct[:name].variable_case %>(Structure):
     ]
 
     def __init__(self):
-<%
-    struct[:fields].each do |field_name, field_data|
-      # Ensure field name is in correct case for language
-      field_name = field_name.variable_case
-      # If an array copy over each value in the array (1D array << {1,2}D array)
-      if field_data[:is_array]
-        dim1 = field_data[:array_dimension_sizes][0]
-        dim2 = field_data[:array_dimension_sizes][1] || 0
-%>
-      self.<%= field_name %> = _FieldIndexer(self, "_<%= field_name %>", <%=dim1%>, <%=dim2%>)
-<%
-      end # end if
-    end # end fields.each
-%>
-      super().__init__()
+        super().__init__()
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -98,6 +82,25 @@ class <%= sklib_prefix() %>_<%= struct[:name].variable_case %>(Structure):
       end # if
     end # fields each
 %>
+<% struct[:fields].each do |field_name, field_data| %>
+<%
+      # If an array, return a list/2d list representation of the array
+      field_name = field_name.variable_case
+      if field_data[:is_array]
+        dim1 = field_data[:array_dimension_sizes][0]
+        dim2 = field_data[:array_dimension_sizes][1] || 0
+%>
+    @property
+    def <%= field_name %>(self):
+        indexer_name = "_<%= field_name %>_indexer"
+        if not hasattr(self, indexer_name):
+            setattr(self, indexer_name, _FieldIndexer(self, "_<%= field_name %>", <%=dim1%>, <%=dim2%>))
+        return getattr(self, indexer_name)
+<%
+      end # if
+    end # fields each
+%>
+
 <%= struct[:name].type_case %> = <%= sklib_prefix() %>_<%= struct[:name].variable_case %>
 
 <%
