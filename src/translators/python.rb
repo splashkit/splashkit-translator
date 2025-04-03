@@ -109,7 +109,7 @@ module Translators
     #
     def enum_signature_syntax(enum_name, enum_values)
       # Convert the enum name to snake case
-      formatted_enum_name = enum_name.to_s.to_snake_case
+      formatted_enum_name = enum_name.to_s.to_pascal_case
     
       # Format each enum value with the category prefix, and join them with a comma
       formatted_values = enum_values.map do |value|
