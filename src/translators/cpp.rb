@@ -36,7 +36,8 @@ module Translators
 * #{function[:description].gsub("\n", "\n* ") unless function[:description].nil? }
 #{param_text}
 #{returns_text}
-*/"
+*/
+"
     end
 
     #
