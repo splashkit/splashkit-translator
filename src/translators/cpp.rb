@@ -27,6 +27,18 @@ module Translators
       )
     end
 
+    def sk_header_doc_for(function)
+
+      param_text = function[:parameters].map{|name, data| "* @param #{name} #{data[:description].gsub("\n", "\n*")}"}.join("\n") || '*'
+      returns_text = function[:return][:description] ? "* @return #{function[:return][:description]}" : '*'
+
+      "/**
+* #{function[:description].gsub("\n", "\n*") unless function[:description].nil? }
+#{param_text}
+#{returns_text}
+*/"
+    end
+
     #
     # Generate a C++ type signature from a SK function
     #
